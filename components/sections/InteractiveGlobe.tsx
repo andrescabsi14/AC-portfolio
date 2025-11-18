@@ -64,12 +64,12 @@ export default function InteractiveGlobe() {
         altitude: 2.5,
       }, 1000);
 
-      // Enable auto-rotate
+      // Enable auto-rotate and disable zoom
       const controls = globeRef.current.controls();
       if (controls) {
         controls.autoRotate = true;
         controls.autoRotateSpeed = 0.3;
-        controls.enableZoom = true;
+        controls.enableZoom = false;
         controls.minDistance = 200;
         controls.maxDistance = 500;
       }
@@ -158,14 +158,14 @@ export default function InteractiveGlobe() {
     lat: project.location.lat,
     lng: project.location.lng,
     size: 0.6,
-    color: '#00ffaa',
+    color: '#0891b2',
     label: project.title,
   }));
 
   return (
     <div className="relative h-screen bg-black overflow-hidden">
       {/* Globe */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0" style={{ opacity: 1 }}>
         <Globe
           ref={globeRef}
           globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
@@ -184,6 +184,9 @@ export default function InteractiveGlobe() {
           atmosphereAltitude={0.15}
         />
       </div>
+
+      {/* Overlay to make stars more subtle */}
+      <div className="absolute inset-0 bg-black/30 pointer-events-none" />
 
       {/* Expanding Light Overlay */}
       <AnimatePresence>

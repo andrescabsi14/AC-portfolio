@@ -3,6 +3,7 @@
 import Header from '@/components/ui/Header';
 import InteractiveGlobe from '@/components/sections/InteractiveGlobe';
 import NYCParallaxScene from '@/components/sections/NYCParallaxScene';
+import AIChatSection from '@/components/sections/AIChatSection';
 
 export default function Home() {
   return (
@@ -19,6 +20,9 @@ export default function Home() {
       <section id="story">
         <NYCParallaxScene />
       </section>
+
+      {/* AI Chat Section */}
+      <AIChatSection />
 
       {/* Footer */}
       <footer className="relative h-screen flex items-center justify-center bg-gradient-to-t from-zinc-900 to-black">
