@@ -60,49 +60,52 @@ export default function Header() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ delay: hasAnimated ? 0 : 3.5, duration: 0.8, ease: 'easeOut' }}
-        className="fixed top-0 left-0 right-0 z-40 px-8 py-6"
+        className="fixed top-0 left-0 right-0 z-40 px-4 md:px-8 py-4 md:py-6"
       >
         <motion.div
           style={{
             backdropFilter: useTransform(headerBlur, (v) => `blur(${v}px)`),
           }}
-          className="max-w-7xl mx-auto bg-white/5 border border-white/10 rounded-full px-8 py-4 flex items-center justify-between"
+          className="max-w-7xl mx-auto bg-gradient-to-r from-white/10 via-white/5 to-white/10 backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/50 rounded-full px-6 md:px-8 py-3 md:py-4 flex items-center justify-between"
         >
           {/* Logo/Name */}
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="text-white font-bold text-xl cursor-pointer"
+            className="text-white font-bold text-lg md:text-xl cursor-pointer bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent"
           >
             Your Name
           </motion.div>
 
           {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8">
             <a
               href="#projects"
-              className="text-white/70 hover:text-white transition-colors text-sm font-medium"
+              className="relative text-white/70 hover:text-white transition-all text-sm font-medium group"
             >
-              Projects
+              <span className="relative z-10">Projects</span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-400 group-hover:w-full transition-all duration-300" />
             </a>
             <a
               href="#story"
-              className="text-white/70 hover:text-white transition-colors text-sm font-medium"
+              className="relative text-white/70 hover:text-white transition-all text-sm font-medium group"
             >
-              My Story
+              <span className="relative z-10">My Story</span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-400 group-hover:w-full transition-all duration-300" />
             </a>
             <a
               href="#experience"
-              className="text-white/70 hover:text-white transition-colors text-sm font-medium"
+              className="relative text-white/70 hover:text-white transition-all text-sm font-medium group"
             >
-              Experience
+              <span className="relative z-10">Experience</span>
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-400 group-hover:w-full transition-all duration-300" />
             </a>
           </nav>
 
           {/* CTA Button */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(34, 211, 238, 0.5)' }}
             whileTap={{ scale: 0.95 }}
-            className="hidden md:block px-6 py-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-black font-medium rounded-full text-sm"
+            className="hidden md:block px-6 py-2.5 bg-gradient-to-r from-cyan-400 via-blue-400 to-blue-500 text-black font-semibold rounded-full text-sm shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/50 transition-shadow"
           >
             Get in Touch
           </motion.button>
