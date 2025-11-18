@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import dynamic from 'next/dynamic';
 
@@ -8,7 +8,6 @@ const Globe = dynamic(() => import('react-globe.gl'), { ssr: false });
 
 export default function USFlightMapSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [globeReady, setGlobeReady] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -87,9 +86,6 @@ export default function USFlightMapSection() {
             pointRadius="size"
             pointColor="color"
             pointLabel="label"
-            onGlobeReady={() => {
-              setGlobeReady(true);
-            }}
             width={typeof window !== 'undefined' ? window.innerWidth : 1920}
             height={typeof window !== 'undefined' ? window.innerHeight : 1080}
           />

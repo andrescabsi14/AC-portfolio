@@ -10,7 +10,17 @@ import * as THREE from 'three';
 
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false });
 
+interface GlobePoint {
+  id: string;
+  lat: number;
+  lng: number;
+  size: number;
+  color: string;
+  label: string;
+}
+
 export default function InteractiveGlobe() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
   const animationRef = useRef<number | null>(null);
   const globeMaterialRef = useRef<THREE.ShaderMaterial | null>(null);
@@ -154,6 +164,7 @@ export default function InteractiveGlobe() {
     if (!globeReady || !globeRef.current) return;
 
     const updateGlobeRotation = () => {
+      if (!globeRef.current) return;
       const pov = globeRef.current.pointOfView();
       if (globeMaterialRef.current && pov) {
         globeMaterialRef.current.uniforms.globeRotation.value.set(pov.lng || 0, pov.lat || 0);
@@ -161,6 +172,7 @@ export default function InteractiveGlobe() {
     };
 
     // Update on camera change
+    if (!globeRef.current) return;
     const controls = globeRef.current.controls();
     if (controls) {
       controls.addEventListener('change', updateGlobeRotation);
@@ -171,12 +183,8 @@ export default function InteractiveGlobe() {
   // Auto-rotation effect
   useEffect(() => {
     if (globeRef.current && globeReady && !isSpinning && !selectedProject) {
-      let rotationAngle = 0;
-      const rotationSpeed = 0.2; // Slow rotation speed
-
       const animate = () => {
         if (globeRef.current && !isSpinning && !selectedProject) {
-          rotationAngle += rotationSpeed;
           const controls = globeRef.current.controls();
           if (controls) {
             controls.autoRotate = true;
@@ -238,6 +246,7 @@ export default function InteractiveGlobe() {
   };
 
   // Handle point click with spinning and expanding light animation
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handlePointClick = (point: any) => {
     const project = filteredProjects.find((p) => p.id === point.id);
     if (project && globeRef.current) {

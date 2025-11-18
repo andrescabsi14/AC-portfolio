@@ -15,7 +15,6 @@ export default function Header() {
     // Check if intro animation has played
     const animated = sessionStorage.getItem('intro-animated');
     if (!animated) {
-      setHasAnimated(false);
       sessionStorage.setItem('intro-animated', 'true');
     } else {
       setHasAnimated(true);
@@ -140,7 +139,7 @@ export default function Header() {
             whileTap={{ scale: 0.95 }}
             className="relative hidden md:block px-6 py-2.5 bg-gradient-to-r from-cyan-500 via-[#0891b2] to-blue-500 text-white font-semibold rounded-full text-sm shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/50 transition-all overflow-hidden group"
           >
-            <span className="relative z-10">Let's Talk</span>
+            <span className="relative z-10">Let&apos;s Talk</span>
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-cyan-500 to-[#0891b2] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </motion.button>
         </motion.div>

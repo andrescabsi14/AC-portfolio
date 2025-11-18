@@ -49,11 +49,6 @@ export default function NYCParallaxScene() {
 
   // Divide scroll into 3 stages
   // Stage 1: 0-0.33, Stage 2: 0.33-0.66, Stage 3: 0.66-1.0
-  const currentStage = useTransform(scrollYProgress, (latest) => {
-    if (latest < 0.33) return 0;
-    if (latest < 0.66) return 1;
-    return 2;
-  });
 
   // Cloud parallax (slowest)
   const cloudY = useTransform(scrollYProgress, [0, 1], [0, 300]);
@@ -72,6 +67,11 @@ export default function NYCParallaxScene() {
   const stage1Opacity = useTransform(scrollYProgress, [0, 0.15, 0.25, 0.33], [1, 1, 0.3, 0]);
   const stage2Opacity = useTransform(scrollYProgress, [0.25, 0.33, 0.58, 0.66], [0, 1, 1, 0]);
   const stage3Opacity = useTransform(scrollYProgress, [0.58, 0.66, 1], [0, 1, 1]);
+
+  // Progress indicators for scroll
+  const progress0 = useTransform(scrollYProgress, [0, 0.33], ['0%', '100%']);
+  const progress1 = useTransform(scrollYProgress, [0.33, 0.66], ['0%', '100%']);
+  const progress2 = useTransform(scrollYProgress, [0.66, 1], ['0%', '100%']);
 
   // Color transitions
   const skyColor = useTransform(
@@ -253,23 +253,33 @@ export default function NYCParallaxScene() {
 
         {/* Scroll Progress Indicator */}
         <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col gap-4 pointer-events-none">
-          {stages.map((stage, index) => (
+          <motion.div
+            key="stage-0"
+            className="w-2 h-16 bg-white/20 rounded-full overflow-hidden"
+          >
             <motion.div
-              key={stage.id}
-              className="w-2 h-16 bg-white/20 rounded-full overflow-hidden"
-            >
-              <motion.div
-                style={{
-                  height: useTransform(
-                    scrollYProgress,
-                    [index * 0.33, (index + 1) * 0.33],
-                    ['0%', '100%']
-                  ),
-                }}
-                className="w-full bg-gradient-to-b from-cyan-400 to-purple-500"
-              />
-            </motion.div>
-          ))}
+              style={{ height: progress0 }}
+              className="w-full bg-gradient-to-b from-cyan-400 to-purple-500"
+            />
+          </motion.div>
+          <motion.div
+            key="stage-1"
+            className="w-2 h-16 bg-white/20 rounded-full overflow-hidden"
+          >
+            <motion.div
+              style={{ height: progress1 }}
+              className="w-full bg-gradient-to-b from-cyan-400 to-purple-500"
+            />
+          </motion.div>
+          <motion.div
+            key="stage-2"
+            className="w-2 h-16 bg-white/20 rounded-full overflow-hidden"
+          >
+            <motion.div
+              style={{ height: progress2 }}
+              className="w-full bg-gradient-to-b from-cyan-400 to-purple-500"
+            />
+          </motion.div>
         </div>
       </div>
     </div>

@@ -14,7 +14,7 @@ export default function AIChatSection() {
           className="text-center mb-12"
         >
           <h2 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 mb-6">
-            Let's Talk
+            Let&apos;s Talk
           </h2>
           <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto">
             Have a project in mind? Want to collaborate? Start a conversation with me.

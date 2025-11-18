@@ -9,6 +9,7 @@ const Globe = dynamic(() => import('react-globe.gl'), { ssr: false });
 
 export default function GlobeSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const globeRef = useRef<any>(null);
   const [globeReady, setGlobeReady] = useState(false);
 
@@ -25,8 +26,6 @@ export default function GlobeSection() {
   const whitePointScale = useTransform(scrollYProgress, [0.8, 0.85], [0, 1]);
   const whitePointOpacity = useTransform(scrollYProgress, [0.8, 0.85], [0, 1]);
 
-  // Rotation speed increases as you scroll
-  const rotationSpeed = useTransform(scrollYProgress, [0, 0.5, 0.8], [0.5, 3, 8]);
 
   useEffect(() => {
     if (globeRef.current && globeReady) {
@@ -39,11 +38,13 @@ export default function GlobeSection() {
 
       // Animate to show the route
       setTimeout(() => {
-        globeRef.current.pointOfView({
-          lat: 20, // Mid point between Bogota and NYC
-          lng: -60,
-          altitude: 2,
-        }, 3000);
+        if (globeRef.current) {
+          globeRef.current.pointOfView({
+            lat: 20, // Mid point between Bogota and NYC
+            lng: -60,
+            altitude: 2,
+          }, 3000);
+        }
       }, 2000);
     }
   }, [globeReady]);
