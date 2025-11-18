@@ -7,8 +7,22 @@ interface NameLoaderProps {
   onLoadingComplete: () => void;
 }
 
+const quotes = [
+  "Building technology that empowers people and transforms lives.",
+  "Innovation is not just about code, it's about impact.",
+  "Every line of code is an opportunity to make the world better.",
+  "Solving complex problems with elegant, simple solutions.",
+  "Technology is the bridge between vision and reality.",
+  "Creating experiences that inspire, engage, and empower.",
+  "From self-taught to founder—driven by curiosity and purpose.",
+  "Building the future, one commit at a time.",
+  "Code with purpose, design with intention, ship with pride.",
+  "Turning ideas into products that matter.",
+];
+
 export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
   const [isComplete, setIsComplete] = useState(false);
+  const [selectedQuote] = useState(() => quotes[Math.floor(Math.random() * quotes.length)]);
 
   const firstName = 'ANDRES';
   const lastName = 'CABRERA';
@@ -132,6 +146,20 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
             opacity: { delay: 1.5, duration: 2, times: [0, 0.3, 0.7, 1] },
           }}
         />
+
+        {/* Inspiring Quote */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2, duration: 1, ease: 'easeOut' }}
+          className="text-sm md:text-base lg:text-lg text-gray-400 font-light max-w-2xl mx-auto px-8 mt-8"
+          style={{
+            fontWeight: 300,
+            letterSpacing: '0.02em',
+          }}
+        >
+          {selectedQuote}
+        </motion.p>
       </div>
     </motion.div>
   );
