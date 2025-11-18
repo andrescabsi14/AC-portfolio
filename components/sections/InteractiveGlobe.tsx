@@ -5,12 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { projects, allYears, allTags, Project } from '@/data/projects';
 import ProjectLightbox from '@/components/ui/ProjectLightbox';
+import * as solar from 'solar-calculator';
+import * as THREE from 'three';
 
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false });
 
 export default function InteractiveGlobe() {
   const globeRef = useRef<any>(null);
   const animationRef = useRef<number | null>(null);
+  const globeMaterialRef = useRef<THREE.ShaderMaterial | null>(null);
   const [globeReady, setGlobeReady] = useState(false);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -19,6 +22,17 @@ export default function InteractiveGlobe() {
   const [showExpandingLight, setShowExpandingLight] = useState(false);
   const [isExpanding, setIsExpanding] = useState(false);
 
+  // Calculate sun position based on current time
+  const getSunPosition = (date: Date) => {
+    const day = new Date(+date).setUTCHours(0, 0, 0, 0);
+    const t = solar.century(date);
+    const longitude = ((day - +date) / 864e5) * 360 - 180;
+    return {
+      lng: longitude - solar.equationOfTime(t) / 4,
+      lat: solar.declination(t),
+    };
+  };
+
   // Filter projects based on year and tags
   const filteredProjects = projects.filter((project) => {
     const yearMatch = selectedYear === null || project.year === selectedYear;
@@ -26,6 +40,133 @@ export default function InteractiveGlobe() {
       selectedTags.length === 0 || selectedTags.some((tag) => project.tags.includes(tag));
     return yearMatch && tagMatch;
   });
+
+  // Setup day-night cycle shader
+  useEffect(() => {
+    if (!globeReady || !globeRef.current) return;
+
+    const globeMaterial = globeRef.current.globeMaterial();
+    if (!globeMaterial) return;
+
+    // Load textures
+    const textureLoader = new THREE.TextureLoader();
+    const dayTexture = textureLoader.load('//unpkg.com/three-globe/example/img/earth-day.jpg');
+    const nightTexture = textureLoader.load('//unpkg.com/three-globe/example/img/earth-night.jpg');
+
+    // Create custom shader material
+    const customMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        dayTexture: { value: dayTexture },
+        nightTexture: { value: nightTexture },
+        sunPosition: { value: new THREE.Vector2() },
+        globeRotation: { value: new THREE.Vector2() },
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        varying vec2 vUv;
+
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D dayTexture;
+        uniform sampler2D nightTexture;
+        uniform vec2 sunPosition;
+        uniform vec2 globeRotation;
+
+        varying vec3 vNormal;
+        varying vec2 vUv;
+
+        #define PI 3.14159265359
+
+        float toRad(float deg) {
+          return deg * PI / 180.0;
+        }
+
+        vec3 Polar2Cartesian(vec2 c) {
+          float theta = toRad(90.0 - c.x);
+          float phi = toRad(90.0 - c.y);
+          return vec3(sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta));
+        }
+
+        void main() {
+          // Rotation matrices for globe rotation
+          float rotYAngle = toRad(globeRotation.x);
+          float rotXAngle = toRad(globeRotation.y);
+
+          mat3 rotY = mat3(
+            cos(rotYAngle), 0.0, sin(rotYAngle),
+            0.0, 1.0, 0.0,
+            -sin(rotYAngle), 0.0, cos(rotYAngle)
+          );
+
+          mat3 rotX = mat3(
+            1.0, 0.0, 0.0,
+            0.0, cos(rotXAngle), -sin(rotXAngle),
+            0.0, sin(rotXAngle), cos(rotXAngle)
+          );
+
+          // Calculate sun direction
+          vec3 rotatedSunDirection = rotX * rotY * Polar2Cartesian(sunPosition);
+
+          // Calculate lighting intensity
+          float intensity = dot(normalize(vNormal), normalize(rotatedSunDirection));
+
+          // Get day and night colors
+          vec4 dayColor = texture2D(dayTexture, vUv);
+          vec4 nightColor = texture2D(nightTexture, vUv);
+
+          // Blend between day and night
+          float blendFactor = smoothstep(-0.1, 0.1, intensity);
+          gl_FragColor = mix(nightColor, dayColor, blendFactor);
+        }
+      `,
+    });
+
+    globeMaterialRef.current = customMaterial;
+
+    // Apply custom material to globe
+    globeRef.current.globeMaterial(customMaterial);
+
+    // Update sun position based on current time
+    const updateSunPosition = () => {
+      const now = new Date();
+      const sunPos = getSunPosition(now);
+      if (globeMaterialRef.current) {
+        globeMaterialRef.current.uniforms.sunPosition.value.set(sunPos.lng, sunPos.lat);
+      }
+    };
+
+    // Initial update
+    updateSunPosition();
+
+    // Update sun position every minute
+    const interval = setInterval(updateSunPosition, 60000);
+
+    return () => clearInterval(interval);
+  }, [globeReady]);
+
+  // Update globe rotation when camera moves
+  useEffect(() => {
+    if (!globeReady || !globeRef.current) return;
+
+    const updateGlobeRotation = () => {
+      const pov = globeRef.current.pointOfView();
+      if (globeMaterialRef.current && pov) {
+        globeMaterialRef.current.uniforms.globeRotation.value.set(pov.lng || 0, pov.lat || 0);
+      }
+    };
+
+    // Update on camera change
+    const controls = globeRef.current.controls();
+    if (controls) {
+      controls.addEventListener('change', updateGlobeRotation);
+      return () => controls.removeEventListener('change', updateGlobeRotation);
+    }
+  }, [globeReady]);
 
   // Auto-rotation effect
   useEffect(() => {
@@ -168,7 +309,6 @@ export default function InteractiveGlobe() {
       <div className="absolute inset-0" style={{ opacity: 1 }}>
         <Globe
           ref={globeRef}
-          globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
           backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
           bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
           pointsData={pointsData}
