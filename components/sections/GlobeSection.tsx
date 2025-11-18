@@ -61,8 +61,8 @@ export default function GlobeSection() {
 
   // Points data
   const pointsData = [
-    { lat: 4.7110, lng: -74.0721, size: 0.8, color: '#00ff88', label: 'Bogotá' },
-    { lat: 40.7128, lng: -74.0060, size: 0.8, color: '#00ff88', label: 'New York' },
+    { lat: 4.7110, lng: -74.0721, size: 0.8, color: '#0891b2', label: 'Bogotá' },
+    { lat: 40.7128, lng: -74.0060, size: 0.8, color: '#0891b2', label: 'New York' },
   ];
 
   return (
@@ -95,6 +95,9 @@ export default function GlobeSection() {
             width={typeof window !== 'undefined' ? window.innerWidth : 1920}
             height={typeof window !== 'undefined' ? window.innerHeight : 1080}
           />
+
+          {/* Overlay to make stars more subtle */}
+          <div className="absolute inset-0 bg-black/30 pointer-events-none" />
         </motion.div>
 
         {/* White Point that appears as globe shrinks */}
