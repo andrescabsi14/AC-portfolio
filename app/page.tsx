@@ -1,15 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import Header from '@/components/ui/Header';
 import InteractiveGlobe from '@/components/sections/InteractiveGlobe';
 import NYCParallaxScene from '@/components/sections/NYCParallaxScene';
 import AIChatSection from '@/components/sections/AIChatSection';
+import NameLoader from '@/components/ui/NameLoader';
 
 export default function Home() {
+  const [showLoader, setShowLoader] = useState(true);
+
   return (
-    <main className="relative bg-black">
-      {/* Header with intro animation */}
-      <Header />
+    <>
+      {showLoader && (
+        <NameLoader onLoadingComplete={() => setShowLoader(false)} />
+      )}
+      <main className="relative bg-black">
+        {/* Header with intro animation */}
+        <Header />
 
       {/* Interactive Globe Section - Project Menu */}
       <section id="projects">
@@ -42,5 +50,6 @@ export default function Home() {
         </div>
       </footer>
     </main>
+    </>
   );
 }
