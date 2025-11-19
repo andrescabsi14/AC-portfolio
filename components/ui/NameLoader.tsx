@@ -61,11 +61,11 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
     }),
     glow: (i: number) => ({
       textShadow: [
-        '0 0 20px rgba(139, 92, 246, 0.3)',
-        '0 0 40px rgba(139, 92, 246, 0.6)',
-        '0 0 60px rgba(139, 92, 246, 0.4)',
-        '0 0 40px rgba(139, 92, 246, 0.6)',
-        '0 0 20px rgba(139, 92, 246, 0.3)',
+        '0 0 20px rgba(8, 145, 178, 0.3)',
+        '0 0 40px rgba(8, 145, 178, 0.6)',
+        '0 0 60px rgba(8, 145, 178, 0.4)',
+        '0 0 40px rgba(8, 145, 178, 0.6)',
+        '0 0 20px rgba(8, 145, 178, 0.3)',
       ],
       transition: {
         delay: i * 0.1 + 0.8,
@@ -104,7 +104,7 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
               variants={letterVariants}
               initial="hidden"
               animate={['visible', 'glow']}
-              className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-br from-violet-400 via-purple-300 to-indigo-400"
+              className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-br from-cyan-400 via-cyan-500 to-cyan-600"
               style={{
                 fontFamily: 'system-ui, -apple-system, sans-serif',
                 fontWeight: 700,
@@ -125,7 +125,7 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
               variants={letterVariants}
               initial="hidden"
               animate={['visible', 'glow']}
-              className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-br from-violet-400 via-purple-300 to-indigo-400"
+              className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-br from-cyan-400 via-cyan-500 to-cyan-600"
               style={{
                 fontFamily: 'system-ui, -apple-system, sans-serif',
                 fontWeight: 700,
@@ -139,7 +139,7 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
 
         {/* Subtle animated line underneath */}
         <motion.div
-          className="h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent mx-auto"
+          className="h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent mx-auto"
           initial={{ width: 0, opacity: 0 }}
           animate={{
             width: '80%',
