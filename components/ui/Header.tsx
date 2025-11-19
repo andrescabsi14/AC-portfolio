@@ -1,15 +1,17 @@
 'use client';
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { motion, useScroll } from 'framer-motion';
+import { useEffect, useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
 
 export default function Header() {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [currentLocation] = useState('New York');
+  const [isVisible, setIsVisible] = useState(true);
+  const [activeSection, setActiveSection] = useState('');
+  const lastScrollY = useRef(0);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
   const { scrollY } = useScroll();
-
-  const headerOpacity = useTransform(scrollY, [250, 350], [0, 1]);
-  const headerY = useTransform(scrollY, [250, 350], [-100, 0]);
 
   useEffect(() => {
     // Check if intro animation has played
@@ -21,20 +23,75 @@ export default function Header() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Hide header when scrolling
+      if (currentScrollY > 300) {
+        setIsVisible(false);
+      }
+
+      // Clear existing timeout
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+
+      // Show header when scroll stops
+      scrollTimeout.current = setTimeout(() => {
+        if (currentScrollY > 300) {
+          setIsVisible(true);
+        }
+      }, 150);
+
+      lastScrollY.current = currentScrollY;
+
+      // Check which section is in viewport
+      const sections = ['world-experience', 'networking', 'recognition'];
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          const isInViewport = rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2;
+          if (isInViewport) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+    };
+  }, []);
+
   const scrollToChat = () => {
     document.getElementById('ai-chat')?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Show/hide based on scroll position
+  const shouldShow = scrollY.get() < 300 || isVisible;
+
   return (
     <motion.header
-      style={{
-        opacity: headerOpacity,
-        y: headerY,
+      initial={{ y: 0 }}
+      animate={{
+        y: shouldShow ? 0 : -100,
+        opacity: scrollY.get() < 250 ? 0 : 1,
+      }}
+      transition={{
+        duration: 0.3,
+        ease: 'easeInOut',
       }}
       className="fixed top-0 left-0 right-0 z-40 backdrop-blur-xl bg-black/80 border-b border-white/5"
     >
       <div className="max-w-7xl mx-auto px-6 md:px-8 py-3 flex items-center justify-between">
-        {/* Logo/Name - Receives animated name from intro */}
+        {/* Logo/Name */}
         <div className="flex items-center gap-6">
           <motion.div
             whileHover={{ scale: 1.02 }}
@@ -47,7 +104,7 @@ export default function Header() {
             </a>
           </motion.div>
 
-          {/* Mission Impossible Style Location */}
+          {/* Location Badge */}
           <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-white/5 rounded-md border border-white/10">
             <div className="flex items-center gap-1">
               <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
@@ -83,32 +140,43 @@ export default function Header() {
         <nav className="flex items-center gap-1 md:gap-2">
           <a
             href="#world-experience"
-            className="px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all font-light"
+            className={`px-4 py-2 text-sm transition-all font-light rounded-lg ${
+              activeSection === 'world-experience'
+                ? 'text-white font-semibold bg-white/10'
+                : 'text-white/70 hover:text-white hover:bg-white/5'
+            }`}
           >
             Experience
           </a>
           <a
             href="#networking"
-            className="hidden md:block px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all font-light"
+            className={`hidden md:block px-4 py-2 text-sm transition-all font-light rounded-lg ${
+              activeSection === 'networking'
+                ? 'text-white font-semibold bg-white/10'
+                : 'text-white/70 hover:text-white hover:bg-white/5'
+            }`}
           >
             Networking
           </a>
           <a
             href="#recognition"
-            className="hidden md:block px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-all font-light"
+            className={`hidden md:block px-4 py-2 text-sm transition-all font-light rounded-lg ${
+              activeSection === 'recognition'
+                ? 'text-white font-semibold bg-white/10'
+                : 'text-white/70 hover:text-white hover:bg-white/5'
+            }`}
           >
             Recognition
           </a>
 
-          {/* CTA Button */}
-          <motion.button
+          {/* CTA Button with shadCN */}
+          <Button
             onClick={scrollToChat}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="ml-2 px-5 py-2 bg-white text-black font-medium rounded-md text-sm hover:bg-gray-100 transition-all"
+            className="ml-2"
+            variant="default"
           >
             Let&apos;s Talk
-          </motion.button>
+          </Button>
         </nav>
       </div>
     </motion.header>

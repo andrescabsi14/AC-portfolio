@@ -1,25 +1,24 @@
 'use client';
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { useEffect, useState, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface IntroSectionProps {
   onNameAnimationComplete?: () => void;
 }
 
 export default function IntroSection({ onNameAnimationComplete }: IntroSectionProps) {
-  const { scrollY } = useScroll();
   const [hasAnimated, setHasAnimated] = useState(false);
-
-  // Name animation transforms
-  const nameScale = useTransform(scrollY, [0, 300], [1, 0.4]);
-  const nameY = useTransform(scrollY, [0, 300], [0, -350]);
-  const nameX = useTransform(scrollY, [0, 300], [0, -600]);
-  const nameOpacity = useTransform(scrollY, [0, 100, 300], [1, 1, 0]);
-
-  // AI first experiences text
-  const aiTextOpacity = useTransform(scrollY, [0, 200], [1, 0]);
-  const aiTextY = useTransform(scrollY, [0, 200], [0, -100]);
+  const [scrollIndicatorVisible, setScrollIndicatorVisible] = useState(true);
+  const [scrollIndicatorFixed, setScrollIndicatorFixed] = useState(false);
+  const nameRef = useRef<HTMLDivElement>(null);
+  const taglineRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Check if intro animation has played
@@ -35,13 +34,73 @@ export default function IntroSection({ onNameAnimationComplete }: IntroSectionPr
     const timer = setTimeout(() => {
       setHasAnimated(true);
       onNameAnimationComplete();
-    }, 3500);
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, [hasAnimated, onNameAnimationComplete]);
 
+  useEffect(() => {
+    if (!nameRef.current || !taglineRef.current || !sectionRef.current) return;
+
+    // GSAP Parallax effect for name
+    gsap.to(nameRef.current, {
+      y: -200,
+      opacity: 0.5,
+      scale: 0.8,
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1.5,
+      },
+    });
+
+    // GSAP Parallax effect for tagline (slower movement)
+    gsap.to(taglineRef.current, {
+      y: -100,
+      opacity: 0,
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1,
+      },
+    });
+
+    // Scroll indicator behavior
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const sectionHeight = sectionRef.current?.offsetHeight || 0;
+
+      if (scrollY > 50 && scrollY < sectionHeight - 100) {
+        // Fade out when scrolling starts
+        setScrollIndicatorVisible(false);
+        setScrollIndicatorFixed(false);
+      } else if (scrollY >= sectionHeight - 100) {
+        // Fade in with fixed position after first section
+        setScrollIndicatorVisible(true);
+        setScrollIndicatorFixed(true);
+      } else {
+        // Show in original position when at top
+        setScrollIndicatorVisible(true);
+        setScrollIndicatorFixed(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleScrollIndicatorClick = () => {
+    const sectionHeight = sectionRef.current?.offsetHeight || 0;
+    window.scrollTo({
+      top: sectionHeight,
+      behavior: 'smooth',
+    });
+  };
+
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-black">
+    <section ref={sectionRef} className="relative h-screen w-full overflow-hidden bg-black">
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black z-10" />
@@ -51,21 +110,13 @@ export default function IntroSection({ onNameAnimationComplete }: IntroSectionPr
 
       {/* Content */}
       <div className="relative z-20 h-full flex flex-col items-center justify-center px-6">
-        {/* Name with animation to header */}
-        <motion.div
-          style={{
-            scale: nameScale,
-            y: nameY,
-            x: nameX,
-            opacity: nameOpacity,
-          }}
-          className="absolute"
-        >
+        {/* Name with GSAP parallax */}
+        <div ref={nameRef} className="text-center mb-8">
           <motion.h1
             initial={hasAnimated ? false : { opacity: 0, y: 50, scale: 0.9 }}
             animate={hasAnimated ? false : { opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            className="text-7xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400"
+            className="text-6xl md:text-8xl lg:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400"
             style={{
               letterSpacing: '-0.02em',
               textShadow: '0 0 80px rgba(255,255,255,0.1)',
@@ -73,38 +124,40 @@ export default function IntroSection({ onNameAnimationComplete }: IntroSectionPr
           >
             Andrés Cabrera
           </motion.h1>
-        </motion.div>
+        </div>
 
-        {/* AI First Experiences */}
-        <motion.div
-          style={{
-            opacity: aiTextOpacity,
-            y: aiTextY,
-          }}
-          className="mt-64"
-        >
+        {/* AI First Experiences - positioned below name */}
+        <div ref={taglineRef} className="text-center">
           <motion.p
             initial={hasAnimated ? false : { opacity: 0, y: 30 }}
             animate={hasAnimated ? false : { opacity: 1, y: 0 }}
             transition={{ duration: 1.2, delay: 2, ease: [0.22, 1, 0.36, 1] }}
-            className="text-2xl md:text-4xl font-light tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-gray-500"
+            className="text-2xl md:text-3xl lg:text-4xl font-light tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-gray-500"
           >
-            AI first experiences
+            AI First Experiences
           </motion.p>
-        </motion.div>
+        </div>
       </div>
 
       {/* Scroll Indicator */}
       <motion.div
+        ref={scrollIndicatorRef}
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: hasAnimated ? 0 : 3, duration: 1 }}
-        className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30"
+        animate={{
+          opacity: scrollIndicatorVisible ? 1 : 0,
+        }}
+        transition={{ duration: 0.5 }}
+        className={`${
+          scrollIndicatorFixed
+            ? 'fixed bottom-8 left-1/2 -translate-x-1/2'
+            : 'absolute bottom-12 left-1/2 -translate-x-1/2'
+        } z-30 cursor-pointer`}
+        onClick={handleScrollIndicatorClick}
       >
         <motion.div
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="text-gray-400 text-sm flex flex-col items-center gap-2"
+          className="text-gray-400 text-sm flex flex-col items-center gap-2 hover:text-gray-200 transition-colors"
         >
           <span className="text-xs font-light tracking-widest uppercase">Scroll</span>
           <svg
