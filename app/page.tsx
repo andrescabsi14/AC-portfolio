@@ -1,11 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import Header from '@/components/ui/Header';
 import InteractiveGlobe from '@/components/sections/InteractiveGlobe';
 import NYCParallaxScene from '@/components/sections/NYCParallaxScene';
 import AIChatSection from '@/components/sections/AIChatSection';
-import NameLoader from '@/components/ui/NameLoader';
+
+// Only render NameLoader on client to avoid hydration issues with animations
+const NameLoader = dynamic(() => import('@/components/ui/NameLoader'), { ssr: false });
 
 export default function Home() {
   const [showLoader, setShowLoader] = useState(true);

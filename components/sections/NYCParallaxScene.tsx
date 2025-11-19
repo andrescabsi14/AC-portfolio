@@ -125,6 +125,7 @@ export default function NYCParallaxScene() {
             {[...Array(8)].map((_, i) => (
               <div
                 key={`bg-${i}`}
+                suppressHydrationWarning
                 className="bg-gradient-to-t from-blue-900/40 to-blue-800/20 rounded-t-lg backdrop-blur-sm"
                 style={{
                   width: `${60 + Math.random() * 40}px`,
@@ -144,6 +145,7 @@ export default function NYCParallaxScene() {
             {[...Array(6)].map((_, i) => (
               <div
                 key={`mid-${i}`}
+                suppressHydrationWarning
                 className="bg-gradient-to-t from-purple-900/50 to-purple-800/30 rounded-t-lg backdrop-blur-sm border-t border-purple-500/20"
                 style={{
                   width: `${80 + Math.random() * 60}px`,
@@ -155,6 +157,7 @@ export default function NYCParallaxScene() {
                   {[...Array(12)].map((_, j) => (
                     <div
                       key={j}
+                      suppressHydrationWarning
                       className="w-2 h-2 bg-yellow-200/30 rounded-sm"
                       style={{
                         opacity: Math.random() > 0.3 ? 0.6 : 0.2,
@@ -180,6 +183,7 @@ export default function NYCParallaxScene() {
             {[...Array(5)].map((_, i) => (
               <div
                 key={`fg-${i}`}
+                suppressHydrationWarning
                 className="bg-gradient-to-t from-gray-900 to-gray-800 rounded-t-lg border-t-2 border-orange-500/30"
                 style={{
                   width: `${100 + Math.random() * 80}px`,
@@ -191,6 +195,7 @@ export default function NYCParallaxScene() {
                   {[...Array(32)].map((_, j) => (
                     <div
                       key={j}
+                      suppressHydrationWarning
                       className="w-3 h-3 bg-yellow-300/40 rounded-sm"
                       style={{
                         opacity: Math.random() > 0.2 ? 0.8 : 0.1,

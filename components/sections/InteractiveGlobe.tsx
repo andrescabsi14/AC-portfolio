@@ -55,108 +55,116 @@ export default function InteractiveGlobe() {
   useEffect(() => {
     if (!globeReady || !globeRef.current) return;
 
-    const globeMaterial = globeRef.current.globeMaterial();
-    if (!globeMaterial) return;
+    // Check if globeMaterial method exists
+    if (typeof globeRef.current.globeMaterial !== 'function') return;
 
-    // Load textures
-    const textureLoader = new THREE.TextureLoader();
-    const dayTexture = textureLoader.load('//unpkg.com/three-globe/example/img/earth-day.jpg');
-    const nightTexture = textureLoader.load('//unpkg.com/three-globe/example/img/earth-night.jpg');
+    try {
+      const globeMaterial = globeRef.current.globeMaterial();
+      if (!globeMaterial) return;
 
-    // Create custom shader material
-    const customMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        dayTexture: { value: dayTexture },
-        nightTexture: { value: nightTexture },
-        sunPosition: { value: new THREE.Vector2() },
-        globeRotation: { value: new THREE.Vector2() },
-      },
-      vertexShader: `
-        varying vec3 vNormal;
-        varying vec2 vUv;
+      // Load textures
+      const textureLoader = new THREE.TextureLoader();
+      const dayTexture = textureLoader.load('//unpkg.com/three-globe/example/img/earth-day.jpg');
+      const nightTexture = textureLoader.load('//unpkg.com/three-globe/example/img/earth-night.jpg');
 
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          vUv = uv;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      // Create custom shader material
+      const customMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          dayTexture: { value: dayTexture },
+          nightTexture: { value: nightTexture },
+          sunPosition: { value: new THREE.Vector2() },
+          globeRotation: { value: new THREE.Vector2() },
+        },
+        vertexShader: `
+          varying vec3 vNormal;
+          varying vec2 vUv;
+
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform sampler2D dayTexture;
+          uniform sampler2D nightTexture;
+          uniform vec2 sunPosition;
+          uniform vec2 globeRotation;
+
+          varying vec3 vNormal;
+          varying vec2 vUv;
+
+          #define PI 3.14159265359
+
+          float toRad(float deg) {
+            return deg * PI / 180.0;
+          }
+
+          vec3 Polar2Cartesian(vec2 c) {
+            float theta = toRad(90.0 - c.x);
+            float phi = toRad(90.0 - c.y);
+            return vec3(sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta));
+          }
+
+          void main() {
+            // Rotation matrices for globe rotation
+            float rotYAngle = toRad(globeRotation.x);
+            float rotXAngle = toRad(globeRotation.y);
+
+            mat3 rotY = mat3(
+              cos(rotYAngle), 0.0, sin(rotYAngle),
+              0.0, 1.0, 0.0,
+              -sin(rotYAngle), 0.0, cos(rotYAngle)
+            );
+
+            mat3 rotX = mat3(
+              1.0, 0.0, 0.0,
+              0.0, cos(rotXAngle), -sin(rotXAngle),
+              0.0, sin(rotXAngle), cos(rotXAngle)
+            );
+
+            // Calculate sun direction
+            vec3 rotatedSunDirection = rotX * rotY * Polar2Cartesian(sunPosition);
+
+            // Calculate lighting intensity
+            float intensity = dot(normalize(vNormal), normalize(rotatedSunDirection));
+
+            // Get day and night colors
+            vec4 dayColor = texture2D(dayTexture, vUv);
+            vec4 nightColor = texture2D(nightTexture, vUv);
+
+            // Blend between day and night
+            float blendFactor = smoothstep(-0.1, 0.1, intensity);
+            gl_FragColor = mix(nightColor, dayColor, blendFactor);
+          }
+        `,
+      });
+
+      globeMaterialRef.current = customMaterial;
+
+      // Apply custom material to globe
+      globeRef.current.globeMaterial(customMaterial);
+
+      // Update sun position based on current time
+      const updateSunPosition = () => {
+        const now = new Date();
+        const sunPos = getSunPosition(now);
+        if (globeMaterialRef.current) {
+          globeMaterialRef.current.uniforms.sunPosition.value.set(sunPos.lng, sunPos.lat);
         }
-      `,
-      fragmentShader: `
-        uniform sampler2D dayTexture;
-        uniform sampler2D nightTexture;
-        uniform vec2 sunPosition;
-        uniform vec2 globeRotation;
+      };
 
-        varying vec3 vNormal;
-        varying vec2 vUv;
+      // Initial update
+      updateSunPosition();
 
-        #define PI 3.14159265359
+      // Update sun position every minute
+      const interval = setInterval(updateSunPosition, 60000);
 
-        float toRad(float deg) {
-          return deg * PI / 180.0;
-        }
-
-        vec3 Polar2Cartesian(vec2 c) {
-          float theta = toRad(90.0 - c.x);
-          float phi = toRad(90.0 - c.y);
-          return vec3(sin(phi) * cos(theta), cos(phi), sin(phi) * sin(theta));
-        }
-
-        void main() {
-          // Rotation matrices for globe rotation
-          float rotYAngle = toRad(globeRotation.x);
-          float rotXAngle = toRad(globeRotation.y);
-
-          mat3 rotY = mat3(
-            cos(rotYAngle), 0.0, sin(rotYAngle),
-            0.0, 1.0, 0.0,
-            -sin(rotYAngle), 0.0, cos(rotYAngle)
-          );
-
-          mat3 rotX = mat3(
-            1.0, 0.0, 0.0,
-            0.0, cos(rotXAngle), -sin(rotXAngle),
-            0.0, sin(rotXAngle), cos(rotXAngle)
-          );
-
-          // Calculate sun direction
-          vec3 rotatedSunDirection = rotX * rotY * Polar2Cartesian(sunPosition);
-
-          // Calculate lighting intensity
-          float intensity = dot(normalize(vNormal), normalize(rotatedSunDirection));
-
-          // Get day and night colors
-          vec4 dayColor = texture2D(dayTexture, vUv);
-          vec4 nightColor = texture2D(nightTexture, vUv);
-
-          // Blend between day and night
-          float blendFactor = smoothstep(-0.1, 0.1, intensity);
-          gl_FragColor = mix(nightColor, dayColor, blendFactor);
-        }
-      `,
-    });
-
-    globeMaterialRef.current = customMaterial;
-
-    // Apply custom material to globe
-    globeRef.current.globeMaterial(customMaterial);
-
-    // Update sun position based on current time
-    const updateSunPosition = () => {
-      const now = new Date();
-      const sunPos = getSunPosition(now);
-      if (globeMaterialRef.current) {
-        globeMaterialRef.current.uniforms.sunPosition.value.set(sunPos.lng, sunPos.lat);
-      }
-    };
-
-    // Initial update
-    updateSunPosition();
-
-    // Update sun position every minute
-    const interval = setInterval(updateSunPosition, 60000);
-
-    return () => clearInterval(interval);
+      return () => clearInterval(interval);
+    } catch (error) {
+      // Globe shader material not available yet, skip setup
+      return;
+    }
   }, [globeReady]);
 
   // Update globe rotation when camera moves

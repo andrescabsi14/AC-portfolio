@@ -22,12 +22,15 @@ const quotes = [
 
 export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
   const [isComplete, setIsComplete] = useState(false);
-  const [selectedQuote] = useState(() => quotes[Math.floor(Math.random() * quotes.length)]);
+  const [selectedQuote, setSelectedQuote] = useState(quotes[0]);
 
   const firstName = 'ANDRES';
   const lastName = 'CABRERA';
 
   useEffect(() => {
+    // Set random quote on client-side only
+    setSelectedQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+
     // Complete the animation after 3.5 seconds
     const timer = setTimeout(() => {
       setIsComplete(true);
@@ -85,6 +88,7 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
 
   return (
     <motion.div
+      suppressHydrationWarning
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black"
       variants={containerVariants}
       initial="hidden"
