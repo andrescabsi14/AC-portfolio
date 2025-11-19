@@ -181,16 +181,15 @@ export default function WorldExperienceSection() {
             pointsData={globePoints}
             pointLat="lat"
             pointLng="lng"
-            pointColor={(point: GlobePoint) => point.isCurrentLocation ? '#22d3ee' : '#06b6d4'}
+            pointColor={(point: any) => (point as GlobePoint).isCurrentLocation ? '#22d3ee' : '#06b6d4'}
             pointAltitude={0.01}
-            pointRadius={(point: GlobePoint) => point.isCurrentLocation ? 1.2 : 0.8}
+            pointRadius={(point: any) => (point as GlobePoint).isCurrentLocation ? 1.2 : 0.8}
             pointLabel="label"
             onPointClick={(point) => handlePointClick(point as GlobePoint)}
             pointsMerge={true}
             enablePointerInteraction={true}
             htmlElementsData={globePoints.filter(p => p.isCurrentLocation)}
-            htmlElement={(d: GlobePoint) => {
-              if (!d.isCurrentLocation) return undefined;
+            htmlElement={() => {
               const el = document.createElement('div');
               el.className = 'pulse-marker';
               el.style.width = '12px';
