@@ -1,58 +1,57 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Header from '@/components/ui/Header';
-import InteractiveGlobe from '@/components/sections/InteractiveGlobe';
-import NYCParallaxScene from '@/components/sections/NYCParallaxScene';
-import AIChatSection from '@/components/sections/AIChatSection';
+import IntroSection from '@/components/sections/IntroSection';
+import AIChatSectionNew from '@/components/sections/AIChatSectionNew';
+import WorldExperienceSection from '@/components/sections/WorldExperienceSection';
+import NetworkingSection from '@/components/sections/NetworkingSection';
+import RecognitionSection from '@/components/sections/RecognitionSection';
 
 // Only render NameLoader on client to avoid hydration issues with animations
 const NameLoader = dynamic(() => import('@/components/ui/NameLoader'), { ssr: false });
 
 export default function Home() {
   const [showLoader, setShowLoader] = useState(true);
+  const [headerVisible, setHeaderVisible] = useState(false);
+
+  // Add smooth snap scrolling
+  useEffect(() => {
+    // Update CSS to enable snap scrolling
+    document.documentElement.style.scrollSnapType = 'y mandatory';
+    document.documentElement.style.scrollBehavior = 'smooth';
+
+    return () => {
+      document.documentElement.style.scrollSnapType = '';
+      document.documentElement.style.scrollBehavior = '';
+    };
+  }, []);
 
   return (
     <>
       {showLoader && (
         <NameLoader onLoadingComplete={() => setShowLoader(false)} />
       )}
-      <main className="relative bg-black">
-        {/* Header with intro animation */}
+      <main className="relative bg-black overflow-x-hidden">
+        {/* Header - appears after scrolling */}
         <Header />
 
-      {/* Interactive Globe Section - Project Menu */}
-      <section id="projects">
-        <InteractiveGlobe />
-      </section>
+        {/* Intro Section with Name Animation */}
+        <IntroSection onNameAnimationComplete={() => setHeaderVisible(true)} />
 
-      {/* NYC Parallax Scene - The Story */}
-      <section id="story">
-        <NYCParallaxScene />
-      </section>
+        {/* AI Chat Section */}
+        <AIChatSectionNew />
 
-      {/* AI Chat Section */}
-      <AIChatSection />
+        {/* World Experience Section */}
+        <WorldExperienceSection />
 
-      {/* Footer */}
-      <footer className="relative h-screen flex items-center justify-center bg-gradient-to-t from-zinc-900 to-black">
-        <div className="text-center space-y-6 px-8">
-          <h2 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">
-            The Journey Continues
-          </h2>
-          <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto">
-            This is just the beginning. Every line of code, every challenge overcome,
-            every connection made is part of a larger story still being written.
-          </p>
-          <div className="pt-8">
-            <p className="text-gray-500 text-sm">
-              Built with Next.js, Framer Motion, and Three.js
-            </p>
-          </div>
-        </div>
-      </footer>
-    </main>
+        {/* Networking Section */}
+        <NetworkingSection />
+
+        {/* Recognition Section */}
+        <RecognitionSection />
+      </main>
     </>
   );
 }
