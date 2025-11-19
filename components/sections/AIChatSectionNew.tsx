@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import Typewriter from '@/components/ui/Typewriter';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -19,28 +21,14 @@ export default function AIChatSectionNew() {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [userType, setUserType] = useState<UserType>(null);
-  const [typewriterText, setTypewriterText] = useState('');
+  const [showTypewriter, setShowTypewriter] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Typewriter effect for initial greeting
+  // Show typewriter on mount
   useEffect(() => {
-    if (!showButton) return;
-
-    const text = "Let's create something extraordinary together.";
-    let index = 0;
-
-    const timer = setInterval(() => {
-      if (index < text.length) {
-        setTypewriterText((prev) => prev + text[index]);
-        index++;
-      } else {
-        clearInterval(timer);
-      }
-    }, 50);
-
-    return () => clearInterval(timer);
-  }, [showButton]);
+    setShowTypewriter(true);
+  }, []);
 
   // Typewriter effect for assistant messages
   const typeMessage = async (text: string) => {
@@ -73,7 +61,7 @@ export default function AIChatSectionNew() {
 
   const handleStartConversation = () => {
     setShowButton(false);
-    setTypewriterText('');
+    setShowTypewriter(false);
     setTimeout(() => {
       setShowValidation(true);
     }, 500);
@@ -181,24 +169,29 @@ export default function AIChatSectionNew() {
                 className="text-center space-y-8"
               >
                 <div className="h-24 flex items-center justify-center">
-                  <p className="text-3xl md:text-4xl font-light text-white">
-                    {typewriterText}
-                    <span className="animate-pulse">|</span>
-                  </p>
+                  {showTypewriter && (
+                    <Typewriter
+                      text="Let's create something extraordinary together."
+                      speed={50}
+                      className="text-3xl md:text-4xl font-light text-white"
+                      onComplete={() => {}}
+                    />
+                  )}
                 </div>
 
-                {typewriterText.length > 40 && (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 2.5 }}
+                >
+                  <Button
                     onClick={handleStartConversation}
-                    className="px-8 py-4 bg-white text-black font-medium rounded-md text-lg hover:bg-gray-100 transition-all"
+                    size="lg"
+                    className="text-lg px-8 py-6"
                   >
                     Let&apos;s start a conversation
-                  </motion.button>
-                )}
+                  </Button>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -216,22 +209,21 @@ export default function AIChatSectionNew() {
                   Is this related to work or a project?
                 </p>
                 <div className="flex gap-4 justify-center">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <Button
                     onClick={() => handleValidation(true)}
-                    className="px-8 py-3 bg-white text-black font-medium rounded-md hover:bg-gray-100 transition-all"
+                    size="lg"
+                    className="px-8"
                   >
                     Yes
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  </Button>
+                  <Button
                     onClick={() => handleValidation(false)}
-                    className="px-8 py-3 bg-white/10 text-white font-medium rounded-md hover:bg-white/20 transition-all border border-white/20"
+                    variant="outline"
+                    size="lg"
+                    className="px-8 bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white"
                   >
                     No
-                  </motion.button>
+                  </Button>
                 </div>
               </motion.div>
             )}
@@ -295,13 +287,14 @@ export default function AIChatSectionNew() {
                     className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 resize-none focus:outline-none transition-all"
                     rows={3}
                   />
-                  <button
+                  <Button
                     onClick={handleSendMessage}
                     disabled={!input.trim() || isTyping}
-                    className="absolute bottom-3 right-3 px-4 py-2 bg-white text-black rounded-md text-sm font-medium hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="absolute bottom-3 right-3"
+                    size="sm"
                   >
                     Send
-                  </button>
+                  </Button>
                 </motion.div>
               </motion.div>
             )}
@@ -335,13 +328,12 @@ export default function AIChatSectionNew() {
                     rows={4}
                     className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-500 resize-none focus:outline-none focus:ring-2 focus:ring-white/40 transition-all"
                   />
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full px-8 py-3 bg-white text-black font-medium rounded-md hover:bg-gray-100 transition-all"
+                  <Button
+                    className="w-full"
+                    size="lg"
                   >
                     Send Message
-                  </motion.button>
+                  </Button>
                 </div>
               </motion.div>
             )}

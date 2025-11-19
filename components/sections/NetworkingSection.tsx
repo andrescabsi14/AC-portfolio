@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface NetworkEvent {
   id: number;
@@ -102,12 +105,11 @@ export default function NetworkingSection() {
   return (
     <section
       id="networking"
-      className="relative h-screen w-full overflow-hidden bg-black snap-start"
+      className="relative min-h-screen w-full overflow-hidden bg-black snap-start py-20"
     >
       {/* Background Image/Video */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black z-10" />
-        {/* Placeholder for background image */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black z-10" />
         <div className="w-full h-full bg-gradient-to-br from-blue-950 via-black to-purple-950" />
       </div>
 
@@ -122,7 +124,7 @@ export default function NetworkingSection() {
           className="text-center mb-16"
         >
           <h2
-            className="text-6xl md:text-8xl font-light text-white mb-4"
+            className="text-5xl md:text-7xl lg:text-8xl font-light text-white mb-4"
             style={{ letterSpacing: '-0.02em' }}
           >
             Networking
@@ -132,65 +134,33 @@ export default function NetworkingSection() {
           </p>
         </motion.div>
 
-        {/* Slider Container */}
-        <div className="relative max-w-5xl mx-auto w-full">
-          <AnimatePresence initial={false} custom={direction}>
-            <motion.div
-              key={currentIndex}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{
-                x: { type: 'spring', stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 },
-              }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={1}
-              onDragEnd={(e, { offset, velocity }) => {
-                const swipe = swipePower(offset.x, velocity.x);
-
-                if (swipe < -swipeConfidenceThreshold) {
-                  paginate(1);
-                } else if (swipe > swipeConfidenceThreshold) {
-                  paginate(-1);
-                }
-              }}
-              className="absolute w-full"
-            >
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 md:p-12">
-                <div className="space-y-6">
-                  {/* Year Badge */}
-                  <div className="inline-block px-4 py-2 bg-white/10 rounded-full border border-white/20">
-                    <span className="text-white font-light text-sm">{currentEvent.year}</span>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-3xl md:text-5xl font-light text-white leading-tight">
-                    {currentEvent.title}
-                  </h3>
-
-                  {/* Organization & Location */}
-                  <div className="flex flex-wrap gap-4 text-gray-400">
-                    <div className="flex items-center gap-2">
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                        />
-                      </svg>
-                      <span className="font-light">{currentEvent.organization}</span>
+        {/* Cards Grid - Show all events */}
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {networkingEvents.map((event, index) => (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+              >
+                <Card className="bg-white/5 backdrop-blur-xl border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 h-full">
+                  <CardHeader>
+                    <div className="flex items-start justify-between mb-3">
+                      <Badge variant="secondary" className="bg-cyan-500/10 text-cyan-300 border-cyan-500/20">
+                        {event.year}
+                      </Badge>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <CardTitle className="text-xl md:text-2xl font-light text-white leading-tight mb-2">
+                      {event.title}
+                    </CardTitle>
+                    <CardDescription className="text-gray-400 font-light">
+                      {event.organization}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-2 text-gray-400 text-sm mb-4">
                       <svg
                         className="w-4 h-4"
                         fill="none"
@@ -210,66 +180,16 @@ export default function NetworkingSection() {
                           d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                         />
                       </svg>
-                      <span className="font-light">{currentEvent.location}</span>
+                      <span className="font-light">{event.location}</span>
                     </div>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-gray-300 text-lg font-light leading-relaxed">
-                    {currentEvent.description}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Navigation Arrows */}
-          <button
-            onClick={() => paginate(-1)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 md:-translate-x-20 w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all group"
-            aria-label="Previous"
-          >
-            <svg
-              className="w-6 h-6 text-white group-hover:scale-110 transition-transform"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          <button
-            onClick={() => paginate(1)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 md:translate-x-20 w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all group"
-            aria-label="Next"
-          >
-            <svg
-              className="w-6 h-6 text-white group-hover:scale-110 transition-transform"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Dots Indicator */}
-        <div className="flex justify-center gap-2 mt-12">
-          {networkingEvents.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => {
-                setDirection(index > currentIndex ? 1 : -1);
-                setCurrentIndex(index);
-              }}
-              className={`w-2 h-2 rounded-full transition-all ${
-                index === currentIndex ? 'bg-white w-8' : 'bg-white/30 hover:bg-white/50'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
+                    <p className="text-gray-300 font-light text-sm leading-relaxed">
+                      {event.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

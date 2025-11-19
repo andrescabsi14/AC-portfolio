@@ -31,14 +31,14 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
     // Set random quote on client-side only
     setSelectedQuote(quotes[Math.floor(Math.random() * quotes.length)]);
 
-    // Complete the animation after 3.5 seconds
+    // Complete the animation after 5 seconds
     const timer = setTimeout(() => {
       setIsComplete(true);
       // Call the callback after fade out animation
       setTimeout(() => {
         onLoadingComplete();
       }, 800);
-    }, 3500);
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, [onLoadingComplete]);
