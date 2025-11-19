@@ -1,58 +1,64 @@
 'use client';
 
+import Link from 'next/link';
 import { motion, useScroll } from 'framer-motion';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+const navItems: {
+  id: string;
+  label: string;
+  hiddenOnMobile?: boolean;
+}[] = [
+  { id: 'world-experience', label: 'Experience' },
+  { id: 'networking', label: 'Networking', hiddenOnMobile: true },
+  { id: 'recognition', label: 'Recognition', hiddenOnMobile: true },
+];
 
 export default function Header() {
-  const [hasAnimated, setHasAnimated] = useState(false);
-  const [currentLocation] = useState('New York');
   const [isVisible, setIsVisible] = useState(true);
   const [activeSection, setActiveSection] = useState('');
-  const lastScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const lastScrollY = useRef(0);
   const { scrollY } = useScroll();
-
-  useEffect(() => {
-    // Check if intro animation has played
-    const animated = sessionStorage.getItem('intro-animated');
-    if (!animated) {
-      sessionStorage.setItem('intro-animated', 'true');
-    } else {
-      setHasAnimated(true);
-    }
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      const isScrollingDown = currentScrollY > lastScrollY.current;
 
-      // Hide header when scrolling
+      // Show header when scrolling down, hide when scrolling up
       if (currentScrollY > 300) {
-        setIsVisible(false);
+        if (isScrollingDown) {
+          setIsVisible(true);
+        } else {
+          setIsVisible(false);
+        }
+      } else {
+        setIsVisible(true);
       }
 
-      // Clear existing timeout
+      lastScrollY.current = currentScrollY;
+
       if (scrollTimeout.current) {
         clearTimeout(scrollTimeout.current);
       }
 
-      // Show header when scroll stops
+      // Auto-hide after 3 seconds of no scroll if scrolled past threshold while scrolling up
       scrollTimeout.current = setTimeout(() => {
-        if (currentScrollY > 300) {
-          setIsVisible(true);
+        if (currentScrollY > 300 && !isScrollingDown) {
+          setIsVisible(false);
         }
-      }, 150);
+      }, 3000);
 
-      lastScrollY.current = currentScrollY;
-
-      // Check which section is in viewport
       const sections = ['world-experience', 'networking', 'recognition'];
       for (const section of sections) {
         const element = document.getElementById(section);
         if (element) {
           const rect = element.getBoundingClientRect();
-          const isInViewport = rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2;
+          const isInViewport =
+            rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2;
           if (isInViewport) {
             setActiveSection(section);
             break;
@@ -74,7 +80,6 @@ export default function Header() {
     document.getElementById('ai-chat')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Show/hide based on scroll position
   const shouldShow = scrollY.get() < 300 || isVisible;
 
   return (
@@ -88,94 +93,39 @@ export default function Header() {
         duration: 0.3,
         ease: 'easeInOut',
       }}
-      className="fixed top-0 left-0 right-0 z-40 backdrop-blur-xl bg-black/80 border-b border-white/5"
+      className="fixed inset-x-0 top-0 z-50 bg-secondary/80 backdrop-blur-sm"
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-8 py-3 flex items-center justify-between">
-        {/* Logo/Name */}
-        <div className="flex items-center gap-6">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className="relative"
-          >
-            <a href="#" className="flex items-center gap-3 group">
-              <div className="text-white font-semibold text-lg tracking-tight">
-                Andrés Cabrera
-              </div>
-            </a>
-          </motion.div>
-
-          {/* Location Badge */}
-          <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-white/5 rounded-md border border-white/10">
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-xs font-mono text-green-400 uppercase tracking-wider">Live</span>
-            </div>
-            <div className="w-px h-3 bg-white/20" />
-            <div className="flex items-center gap-1.5">
-              <svg
-                className="w-3 h-3 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              <span className="text-xs font-medium text-gray-300">{currentLocation}</span>
-            </div>
-          </div>
-        </div>
+      <div className="mx-auto max-w-7xl flex h-16 items-center justify-between px-8">
+        {/* Brand/Name */}
+        <Link href="#" className="flex items-center">
+          <span className="text-sm font-medium tracking-widest uppercase text-secondary-foreground">
+            Andrés Cabrera
+          </span>
+        </Link>
 
         {/* Navigation */}
-        <nav className="flex items-center gap-1 md:gap-2">
-          <a
-            href="#world-experience"
-            className={`px-4 py-2 text-sm transition-all font-light rounded-lg ${
-              activeSection === 'world-experience'
-                ? 'text-white font-semibold bg-white/10'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            Experience
-          </a>
-          <a
-            href="#networking"
-            className={`hidden md:block px-4 py-2 text-sm transition-all font-light rounded-lg ${
-              activeSection === 'networking'
-                ? 'text-white font-semibold bg-white/10'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            Networking
-          </a>
-          <a
-            href="#recognition"
-            className={`hidden md:block px-4 py-2 text-sm transition-all font-light rounded-lg ${
-              activeSection === 'recognition'
-                ? 'text-white font-semibold bg-white/10'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            Recognition
-          </a>
+        <nav className="flex items-center gap-8">
+          {navItems.map((item) => (
+            <Link
+              key={item.id}
+              href={`#${item.id}`}
+              className={cn(
+                'text-xs font-medium tracking-widest uppercase transition-all duration-300',
+                item.hiddenOnMobile ? 'hidden md:inline-flex' : 'inline-flex',
+                activeSection === item.id
+                  ? 'text-secondary-foreground'
+                  : 'text-secondary-foreground/70 hover:text-secondary-foreground'
+              )}
+            >
+              {item.label}
+            </Link>
+          ))}
 
-          {/* CTA Button with shadCN */}
           <Button
-            onClick={scrollToChat}
-            className="ml-2"
-            variant="default"
+            variant="outline"
+            className="ml-4 h-auto border border-secondary-foreground/30 px-6 py-2.5 text-xs font-medium tracking-widest uppercase text-secondary-foreground hover:bg-secondary-foreground/10"
           >
-            Let&apos;s Talk
+            Contact
           </Button>
         </nav>
       </div>
