@@ -10,11 +10,13 @@ import { cn } from '@/lib/utils';
 const navItems: {
   id: string;
   label: string;
+  href?: string;
   hiddenOnMobile?: boolean;
+  href?: string;
 }[] = [
   { id: 'about', label: 'About' },
   { id: 'world-experience', label: 'Experience' },
-  { id: 'networking', label: 'Networking', hiddenOnMobile: true },
+  { id: 'ai-first', label: 'AI First', href: '/ai-first' },
 ];
 
 export default function Header() {
@@ -148,7 +150,7 @@ export default function Header() {
               onMouseLeave={() => setHoveredNavItem(null)}
             >
               <Link
-                href={item.id === 'about' ? '/about' : `#${item.id}`}
+                href={item.href || `#${item.id}`}
                 className={cn(
                   'text-xs font-medium tracking-widest uppercase transition-all duration-300',
                   activeSection === item.id
@@ -169,12 +171,14 @@ export default function Header() {
             </div>
           ))}
 
-          <Button
-            variant="outline"
-            className="ml-4 h-auto border border-secondary-foreground/30 px-6 py-2.5 text-xs font-medium tracking-widest uppercase text-secondary-foreground hover:bg-secondary-foreground/10"
-          >
-            Contact
-          </Button>
+          <Link href="/contact">
+            <Button
+              variant="outline"
+              className="ml-4 h-auto border border-secondary-foreground/30 px-6 py-2.5 text-xs font-medium tracking-widest uppercase text-secondary-foreground hover:bg-secondary-foreground/10"
+            >
+              Get Started
+            </Button>
+          </Link>
         </nav>
       </div>
     </motion.header>
