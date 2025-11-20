@@ -1,7 +1,6 @@
 'use client';
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 
 const dataPoints = [
@@ -24,77 +23,57 @@ const dataPoints = [
 ];
 
 export default function DataSovereigntySection() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  });
-
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-  const y = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [100, 0, 0, -100]);
-
   return (
-    <section
-      ref={ref}
-      className="relative min-h-screen flex items-center py-32"
-      style={{ scrollSnapAlign: 'start' }}
-    >
-      <motion.div style={{ opacity, y }} className="max-w-7xl mx-auto px-6 w-full">
+    <section className="px-6 py-32 bg-black" style={{ scrollSnapAlign: 'start' }}>
+      <div className="max-w-6xl mx-auto w-full">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           viewport={{ once: true }}
-          className="text-center mb-20"
+          className="text-center mb-16 space-y-6"
         >
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            Your Data is <span className="text-blue-400">Your Future</span>
+          <h2 className="text-3xl md:text-5xl font-light text-white">
+            Your Data is Your Future
           </h2>
-          <p className="text-xl text-white/70 max-w-3xl mx-auto">
-            In 10 years, companies will be valued by their proprietary data, not their revenue.
-            We teach you to own your intelligence, not give it away.
+          <p className="text-lg md:text-xl text-white/50 font-light leading-relaxed max-w-3xl mx-auto">
+            In 10 years, companies will be valued by their proprietary data, not their revenue. We teach you to own your intelligence, not give it away.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 mb-12">
           {dataPoints.map((point, index) => (
             <motion.div
               key={point.title}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: index * 0.05 }}
               viewport={{ once: true }}
             >
-              <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-white/10 p-8 h-full hover:border-blue-500/30 transition-all duration-300 group">
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <h3 className="text-2xl font-semibold text-white mb-4 group-hover:text-blue-400 transition-colors">
-                    {point.title}
-                  </h3>
-                  <p className="text-white/70 leading-relaxed">
-                    {point.description}
-                  </p>
-                </motion.div>
+              <Card className="bg-white/5 border border-white/10 p-8 h-full hover:border-white/20 hover:bg-white/10 transition-all duration-300 group">
+                <h3 className="text-xl font-light text-white mb-3 group-hover:text-white/80 transition-colors">
+                  {point.title}
+                </h3>
+                <p className="text-white/50 font-light leading-relaxed text-sm">
+                  {point.description}
+                </p>
               </Card>
             </motion.div>
           ))}
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           viewport={{ once: true }}
-          className="mt-16 text-center"
+          className="text-center"
         >
-          <p className="text-2xl md:text-3xl text-white/90 max-w-4xl mx-auto leading-relaxed">
-            First-mover advantage: Capture value{' '}
-            <span className="text-blue-400 font-semibold">years before your competitors</span>.
+          <p className="text-lg md:text-xl text-white/50 font-light leading-relaxed max-w-4xl mx-auto">
+            First-mover advantage: Capture value years before your competitors.
           </p>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }

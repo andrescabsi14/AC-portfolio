@@ -1,7 +1,6 @@
 'use client';
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { motion } from 'framer-motion';
 
 const automationExamples = [
   'Send analysis reports in minutes instead of days',
@@ -13,38 +12,21 @@ const automationExamples = [
 ];
 
 export default function AIFirstValue() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  });
-
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
 
   return (
-    <section
-      ref={ref}
-      className="relative min-h-screen flex items-center py-32 overflow-hidden"
-      style={{ scrollSnapAlign: 'start' }}
-    >
-      {/* Parallax background */}
-      <motion.div
-        style={{ y: backgroundY }}
-        className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-purple-900/10 to-black"
-      />
-
-      <div className="relative z-10 max-w-6xl mx-auto px-6 w-full">
+    <section className="px-6 py-32 bg-black" style={{ scrollSnapAlign: 'start' }}>
+      <div className="max-w-6xl mx-auto w-full">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-16 space-y-6"
         >
-          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
+          <h2 className="text-3xl md:text-5xl font-light text-white">
             Imagine the possibilities
           </h2>
-          <p className="text-xl text-white/70 max-w-3xl mx-auto">
+          <p className="text-lg md:text-xl text-white/50 font-light leading-relaxed max-w-3xl mx-auto">
             What if you could automate everything that doesn't need human touch?
           </p>
         </motion.div>
@@ -53,19 +35,15 @@ export default function AIFirstValue() {
           {automationExamples.map((example, index) => (
             <motion.div
               key={example}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: index * 0.05 }}
               viewport={{ once: true }}
               className="group"
             >
-              <div className="flex items-start gap-3 p-6 rounded-xl bg-white/5 border border-white/10 hover:border-blue-500/50 transition-all duration-300">
-                <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.5 }}
-                  className="flex-shrink-0 w-2 h-2 mt-2 rounded-full bg-blue-400"
-                />
-                <p className="text-white/80 group-hover:text-white transition-colors">
+              <div className="flex items-start gap-3 p-6 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-all duration-300">
+                <div className="flex-shrink-0 w-1.5 h-1.5 mt-2 rounded-full bg-white/40" />
+                <p className="text-white/50 group-hover:text-white/70 font-light transition-colors text-sm">
                   {example}
                 </p>
               </div>
@@ -74,33 +52,20 @@ export default function AIFirstValue() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           viewport={{ once: true }}
-          className="relative p-12 rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/30 overflow-hidden"
+          className="relative p-12 rounded-lg bg-white/5 border border-white/10"
         >
-          {/* Animated glow effect */}
-          <motion.div
-            animate={{
-              opacity: [0.5, 0.8, 0.5],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-            }}
-            className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-3xl"
-          />
-
-          <div className="relative z-10 text-center">
-            <p className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <div className="text-center">
+            <p className="text-2xl md:text-3xl font-light text-white mb-3">
               Save 50% of your time
             </p>
-            <p className="text-2xl md:text-3xl text-blue-400 mb-6">
+            <p className="text-lg md:text-xl text-white/70 font-light mb-6">
               Save hundreds of thousands in costs
             </p>
-            <p className="text-xl text-white/70">
+            <p className="text-white/50 font-light text-sm">
               These aren't promises. They're results from businesses already using AI-first solutions.
             </p>
           </div>

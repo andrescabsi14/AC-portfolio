@@ -6,6 +6,9 @@ import Header from "@/components/ui/Header";
 import Footer from "@/components/ui/Footer";
 import InteractiveChatSection from "@/components/sections/ai-first/InteractiveChatSection";
 import IndustriesSection from "@/components/sections/ai-first/IndustriesSection";
+import AIFirstValue from "@/components/sections/ai-first/AIFirstValue";
+import DataSovereigntySection from "@/components/sections/ai-first/DataSovereigntySection";
+import AIFirstVision from "@/components/sections/ai-first/AIFirstVision";
 import { useEffect } from "react";
 
 export default function AIFirstPage() {
@@ -210,6 +213,15 @@ export default function AIFirstPage() {
             </motion.div>
           </div>
         </section>
+
+        {/* AI First Vision Section */}
+        <AIFirstVision />
+
+        {/* AI First Value Section */}
+        <AIFirstValue />
+
+        {/* Data Sovereignty Section */}
+        <DataSovereigntySection />
 
         {/* Interactive Chat Section */}
         <InteractiveChatSection />
