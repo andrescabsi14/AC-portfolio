@@ -11,10 +11,11 @@ const navItems: {
   id: string;
   label: string;
   hiddenOnMobile?: boolean;
+  href?: string;
 }[] = [
   { id: 'about', label: 'About' },
   { id: 'world-experience', label: 'Experience' },
-  { id: 'networking', label: 'Networking', hiddenOnMobile: true },
+  { id: 'ai-first', label: 'AI First', href: '/ai-first' },
 ];
 
 export default function Header() {
@@ -148,7 +149,7 @@ export default function Header() {
               onMouseLeave={() => setHoveredNavItem(null)}
             >
               <Link
-                href={item.id === 'about' ? '/about' : `#${item.id}`}
+                href={item.href || (item.id === 'about' ? '/about' : `#${item.id}`)}
                 className={cn(
                   'text-xs font-medium tracking-widest uppercase transition-all duration-300',
                   activeSection === item.id
