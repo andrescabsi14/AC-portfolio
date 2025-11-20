@@ -17,64 +17,30 @@ export default function AIFirstCTA() {
   return (
     <section
       id="ai-first-cta"
-      className="relative min-h-screen flex items-center justify-center py-32 overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center py-32"
       style={{ scrollSnapAlign: 'start' }}
     >
-      {/* Animated background */}
-      <div className="absolute inset-0">
-        <motion.div
-          animate={{
-            backgroundPosition: ['0% 0%', '100% 100%'],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            repeatType: 'reverse',
-          }}
-          className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-purple-900/30 to-black"
-          style={{ backgroundSize: '200% 200%' }}
-        />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+      <div className="max-w-5xl mx-auto px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="inline-block mb-8 px-6 py-3 rounded-full bg-red-500/10 border border-red-500/30"
-          >
-            <p className="text-red-400 font-bold tracking-wider uppercase text-sm">
-              🔥 Exclusive Access • Limited Availability
-            </p>
-          </motion.div>
-
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
-            This Program Isn't For Everyone
-            <br />
-            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              But It Might Be For You
-            </span>
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 leading-tight">
+            Ready to Transform Your Business?
           </h2>
 
           <div className="space-y-6 mb-12 max-w-4xl mx-auto">
             <p className="text-xl md:text-2xl text-white/80 leading-relaxed">
-              We've engineered a program to give select businesses access to{' '}
-              <span className="text-white font-semibold">Fortune 500-level talent and infrastructure</span>.
+              Get access to <span className="text-white font-semibold">Fortune 500-level talent</span> and an international elite team.
             </p>
-            <p className="text-xl md:text-2xl text-white/70 leading-relaxed">
-              The kind of team that built systems for Google, Amazon, and the world's leading tech companies
-              is now available to <span className="text-white font-semibold">small and medium businesses</span>.
+            <p className="text-xl text-white/70 leading-relaxed">
+              We've engineered a program to give select small and medium businesses access to the kind of expertise
+              that normally only works with Google, Amazon, and leading tech companies.
             </p>
-            <p className="text-xl md:text-2xl text-blue-400 font-semibold">
-              This window won't stay open. Your competitors are reading this too.
+            <p className="text-xl text-blue-400 font-semibold">
+              The window won't stay open forever. Your competitors are moving now.
             </p>
           </div>
 

@@ -40,14 +40,14 @@ export default function AIFirstExperience() {
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-12 mb-20">
+        <div className="grid lg:grid-cols-2 gap-8 mb-20">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-blue-500/20 p-10 h-full">
+            <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-white/10 p-8 h-full hover:border-blue-500/30 transition-all duration-300">
               <h3 className="text-3xl font-bold text-white mb-6">
                 Elite Team, Global Reach
               </h3>
@@ -94,7 +94,7 @@ export default function AIFirstExperience() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-purple-500/20 p-10 h-full">
+            <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-white/10 p-8 h-full hover:border-blue-500/30 transition-all duration-300">
               <h3 className="text-3xl font-bold text-white mb-6">
                 Your Data. Your Ownership. Your Future.
               </h3>

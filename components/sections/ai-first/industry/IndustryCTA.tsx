@@ -12,59 +12,27 @@ interface IndustryCTAProps {
 export default function IndustryCTA({ industry }: IndustryCTAProps) {
   return (
     <section
-      className="relative min-h-screen flex items-center justify-center py-32 overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center py-32"
       style={{ scrollSnapAlign: 'start' }}
     >
-      {/* Animated background */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${industry.color}`}>
-        <motion.div
-          animate={{
-            backgroundPosition: ['0% 0%', '100% 100%'],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            repeatType: 'reverse',
-          }}
-          className="absolute inset-0 bg-gradient-to-br from-blue-900/30 via-purple-900/30 to-black"
-          style={{ backgroundSize: '200% 200%' }}
-        />
-      </div>
-
-      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+      <div className="max-w-5xl mx-auto px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="inline-block mb-8 px-6 py-3 rounded-full bg-red-500/10 border border-red-500/30"
-          >
-            <p className="text-red-400 font-bold tracking-wider uppercase text-sm">
-              🔥 Elite Team Access • {industry.name} Specialists
-            </p>
-          </motion.div>
-
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 leading-tight">
-            Access Fortune 500-Level Talent
-            <br />
-            <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              For Your {industry.name} Business
-            </span>
+            Transform Your <span className="text-blue-400">{industry.name}</span> Business
           </h2>
 
           <div className="space-y-6 mb-12 max-w-4xl mx-auto">
             <p className="text-xl md:text-2xl text-white/80 leading-relaxed">
-              We're an <span className="text-white font-semibold">international elite team</span> that built systems
-              for Fortune 500 companies. Now we work with select small and medium businesses.
+              Get access to an <span className="text-white font-semibold">international elite team</span> that built systems
+              for Fortune 500 companies—now available to select {industry.name.toLowerCase()} businesses.
             </p>
-            <p className="text-xl md:text-2xl text-blue-400 font-semibold">
-              Your competitors in {industry.name.toLowerCase()} are moving. Don't get left behind.
+            <p className="text-xl text-blue-400 font-semibold">
+              Your competitors are moving. Don't get left behind.
             </p>
           </div>
 
