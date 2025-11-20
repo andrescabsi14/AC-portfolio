@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { MessageSquare, Calendar, Sparkles } from 'lucide-react';
@@ -58,6 +59,10 @@ export default function ContactSection({
   ctaText = "Start Conversation with AI Assistant",
   className = '',
 }: ContactSectionProps) {
+  const [isFocused, setIsFocused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+
   const handleStartConversation = () => {
     if (onStartConversation) {
       onStartConversation();
@@ -69,6 +74,10 @@ export default function ContactSection({
         chatSection.scrollIntoView({ behavior: 'smooth' });
       }
     }
+  };
+
+  const handleInputClick = () => {
+    handleStartConversation();
   };
 
   return (
@@ -224,23 +233,76 @@ export default function ContactSection({
                 </p>
               </div>
 
-              {/* CTA Button */}
+              {/* Interactive Input with Glowing Line */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.6 }}
-                className="flex justify-center"
+                className="mt-8"
               >
-                <Button
-                  onClick={handleStartConversation}
-                  size="lg"
-                  className="bg-nyc-broadway hover:bg-nyc-broadway/90 text-black font-normal px-8 py-6 text-lg rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-[0_10px_30px_rgba(255,215,0,0.3)]"
-                >
-                  <MessageSquare className="w-5 h-5 mr-2" />
-                  {ctaText}
-                </Button>
+                <div className="max-w-3xl mx-auto">
+                  <p className="text-center text-white/60 text-sm mb-6 font-light">
+                    What would you like to discuss?
+                  </p>
+
+                  <div
+                    className="relative cursor-text"
+                    onClick={handleInputClick}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                  >
+                    {/* Input Container */}
+                    <div className="relative py-4 px-2">
+                      {/* Placeholder/Cursor */}
+                      <div className="flex items-center min-h-[2rem]">
+                        {!inputValue && (
+                          <>
+                            <span className="text-white/40 font-light text-lg mr-2">
+                              Type your message here
+                            </span>
+                            {/* Blinking Cursor */}
+                            <span
+                              className="inline-block w-0.5 h-6 bg-white/70 animate-pulse"
+                              style={{
+                                animation: 'blink 1s step-end infinite',
+                              }}
+                            />
+                          </>
+                        )}
+                      </div>
+
+                      {/* Bottom Line with Glow */}
+                      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-white/20 transition-all duration-300">
+                        {/* Glow Effect on Hover */}
+                        <div
+                          className={`absolute inset-0 transition-all duration-500 ${
+                            isHovered
+                              ? 'shadow-[0_0_20px_rgba(255,215,0,0.8),0_0_40px_rgba(255,215,0,0.4)] bg-nyc-broadway'
+                              : ''
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-center text-white/40 text-xs mt-4 font-light italic">
+                    Click to start your conversation with the AI assistant
+                  </p>
+                </div>
               </motion.div>
+
+              {/* Add CSS for blinking cursor animation */}
+              <style jsx>{`
+                @keyframes blink {
+                  0%, 50% {
+                    opacity: 1;
+                  }
+                  51%, 100% {
+                    opacity: 0;
+                  }
+                }
+              `}</style>
             </div>
           </Card>
         </motion.div>
