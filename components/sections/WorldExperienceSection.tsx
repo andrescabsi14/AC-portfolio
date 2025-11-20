@@ -233,6 +233,7 @@ const shaderMaterial = useMemo(() => {
       uHighDayMap: { value: highDayTexture },
       uHighNightMap: { value: highNightTexture },
       uLightDir: { value: new THREE.Vector3(1, 0.2, 0.5).normalize() },
+      uGlobeRotation: { value: 0 }, // Track the Y-axis rotation to keep day/night fixed
       uTimeOfDay: { value: timeOfDay },
       uTerminatorSoftness: { value: 0.2 },
       uSunPhase: { value: 0 }, // 0 = night, 1 = dawn, 2 = day, 3 = dusk
@@ -262,6 +263,7 @@ const shaderMaterial = useMemo(() => {
         uniform sampler2D uHighDayMap;
         uniform sampler2D uHighNightMap;
         uniform vec3 uLightDir;
+        uniform float uGlobeRotation;
         uniform float uTerminatorSoftness;
         uniform float uSunPhase;
         uniform float uPhaseProgress;
@@ -271,7 +273,20 @@ const shaderMaterial = useMemo(() => {
 
         void main() {
           vec3 normal = normalize(vNormal);
-          vec3 lightDir = normalize(uLightDir);
+
+          // Rotate light direction by inverse of globe rotation to keep day/night fixed in world space
+          // As the globe rotates, we counter-rotate the light so it stays aligned with the actual sun position
+          float angle = uGlobeRotation;
+          float cosA = cos(angle);
+          float sinA = sin(angle);
+
+          vec3 origLightDir = normalize(uLightDir);
+          vec3 lightDir = vec3(
+            origLightDir.x * cosA + origLightDir.z * sinA,
+            origLightDir.y,
+            -origLightDir.x * sinA + origLightDir.z * cosA
+          );
+          lightDir = normalize(lightDir);
 
           // More precise day/night boundary calculation
           float intensity = dot(normal, lightDir);
@@ -355,16 +370,25 @@ const shaderMaterial = useMemo(() => {
 
   useFrame((_, delta) => {
     if (meshRef.current) {
-      // Continuous rotation with speed based on expanded state
-      const rotationSpeed = isExpanded ? 0.01 : 0.02;
-      meshRef.current.rotation.y += delta * rotationSpeed;
+      // Only rotate mesh when NOT expanded
+      // When expanded, keep mesh still so day/night pattern is truly fixed as camera rotates around it
+      if (!isExpanded) {
+        meshRef.current.rotation.y += delta * 0.02;
+      }
       meshRef.current.rotation.x = THREE.MathUtils.degToRad(1.3);
       // Rotate 180 degrees to fix upside-down orientation
       meshRef.current.rotation.z = THREE.MathUtils.degToRad(180);
     }
 
       if (materialRef.current) {
-        const sunAngle = timeOfDay * Math.PI * 2;
+        // Calculate sun direction based on actual real-time (not just state updates every 60s)
+        // This creates a FIXED day/night terminator in world space
+        // As time progresses, different locations come into and out of daylight
+        const now = new Date();
+        const localHours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+        const dynamicTimeOfDay = (localHours % 24) / 24;
+
+        const sunAngle = dynamicTimeOfDay * Math.PI * 2;
         const sunDirection = new THREE.Vector3(
           Math.cos(sunAngle),
           0.2,
@@ -372,6 +396,14 @@ const shaderMaterial = useMemo(() => {
         );
         sunDirection.applyQuaternion(tiltQuaternion).normalize();
         materialRef.current.uniforms.uLightDir.value.copy(sunDirection);
+
+        // Update globe rotation to keep day/night lighting fixed in world space
+        // When not expanded: counter-rotate light as globe spins
+        // When expanded: keep rotation at 0 so light stays fixed in world space
+        if (meshRef.current) {
+          materialRef.current.uniforms.uGlobeRotation.value = isExpanded ? 0 : meshRef.current.rotation.y;
+        }
+
         materialRef.current.uniforms.uTimeOfDay.value = timeOfDay;
         materialRef.current.uniforms.uIsExpanded.value = isExpanded ? 1.0 : 0.0;
 
@@ -395,7 +427,7 @@ const shaderMaterial = useMemo(() => {
   }, [shaderMaterial]);
 
   return (
-    <mesh ref={meshRef} castShadow receiveShadow scale={[scale, scale, scale]}>
+    <mesh ref={meshRef} castShadow receiveShadow scale={[scale, scale, -scale]}>
       <sphereGeometry args={[1, 128, 128]} />
       <primitive object={shaderMaterial} attach="material" />
     </mesh>
@@ -463,56 +495,77 @@ const CurrentLocationPulse = () => {
   );
 };
 
-const LightBeamMarker = ({ location }: { location: (typeof GLOBE_MOMENT_LOCATIONS)[0] }) => {
-  const groupRef = useRef<THREE.Group>(null);
-  const position = useMemo(() => latLngToCartesian(location.lat, location.lng, 1.02), [location]);
 
-  return (
-    <group ref={groupRef} position={position}>
-      {/* Black sphere marker */}
-      <mesh>
-        <sphereGeometry args={[0.035, 16, 16]} />
-        <meshStandardMaterial
-          color="#000000"
-          metalness={0.3}
-          roughness={0.4}
-        />
-      </mesh>
-
-      {/* White wireframe border */}
-      <mesh>
-        <sphereGeometry args={[0.037, 16, 16]} />
-        <meshStandardMaterial
-          color="#ffffff"
-          wireframe={true}
-          transparent={true}
-          opacity={0.8}
-          side={THREE.BackSide}
-        />
-      </mesh>
-    </group>
-  );
-};
-
-const CameraController = ({ isExpanded }: { isExpanded: boolean }) => {
+const CameraController = ({ isExpanded, config }: { isExpanded: boolean; config: any }) => {
   const { camera } = useThree();
-  const targetZ = useRef(2.5);
-
-  useEffect(() => {
-    // Default: z = 1.6 (zoomed out, globe smaller)
-    // Expanded: z = 2.5 (zoomed out more, entire globe visible)
-    targetZ.current = isExpanded ? 2.5 : 1.6;
-  }, [isExpanded]);
 
   useFrame(() => {
-    // Smooth camera animation
-    camera.position.z += (targetZ.current - camera.position.z) * 0.08;
+    // Only control camera when NOT expanded
+    // When expanded, OrbitControls has full control
+    if (!isExpanded) {
+      const interpolationSpeed = config.notExpanded.camera.interpolationSpeed;
+      const targetZ = config.notExpanded.camera.targetZ;
+
+      camera.position.x += (0 - camera.position.x) * interpolationSpeed;
+      camera.position.y += (0 - camera.position.y) * interpolationSpeed;
+      camera.position.z += (targetZ - camera.position.z) * interpolationSpeed;
+    }
   });
 
   return null;
 };
 
 export default function WorldExperienceSection() {
+  // Globe configuration for expanded and non-expanded states
+  const GLOBE_CONFIG = {
+    notExpanded: {
+      camera: {
+        targetZ: 1.25,
+        interpolationSpeed: 0.08,
+      },
+      canvas: {
+        filter: 'blur(10px) brightness(70%) contrast(300%)',
+        fov: 45,
+        initialZ: 0.8,
+      },
+      orbitControls: {
+        enableRotate: false,
+        autoRotate: false,
+        autoRotateSpeed: 0.4,
+        minDistance: 1.8,
+        maxDistance: 5.5,
+      },
+      overlays: {
+        dottedOpacity: 1,
+        darkOpacity: 0.3,
+        transitionDuration: 0.5,
+      },
+    },
+    expanded: {
+      camera: {
+        targetZ: 5.5,
+        interpolationSpeed: 0.08,
+      },
+      canvas: {
+        filter: 'none',
+        fov: 45,
+        initialZ: 0.8,
+      },
+      orbitControls: {
+        enableRotate: true,
+        autoRotate: true,
+        autoRotateSpeed: 0.01,
+        minDistance: 2.0,
+        maxDistance: 8.0,
+      },
+      overlays: {
+        dottedOpacity: 0,
+        darkOpacity: 0,
+        transitionDuration: 3,
+      },
+    },
+  };
+
   const [globeReady, setGlobeReady] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -523,9 +576,10 @@ export default function WorldExperienceSection() {
 
   useEffect(() => {
     if (controlsRef.current) {
-      controlsRef.current.autoRotate = isExpanded;
+      const autoRotateConfig = isExpanded ? GLOBE_CONFIG.expanded.orbitControls.autoRotate : GLOBE_CONFIG.notExpanded.orbitControls.autoRotate;
+      controlsRef.current.autoRotate = autoRotateConfig;
     }
-  }, [isExpanded]);
+  }, [isExpanded, GLOBE_CONFIG]);
 
   // Calculate sun position for New York
   useEffect(() => {
@@ -554,38 +608,18 @@ useEffect(() => {
 
   if (isExpanded) {
     scrollLockPosition.current = window.scrollY;
-    html.style.position = 'fixed';
-    html.style.top = `-${scrollLockPosition.current}px`;
-    html.style.width = '100%';
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollLockPosition.current}px`;
-    body.style.width = '100%';
+    // Disable scrolling without changing position
     html.style.overflow = 'hidden';
     body.style.overflow = 'hidden';
     document.documentElement.setAttribute('data-globe-expanded', 'true');
   } else {
-    if (scrollLockPosition.current) {
-      window.scrollTo(0, scrollLockPosition.current);
-      scrollLockPosition.current = 0;
-    }
-    html.style.position = '';
-    html.style.top = '';
-    html.style.width = '';
-    body.style.position = '';
-    body.style.top = '';
-    body.style.width = '';
+    // Re-enable scrolling
     html.style.overflow = '';
     body.style.overflow = '';
     document.documentElement.setAttribute('data-globe-expanded', 'false');
   }
 
   return () => {
-    html.style.position = '';
-    html.style.top = '';
-    html.style.width = '';
-    body.style.position = '';
-    body.style.top = '';
-    body.style.width = '';
     html.style.overflow = '';
     body.style.overflow = '';
   };
@@ -599,6 +633,18 @@ useEffect(() => {
   return () => clearInterval(timer);
 }, []);
 
+// Handle ESC key to close expanded globe view
+useEffect(() => {
+  const handleEscapeKey = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && isExpanded) {
+      setIsExpanded(false);
+    }
+  };
+
+  window.addEventListener('keydown', handleEscapeKey);
+  return () => window.removeEventListener('keydown', handleEscapeKey);
+}, [isExpanded]);
+
   const handleProjectSelect = (project: Project) => {
     setSelectedProject(project);
   };
@@ -606,7 +652,7 @@ useEffect(() => {
   return (
     <section
       id="world-experience"
-      className="relative min-h-screen w-full overflow-hidden bg-black snap-start"
+      className="relative w-full h-screen overflow-hidden bg-black snap-start"
     >
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-black" />
@@ -614,11 +660,14 @@ useEffect(() => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(30,80,180,0.15),_transparent_60%)]" />
       </div>
 
-      <div className="relative z-10 w-full flex flex-col">
-        <div className="relative w-full h-screen">
+      <div className="relative z-10 w-full flex flex-col h-full">
+        <div className="relative w-full h-full">
           <Canvas
-            camera={{ position: [0, 0, 0.8], fov: 45 }}
+            camera={{ position: [0, 0, GLOBE_CONFIG.notExpanded.canvas.initialZ], fov: GLOBE_CONFIG.notExpanded.canvas.fov }}
             className="absolute inset-0 w-full h-full"
+            style={{
+              filter: isExpanded ? GLOBE_CONFIG.expanded.canvas.filter : GLOBE_CONFIG.notExpanded.canvas.filter,
+            }}
             gl={{ antialias: true, alpha: false }}
           >
             <ambientLight intensity={0.3} />
@@ -630,7 +679,7 @@ useEffect(() => {
               <OuterGlow />
             </Suspense>
             <CurrentLocationPulse />
-            <CameraController isExpanded={isExpanded} />
+            <CameraController isExpanded={isExpanded} config={GLOBE_CONFIG} />
             {isExpanded && (
               <>
                 <group>
@@ -644,9 +693,14 @@ useEffect(() => {
                 </group>
                 <group>
                   {GLOBE_MOMENT_LOCATIONS.map((location, index) => (
-                    <LightBeamMarker
+                    <Marker
                       key={index}
-                      location={location}
+                      project={{
+                        id: `moment-${index}`,
+                        title: location.title,
+                        location: { lat: location.lat, lng: location.lng },
+                      } as any}
+                      onSelect={() => {}}
                     />
                   ))}
                 </group>
@@ -656,11 +710,11 @@ useEffect(() => {
               ref={controlsRef}
               enablePan={false}
               enableZoom={false}
-              enableRotate={isExpanded}
-              autoRotate={false}
-              autoRotateSpeed={0.4}
-              minDistance={1.8}
-              maxDistance={4.5}
+              enableRotate={isExpanded ? GLOBE_CONFIG.expanded.orbitControls.enableRotate : GLOBE_CONFIG.notExpanded.orbitControls.enableRotate}
+              autoRotate={isExpanded ? GLOBE_CONFIG.expanded.orbitControls.autoRotate : GLOBE_CONFIG.notExpanded.orbitControls.autoRotate}
+              autoRotateSpeed={isExpanded ? GLOBE_CONFIG.expanded.orbitControls.autoRotateSpeed : GLOBE_CONFIG.notExpanded.orbitControls.autoRotateSpeed}
+              minDistance={isExpanded ? GLOBE_CONFIG.expanded.orbitControls.minDistance : GLOBE_CONFIG.notExpanded.orbitControls.minDistance}
+              maxDistance={isExpanded ? GLOBE_CONFIG.expanded.orbitControls.maxDistance : GLOBE_CONFIG.notExpanded.orbitControls.maxDistance}
             />
           </Canvas>
         </div>
@@ -672,20 +726,20 @@ useEffect(() => {
             backgroundImage: `radial-gradient(circle, rgba(0,0,0,var(--dotted-overlay-opacity, 0.25)) 1.5px, transparent 1.5px)`,
             backgroundSize: '4px 4px',
           }}
-          animate={{ opacity: isExpanded ? 0 : 1 }}
-          transition={{ duration: 3, ease: 'easeInOut' }}
+          animate={{ opacity: isExpanded ? GLOBE_CONFIG.expanded.overlays.dottedOpacity : GLOBE_CONFIG.notExpanded.overlays.dottedOpacity }}
+          transition={{ duration: isExpanded ? GLOBE_CONFIG.expanded.overlays.transitionDuration : GLOBE_CONFIG.notExpanded.overlays.transitionDuration, ease: 'easeInOut' }}
         />
 
         {/* Dark Overlay - only visible when not expanded */}
         <motion.div
           className="absolute inset-0 pointer-events-none z-5 bg-black"
-          animate={{ opacity: isExpanded ? 0 : 0.15 }}
-          transition={{ duration: 0.5, ease: 'easeInOut' }}
+          animate={{ opacity: isExpanded ? GLOBE_CONFIG.expanded.overlays.darkOpacity : GLOBE_CONFIG.notExpanded.overlays.darkOpacity }}
+          transition={{ duration: GLOBE_CONFIG.notExpanded.overlays.transitionDuration, ease: 'easeInOut' }}
         />
 
         <motion.div
-          className="pointer-events-none absolute px-6 text-center z-20"
-          animate={isExpanded ? { top: 24, left: '50%', width: '100%', transform: 'translateX(-50%)' } : { top: '50%', left: '50%', width: '100%', transform: 'translate(-50%, -50%)' }}
+          className="absolute px-6 text-center z-20"
+          animate={isExpanded ? { top: 100, left: '50%', width: '100%', transform: 'translateX(-50%)' } : { top: '50%', left: '50%', width: '100%', transform: 'translate(-50%, -50%)' }}
           transition={{ duration: 0.5, ease: 'easeInOut' }}
         >
           <motion.h2
@@ -703,10 +757,25 @@ useEffect(() => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg md:text-xl text-gray-400 font-light"
+            className="text-lg md:text-xl text-white-400 font-light mb-8"
           >
             Global impact across continents
           </motion.p>
+          {globeReady && !isExpanded && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="pointer-events-auto"
+            >
+              <Button
+                onClick={() => setIsExpanded(true)}
+                className="cursor-pointer backdrop-blur-md bg-white/10 border border-white/30 text-white uppercase tracking-widest font-medium hover:bg-white/20 hover:border-white/50 transition-all"
+              >
+                Discover My Journey
+              </Button>
+            </motion.div>
+          )}
         </motion.div>
 
         {globeReady && (
@@ -719,7 +788,7 @@ useEffect(() => {
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0.3 }}
                   onClick={() => setIsExpanded(false)}
-                  className="absolute top-24 right-6 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-colors pointer-events-auto"
+                  className="fixed top-6 right-6 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-colors pointer-events-auto"
                 >
                   <svg
                     width="20"
@@ -737,22 +806,6 @@ useEffect(() => {
                 </motion.button>
               )}
             </AnimatePresence>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center pointer-events-auto z-30"
-            >
-              {!isExpanded && (
-                <Button
-                  onClick={() => setIsExpanded(true)}
-                  className="backdrop-blur-md bg-white/10 border border-white/30 text-white uppercase tracking-widest font-medium hover:bg-white/20 hover:border-white/50 transition-all"
-                >
-                  Discover My Journey
-                </Button>
-              )}
-            </motion.div>
           </>
         )}
       </div>

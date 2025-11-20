@@ -16,7 +16,7 @@ const quotes = [
   "Creating experiences that inspire, engage, and empower.",
   "From self-taught to founder—driven by curiosity and purpose.",
   "Building the future, one commit at a time.",
-  "Code with purpose, design with intention, ship with pride.",
+  "Code with purpose, design with intention.",
   "Turning ideas into products that matter.",
 ];
 
@@ -38,7 +38,7 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
       setTimeout(() => {
         onLoadingComplete();
       }, 800);
-    }, 5000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [onLoadingComplete]);
@@ -46,31 +46,15 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
   const letterVariants = {
     hidden: {
       opacity: 0,
-      y: 50,
-      filter: 'blur(10px)',
+      y: 30,
     },
     visible: (i: number) => ({
       opacity: 1,
       y: 0,
-      filter: 'blur(0px)',
       transition: {
-        delay: i * 0.1,
-        duration: 0.8,
-        ease: [0.22, 1, 0.36, 1] as const,
-      },
-    }),
-    glow: (i: number) => ({
-      textShadow: [
-        '0 0 20px rgba(8, 145, 178, 0.3)',
-        '0 0 40px rgba(8, 145, 178, 0.6)',
-        '0 0 60px rgba(8, 145, 178, 0.4)',
-        '0 0 40px rgba(8, 145, 178, 0.6)',
-        '0 0 20px rgba(8, 145, 178, 0.3)',
-      ],
-      transition: {
-        delay: i * 0.1 + 0.8,
-        duration: 2,
-        ease: 'easeInOut' as const,
+        delay: i * 0.04,
+        duration: 0.4,
+        ease: 'easeOut' as const,
       },
     }),
   };
@@ -89,26 +73,25 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
   return (
     <motion.div
       suppressHydrationWarning
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900"
       variants={containerVariants}
       initial="hidden"
       animate={isComplete ? 'exit' : 'hidden'}
     >
       <div className="text-center space-y-6">
         {/* First Name */}
-        <div className="flex justify-center space-x-2 md:space-x-4">
+        <div className="flex justify-center">
           {firstName.split('').map((letter, i) => (
             <motion.span
               key={`first-${i}`}
               custom={i}
               variants={letterVariants}
               initial="hidden"
-              animate={['visible', 'glow']}
-              className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-br from-cyan-400 via-cyan-500 to-cyan-600"
+              animate="visible"
+              className="text-6xl md:text-8xl lg:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400"
               style={{
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                fontWeight: 700,
-                letterSpacing: '0.05em',
+                letterSpacing: '-0.02em',
+                textShadow: '0 0 80px rgba(255,255,255,0.1)',
               }}
             >
               {letter}
@@ -117,19 +100,18 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
         </div>
 
         {/* Last Name */}
-        <div className="flex justify-center space-x-2 md:space-x-4">
+        <div className="flex justify-center">
           {lastName.split('').map((letter, i) => (
             <motion.span
               key={`last-${i}`}
               custom={i + firstName.length}
               variants={letterVariants}
               initial="hidden"
-              animate={['visible', 'glow']}
-              className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-br from-cyan-400 via-cyan-500 to-cyan-600"
+              animate="visible"
+              className="text-6xl md:text-8xl lg:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400"
               style={{
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                fontWeight: 700,
-                letterSpacing: '0.05em',
+                letterSpacing: '-0.02em',
+                textShadow: '0 0 80px rgba(255,255,255,0.1)',
               }}
             >
               {letter}
@@ -156,7 +138,7 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 2, duration: 1, ease: 'easeOut' }}
-          className="text-sm md:text-base lg:text-lg text-gray-400 font-light max-w-2xl mx-auto px-8 mt-8"
+          className="text-2xl md:text-3xl lg:text-4xl text-gray-400 font-light max-w-2xl mx-auto px-8 mt-8"
           style={{
             fontWeight: 300,
             letterSpacing: '0.02em',

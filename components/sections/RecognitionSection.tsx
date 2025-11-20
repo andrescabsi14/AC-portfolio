@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 interface Recognition {
   id: number;
@@ -11,27 +10,27 @@ interface Recognition {
   subtitle: string;
   year: number;
   description: string;
-  icon: string;
+  image: string;
 }
 
 const recognitions: Recognition[] = [
   {
     id: 1,
     title: 'Young Leaders of the Americas',
-    subtitle: 'U.S. Department of State',
+    subtitle: 'Certificate from President of the United States Barack Obama',
     year: 2016,
     description:
-      'Honored as one of 250 exceptional young entrepreneurs from across Latin America and the Caribbean, recognized for innovative leadership and commitment to economic development.',
-    icon: '🏆',
+      'Honored as one of 250 exceptional young entrepreneurs from across Latin America and the Caribbean. This certificate was awarded by President Barack Obama in recognition of innovative leadership and commitment to economic development through the Young Leaders of the Americas Initiative (YLAI).',
+    image: '/photos/certificate/PresidentObamaCertificate.jpg',
   },
   {
     id: 2,
     title: 'DTU Young Influencer',
-    subtitle: 'Denmark Technical University',
+    subtitle: 'C40 World\'s Mayor Summit',
     year: 2018,
     description:
       'Acknowledged as a young influencer in technology and sustainable innovation, contributing to the advancement of cutting-edge solutions in Northern Europe.',
-    icon: '⭐',
+    image: '/photos/certificate/TechCamp-Bolivia.jpg',
   },
 ];
 
@@ -58,6 +57,7 @@ const notableEvents = [
 
 export default function RecognitionSection() {
   const [selectedRecognition, setSelectedRecognition] = useState<number | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState<number | null>(null);
 
   return (
     <section
@@ -107,34 +107,41 @@ export default function RecognitionSection() {
                 <Card
                   className={`
                     bg-white/5 backdrop-blur-xl border-white/10 h-full
-                    transition-all duration-500 cursor-pointer
+                    transition-all duration-500 cursor-pointer overflow-hidden
                     ${
                       selectedRecognition === recognition.id
                         ? 'bg-white/10 border-white/30 scale-105'
                         : 'hover:bg-white/8 hover:border-white/20'
                     }
                   `}
+                  onClick={() => setLightboxOpen(recognition.id)}
                 >
-                  <CardHeader>
-                    <div className="text-5xl md:text-6xl mb-4">{recognition.icon}</div>
-                    <Badge
-                      variant="secondary"
-                      className="w-fit bg-amber-500/10 text-amber-300 border-amber-500/20 mb-4"
-                    >
-                      {recognition.year}
-                    </Badge>
-                    <CardTitle className="text-2xl md:text-3xl font-light text-white leading-tight">
-                      {recognition.title}
-                    </CardTitle>
-                    <CardDescription className="text-lg text-gray-400 font-light">
-                      {recognition.subtitle}
-                    </CardDescription>
+                  <div className="relative">
+                    {/* Image with Gradient Overlay */}
+                    <div className="relative h-80 overflow-hidden">
+                      <img
+                        src={recognition.image}
+                        alt={recognition.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent from-30% via-black/20 via-70% to-black/80" />
+                    </div>
+                  </div>
+                  <CardHeader className="pb-8">
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-xs font-semibold text-amber-300 mb-2">
+                          {recognition.year}
+                        </p>
+                        <CardTitle className="text-2xl md:text-3xl font-light text-white leading-tight">
+                          {recognition.title}
+                        </CardTitle>
+                      </div>
+                      <CardDescription className="text-sm text-gray-400 font-light">
+                        {recognition.subtitle}
+                      </CardDescription>
+                    </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-300 font-light leading-relaxed">
-                      {recognition.description}
-                    </p>
-                  </CardContent>
                 </Card>
               </motion.div>
             ))}
@@ -193,6 +200,63 @@ export default function RecognitionSection() {
           </motion.div>
         </div>
       </div>
+
+      {/* Lightbox Modal */}
+      {lightboxOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={() => setLightboxOpen(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="relative w-full max-w-2xl mx-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setLightboxOpen(null)}
+              className="absolute top-4 right-4 text-white/60 hover:text-white transition"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            {recognitions.map((recognition) => {
+              if (recognition.id !== lightboxOpen) return null;
+              return (
+                <div key={recognition.id} className="space-y-4">
+                  <div>
+                    <h2 className="text-4xl font-light text-white mb-2">
+                      {recognition.title}
+                    </h2>
+                    <p className="text-xl text-gray-300">
+                      {recognition.subtitle}
+                    </p>
+                  </div>
+                  <p className="text-gray-300 font-light leading-relaxed text-lg">
+                    {recognition.description}
+                  </p>
+                </div>
+              );
+            })}
+          </motion.div>
+        </motion.div>
+      )}
     </section>
   );
 }
