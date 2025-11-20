@@ -29,11 +29,14 @@ export default function AIFirstExperience() {
           className="text-center mb-20"
         >
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-8">
-            Why am I <span className="text-blue-400">different?</span>
+            This is <span className="text-blue-400">not</span> hiring another freelancer
           </h2>
-          <p className="text-xl md:text-2xl text-white/70 max-w-4xl mx-auto leading-relaxed">
-            I care about your <span className="text-white font-semibold">why</span>.
-            I care about your business, why you started it, and keeping that identity and culture.
+          <p className="text-xl md:text-2xl text-white/70 max-w-5xl mx-auto leading-relaxed">
+            You're getting access to <span className="text-white font-semibold">elite-level talent and an international team</span> that
+            typically only works with companies like Google, Amazon, and Fortune 500s.
+            <br /><br />
+            We understand both the <span className="text-white font-semibold">business and the technology</span>—a rare combination
+            that changes everything.
           </p>
         </motion.div>
 
@@ -46,16 +49,17 @@ export default function AIFirstExperience() {
           >
             <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-blue-500/20 p-10 h-full">
               <h3 className="text-3xl font-bold text-white mb-6">
-                Proven Experience
+                Elite Team, Global Reach
               </h3>
               <div className="space-y-6 text-white/80">
                 <p className="text-lg leading-relaxed">
-                  <span className="font-semibold text-white">12+ years</span> working with high-tech companies,
-                  including some of the most important companies on the planet.
+                  We're an <span className="font-semibold text-white">international team</span> serving businesses in the US, Europe, and Asia.
+                  This isn't about outsourcing to random freelancers—this is accessing talent that built systems for
+                  <span className="font-semibold text-white"> Fortune 500 companies</span>.
                 </p>
                 <p className="text-lg leading-relaxed">
-                  Started working with AI in <span className="font-semibold text-white">2016</span>, pioneering
-                  predictive medicine using artificial intelligence.
+                  <span className="font-semibold text-white">12+ years</span> at the highest level. Started pioneering AI in
+                  <span className="font-semibold text-white"> 2016</span> when most companies didn't even know what it was.
                 </p>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -92,16 +96,16 @@ export default function AIFirstExperience() {
           >
             <Card className="bg-gradient-to-br from-slate-900/90 to-slate-800/50 border-purple-500/20 p-10 h-full">
               <h3 className="text-3xl font-bold text-white mb-6">
-                My Commitment to You
+                Your Data. Your Ownership. Your Future.
               </h3>
               <div className="space-y-4">
                 {[
-                  'Not just a contractor—a long-term technology partner',
-                  'Results-based work available—that\'s how confident I am',
-                  'Money-back guarantee if you\'re not satisfied',
-                  'We care about long-term transformation, not quick sales',
-                  'Step-by-step implementation at your pace',
-                  'We handle the complexity, you enjoy simplicity',
+                  'We teach you to OWN your data—not hand it to OpenAI or Google',
+                  'Your knowledge stays yours, becoming your most valuable asset',
+                  'First-mover advantage: capture value years before competitors',
+                  'Strategic transformation, not just technology implementation',
+                  'We understand business strategy AND technical architecture',
+                  'Results-based work available—that\'s how confident we are',
                 ].map((item, index) => (
                   <motion.div
                     key={item}
@@ -132,7 +136,7 @@ export default function AIFirstExperience() {
           className="text-center"
         >
           <div className="inline-flex flex-wrap gap-3 justify-center mb-8">
-            {['Enterprise Experience', 'AI Pioneer Since 2016', 'Presidential Recognition', 'Small Business Focus'].map(
+            {['Fortune 500 Talent', 'International Team', 'AI Pioneer Since 2016', 'Presidential Recognition'].map(
               (badge) => (
                 <Badge
                   key={badge}
@@ -143,11 +147,22 @@ export default function AIFirstExperience() {
               )
             )}
           </div>
-          <p className="text-2xl text-white/70 max-w-3xl mx-auto">
-            You don't have to be a huge corporation to access world-class AI technology.
-            <br />
-            <span className="text-white font-semibold">You just need the courage to take the first step.</span>
-          </p>
+          <div className="space-y-6 max-w-4xl mx-auto">
+            <p className="text-2xl md:text-3xl text-white font-semibold">
+              This is your once-in-a-lifetime opportunity
+            </p>
+            <p className="text-xl text-white/70">
+              Yes, you can hire freelancers from anywhere. But can they design your competitive moat?
+              Do they understand how data ownership will make or break businesses in the next decade?
+            </p>
+            <p className="text-xl text-white/70">
+              <span className="text-white font-semibold">We've engineered a program</span> to give small and medium businesses
+              access to elite talent that normally only works with Google, Amazon, and Fortune 500 companies.
+            </p>
+            <p className="text-xl text-blue-400 font-semibold">
+              The window won't stay open forever. Move now, or watch your competitors do it first.
+            </p>
+          </div>
         </motion.div>
       </motion.div>
     </section>

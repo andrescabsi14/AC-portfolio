@@ -5,6 +5,7 @@ import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
 import AIFirstHero from '@/components/sections/ai-first/AIFirstHero';
 import AIFirstVision from '@/components/sections/ai-first/AIFirstVision';
+import DataSovereigntySection from '@/components/sections/ai-first/DataSovereigntySection';
 import AIFirstValue from '@/components/sections/ai-first/AIFirstValue';
 import AIFirstExperience from '@/components/sections/ai-first/AIFirstExperience';
 import InteractiveChatSection from '@/components/sections/ai-first/InteractiveChatSection';
@@ -29,6 +30,7 @@ export default function AIFirstPage() {
       <main className="relative bg-black overflow-x-hidden">
         <AIFirstHero />
         <AIFirstVision />
+        <DataSovereigntySection />
         <AIFirstValue />
         <AIFirstExperience />
         <InteractiveChatSection />

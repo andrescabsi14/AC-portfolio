@@ -44,18 +44,39 @@ export default function AIFirstCTA() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="inline-block mb-8 px-6 py-3 rounded-full bg-red-500/10 border border-red-500/30"
+          >
+            <p className="text-red-400 font-bold tracking-wider uppercase text-sm">
+              🔥 Exclusive Access • Limited Availability
+            </p>
+          </motion.div>
+
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-8 leading-tight">
-            Take this small step.
+            This Program Isn't For Everyone
             <br />
             <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              We'll take care of the next.
+              But It Might Be For You
             </span>
           </h2>
 
-          <p className="text-xl md:text-2xl text-white/80 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Contact us via our 24/7 AI assistant and receive a{' '}
-            <span className="text-white font-semibold">complimentary analysis</span> of your business.
-          </p>
+          <div className="space-y-6 mb-12 max-w-4xl mx-auto">
+            <p className="text-xl md:text-2xl text-white/80 leading-relaxed">
+              We've engineered a program to give select businesses access to{' '}
+              <span className="text-white font-semibold">Fortune 500-level talent and infrastructure</span>.
+            </p>
+            <p className="text-xl md:text-2xl text-white/70 leading-relaxed">
+              The kind of team that built systems for Google, Amazon, and the world's leading tech companies
+              is now available to <span className="text-white font-semibold">small and medium businesses</span>.
+            </p>
+            <p className="text-xl md:text-2xl text-blue-400 font-semibold">
+              This window won't stay open. Your competitors are reading this too.
+            </p>
+          </div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -66,15 +87,15 @@ export default function AIFirstCTA() {
           >
             <div className="inline-block p-8 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/40 backdrop-blur-sm">
               <h3 className="text-2xl md:text-3xl font-bold text-white mb-6">
-                Limited Time Offer
+                Your Complimentary Strategy Session Includes
               </h3>
               <div className="space-y-4 text-left max-w-2xl">
                 {[
-                  'Free business analysis showing AI implementation opportunities',
-                  'Discover how to save thousands of hours annually',
-                  'Reduce costs by hundreds of thousands of dollars',
-                  'Increase revenue by orders of magnitude',
-                  'Step-by-step implementation roadmap—yours to keep',
+                  'Deep-dive analysis by elite engineers (not junior staff)',
+                  'Custom AI roadmap designed for YOUR business specifically',
+                  'Data ownership strategy to protect your competitive moat',
+                  'ROI projections based on real implementations',
+                  'Everything you need to implement—even with another provider',
                 ].map((item, index) => (
                   <motion.div
                     key={item}
@@ -132,9 +153,9 @@ export default function AIFirstCTA() {
         >
           <div className="grid md:grid-cols-3 gap-8 text-center">
             {[
-              { stat: '12+', label: 'Years of Experience' },
-              { stat: 'Since 2016', label: 'Working with AI' },
-              { stat: '100%', label: 'Money-Back Guarantee' },
+              { stat: 'Fortune 500', label: 'Level Talent' },
+              { stat: 'International', label: 'Elite Team' },
+              { stat: 'Since 2016', label: 'AI Pioneer' },
             ].map((item, index) => (
               <motion.div
                 key={item.label}

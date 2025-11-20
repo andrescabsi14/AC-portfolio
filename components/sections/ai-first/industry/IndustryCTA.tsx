@@ -38,19 +38,35 @@ export default function IndustryCTA({ industry }: IndustryCTAProps) {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="inline-block mb-8 px-6 py-3 rounded-full bg-red-500/10 border border-red-500/30"
+          >
+            <p className="text-red-400 font-bold tracking-wider uppercase text-sm">
+              🔥 Elite Team Access • {industry.name} Specialists
+            </p>
+          </motion.div>
+
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 leading-tight">
-            Ready to transform your
+            Access Fortune 500-Level Talent
             <br />
             <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              {industry.name.toLowerCase()}
+              For Your {industry.name} Business
             </span>
-            {' '}business?
           </h2>
 
-          <p className="text-xl md:text-2xl text-white/80 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Get your free, personalized analysis showing exactly how AI can transform
-            your specific challenges into competitive advantages.
-          </p>
+          <div className="space-y-6 mb-12 max-w-4xl mx-auto">
+            <p className="text-xl md:text-2xl text-white/80 leading-relaxed">
+              We're an <span className="text-white font-semibold">international elite team</span> that built systems
+              for Fortune 500 companies. Now we work with select small and medium businesses.
+            </p>
+            <p className="text-xl md:text-2xl text-blue-400 font-semibold">
+              Your competitors in {industry.name.toLowerCase()} are moving. Don't get left behind.
+            </p>
+          </div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -61,15 +77,15 @@ export default function IndustryCTA({ industry }: IndustryCTAProps) {
           >
             <div className="inline-block p-8 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/40 backdrop-blur-sm">
               <h3 className="text-2xl font-bold text-white mb-6">
-                Your Free Analysis Includes:
+                Your Strategy Session Includes:
               </h3>
               <div className="space-y-4 text-left max-w-2xl">
                 {[
-                  `Custom AI implementation roadmap for ${industry.name.toLowerCase()}`,
-                  'ROI projection based on your business size',
-                  'Specific automation opportunities we\'ve identified',
-                  'Cost savings and revenue growth estimates',
-                  'Timeline and resource requirements',
+                  `Deep analysis by engineers who've solved this for ${industry.name.toLowerCase()} at scale`,
+                  'Custom AI roadmap with data ownership strategy',
+                  'ROI projections based on real implementations',
+                  'Competitive advantages specific to your market',
+                  'Everything you need—even if you work with someone else',
                 ].map((item, index) => (
                   <motion.div
                     key={item}
@@ -123,9 +139,9 @@ export default function IndustryCTA({ industry }: IndustryCTAProps) {
         >
           <div className="grid md:grid-cols-3 gap-8 text-center">
             {[
-              { stat: '100%', label: 'Money-Back Guarantee' },
-              { stat: '12+', label: 'Years of Experience' },
-              { stat: 'Since 2016', label: 'Working with AI' },
+              { stat: 'Fortune 500', label: 'Level Talent' },
+              { stat: 'International', label: 'Elite Team' },
+              { stat: 'Since 2016', label: 'AI Pioneer' },
             ].map((item, index) => (
               <motion.div
                 key={item.label}
