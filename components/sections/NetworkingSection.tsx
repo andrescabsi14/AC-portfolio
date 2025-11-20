@@ -127,7 +127,7 @@ export default function NetworkingSection() {
             className="text-5xl md:text-7xl lg:text-8xl font-light text-white mb-4"
             style={{ letterSpacing: '-0.02em' }}
           >
-            Networking
+            Honors
           </h2>
           <p className="text-lg md:text-xl text-gray-400 font-light">
             Building bridges across continents
