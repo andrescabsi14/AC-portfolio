@@ -12,10 +12,11 @@ const navItems: {
   label: string;
   href?: string;
   hiddenOnMobile?: boolean;
+  href?: string;
 }[] = [
-  { id: 'services', label: 'Services', href: '/#services' },
-  { id: 'ai-first', label: 'Become AI-First', href: '/ai-first' },
-  { id: 'contact', label: 'Contact', href: '/contact', hiddenOnMobile: true },
+  { id: 'about', label: 'About' },
+  { id: 'world-experience', label: 'Experience' },
+  { id: 'ai-first', label: 'AI First', href: '/ai-first' },
 ];
 
 export default function Header() {
