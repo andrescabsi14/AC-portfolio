@@ -7,6 +7,7 @@ import Footer from '@/components/ui/Footer';
 import IntroSection from '@/components/sections/IntroSection';
 import AIChatSectionNew from '@/components/sections/AIChatSectionNew';
 import WorldExperienceSection from '@/components/sections/WorldExperienceSection';
+import ContactSection from '@/components/sections/ContactSection';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -160,12 +161,6 @@ const componentSuggestions = [
     title: '8. Footer',
     detail: '<NavigationMenu> or a minimal <Footer> with tiny, elegant typography.',
   },
-];
-
-const contactLinks = [
-  { label: 'Email', href: 'mailto:hello@andrescabrera.com' },
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/andrescabrera' },
-  { label: 'Press Contact', href: 'mailto:press@andrescabrera.com' },
 ];
 
 export default function Home() {
@@ -385,33 +380,15 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Contact Section */}
-        <section id="contact" className="relative mx-auto max-w-5xl space-y-6 px-6 py-20">
-          <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.6em] text-white/50">CONTACT — “LET’S BUILD WHAT COMES NEXT”</p>
-            <h3 className="text-3xl font-semibold text-white">
-              Speaking • Advisory • Innovation Partnerships • Strategy
-            </h3>
-            <p className="text-sm text-white/70">Email • LinkedIn • Press Contact</p>
-          </div>
-          <div className="flex flex-wrap gap-3 text-sm text-white/70">
-            {contactLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="rounded-full border border-white/10 px-4 py-2 uppercase tracking-[0.3em] transition hover:border-white/40 hover:text-white"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-          <div className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-white/70 md:flex-row md:items-center md:justify-between">
-            <p>Ready when you are.</p>
-            <Button asChild variant="secondary" size="lg">
-              <a href="mailto:hello@andrescabrera.com">Invite to speak</a>
-            </Button>
-          </div>
-        </section>
+        {/* Contact Section - Reusable AI Assistant Pre-Footer */}
+        <ContactSection
+          onStartConversation={() => {
+            const aiChatSection = document.getElementById('ai-chat');
+            if (aiChatSection) {
+              aiChatSection.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}
+        />
          {/* AI Chat Section */}
         <AIChatSectionNew />
         <Footer />
