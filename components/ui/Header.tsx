@@ -96,14 +96,15 @@ export default function Header() {
 
   return (
     <motion.header
-      initial={{ opacity: 0 }}
+      initial={{ opacity: 0, y: -50 }}
       animate={{
         y: isAboutPage ? 0 : shouldShow ? 0 : -100,
-        opacity: isAboutPage ? 1 : scrollY.get() < 250 ? 0 : 1,
+        opacity: 1,
       }}
       transition={{
-        duration: 0.3,
-        ease: 'easeInOut',
+        duration: 0.8,
+        ease: 'easeOut',
+        delay: 0.3,
       }}
       className="fixed inset-x-0 top-0 z-50 bg-secondary/80 backdrop-blur-sm"
     >

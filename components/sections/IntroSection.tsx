@@ -100,7 +100,13 @@ export default function IntroSection({ onNameAnimationComplete }: IntroSectionPr
   };
 
   return (
-    <section ref={sectionRef} className="relative h-screen w-full overflow-hidden bg-black">
+    <motion.section
+      ref={sectionRef}
+      className="relative h-screen w-full overflow-hidden bg-black"
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: 'easeOut' }}
+    >
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black z-10" />
@@ -182,6 +188,6 @@ export default function IntroSection({ onNameAnimationComplete }: IntroSectionPr
           </svg>
         </motion.div>
       </motion.div>
-    </section>
+    </motion.section>
   );
 }

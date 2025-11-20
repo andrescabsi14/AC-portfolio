@@ -24,7 +24,7 @@ export default function NameLoader({ onLoadingComplete }: NameLoaderProps) {
   const [isComplete, setIsComplete] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState(quotes[0]);
 
-  const firstName = 'ANDRES';
+  const firstName = 'ANdDRES';
   const lastName = 'CABRERA';
 
   useEffect(() => {
