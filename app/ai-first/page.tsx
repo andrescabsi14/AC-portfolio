@@ -6,149 +6,62 @@ import Header from "@/components/ui/Header";
 import Footer from "@/components/ui/Footer";
 
 export default function AIFirstPage() {
-  const steps = [
-    {
-      number: "01",
-      title: "Assess Your Current State",
-      description: "Understand where you are now. We'll analyze your current processes, identify bottlenecks, and discover where AI can make the biggest impact.",
-      details: [
-        "Process audit and mapping",
-        "Identify automation opportunities",
-        "Calculate potential ROI",
-        "Prioritize high-impact areas"
-      ]
-    },
-    {
-      number: "02",
-      title: "Design Your AI Strategy",
-      description: "Create a custom roadmap tailored to your business. Not every company needs the same AI—we design solutions that fit your unique needs and goals.",
-      details: [
-        "Custom AI integration plan",
-        "Technology stack selection",
-        "Implementation timeline",
-        "Risk mitigation strategies"
-      ]
-    },
-    {
-      number: "03",
-      title: "Implement & Integrate",
-      description: "Deploy AI solutions seamlessly into your existing systems. We handle the technical complexity so you don't have to.",
-      details: [
-        "Smooth integration with current tools",
-        "Minimal disruption to operations",
-        "Team training and onboarding",
-        "Quality assurance and testing"
-      ]
-    },
-    {
-      number: "04",
-      title: "Optimize & Scale",
-      description: "Continuously improve and expand your AI capabilities. We monitor performance, gather insights, and help you scale what works.",
-      details: [
-        "Performance monitoring and analytics",
-        "Continuous optimization",
-        "Scale successful implementations",
-        "Ongoing support and evolution"
-      ]
-    }
-  ];
-
-  const benefits = [
-    {
-      icon: "🚀",
-      title: "Faster Operations",
-      description: "Reduce processing time from days to minutes with intelligent automation"
-    },
-    {
-      icon: "💰",
-      title: "Cost Reduction",
-      description: "Cut operational costs by 40-60% while improving quality and output"
-    },
-    {
-      icon: "📊",
-      title: "Data-Driven Decisions",
-      description: "Make better decisions faster with real-time insights and predictive analytics"
-    },
-    {
-      icon: "🎯",
-      title: "Competitive Edge",
-      description: "Stay ahead of competitors still using traditional methods"
-    },
-    {
-      icon: "🔄",
-      title: "Scalability",
-      description: "Grow without proportionally increasing headcount or costs"
-    },
-    {
-      icon: "😊",
-      title: "Better Customer Experience",
-      description: "Deliver faster, more personalized service that delights customers"
-    }
-  ];
-
   return (
     <>
       <Header />
       <main className="bg-black text-white">
         {/* Hero Section */}
-        <section className="min-h-screen flex items-center justify-center px-6 py-24 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-black to-black"></div>
-          <div className="max-w-5xl mx-auto text-center relative z-10">
+        <section className="min-h-screen flex items-center justify-center px-6 py-32">
+          <div className="max-w-5xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              className="space-y-12"
             >
-              <h1 className="text-6xl md:text-7xl font-bold mb-8 leading-tight">
-                What Does It Mean to Be{" "}
-                <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  AI-First?
-                </span>
+              <h1 className="text-5xl md:text-7xl font-light leading-tight tracking-tight">
+                What it means to be AI-first
               </h1>
-              <p className="text-2xl text-white/70 leading-relaxed mb-12">
-                It's not about using AI for everything. It's about strategically integrating AI into your business
-                to work smarter, faster, and more efficiently than ever before.
+              <p className="text-xl md:text-2xl text-white/50 font-light leading-relaxed max-w-3xl mx-auto">
+                It's not about using AI everywhere. It's about integrating intelligence strategically—where it delivers the most value.
               </p>
-              <div className="w-32 h-1 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto"></div>
             </motion.div>
           </div>
         </section>
 
-        {/* What is AI-First Section */}
-        <section className="px-6 py-24 bg-gradient-to-b from-black to-slate-950">
+        {/* Definition */}
+        <section className="px-6 py-32 bg-black">
           <div className="max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
               viewport={{ once: true }}
-              className="mb-16"
+              className="space-y-16"
             >
-              <h2 className="text-4xl md:text-5xl font-bold mb-8">The AI-First Mindset</h2>
-              <div className="space-y-6 text-lg text-white/80 leading-relaxed">
-                <p>
-                  Being AI-first means that whenever you're designing a process, solving a problem, or planning growth,
-                  your first question is: <strong className="text-white">"How can AI make this better?"</strong>
-                </p>
-                <p>
-                  It's a fundamental shift from "We have these processes, let's maybe add some AI" to
-                  "Let's build our processes with AI at the core."
-                </p>
-                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-8 my-8">
-                  <h3 className="text-2xl font-bold mb-4 text-blue-400">Traditional Business vs. AI-First Business</h3>
-                  <div className="space-y-6">
-                    <div>
-                      <p className="text-white/60 mb-2">❌ Traditional: Manual data entry, human-dependent processes, reactive decision-making</p>
-                      <p className="text-white/90">✅ AI-First: Automated data processing, AI-augmented workflows, predictive insights</p>
-                    </div>
-                    <div>
-                      <p className="text-white/60 mb-2">❌ Traditional: Scale by hiring more people</p>
-                      <p className="text-white/90">✅ AI-First: Scale by optimizing AI systems</p>
-                    </div>
-                    <div>
-                      <p className="text-white/60 mb-2">❌ Traditional: Wait for reports to make decisions</p>
-                      <p className="text-white/90">✅ AI-First: Real-time insights drive instant action</p>
-                    </div>
+              <div className="space-y-8">
+                <h2 className="text-3xl md:text-5xl font-light text-white">The AI-first approach</h2>
+                <div className="space-y-6 text-lg md:text-xl text-white/50 font-light leading-relaxed">
+                  <p>
+                    When designing a process, your first question becomes: "How can AI make this better?"
+                  </p>
+                  <p>
+                    Not as an afterthought. As a foundation.
+                  </p>
+                </div>
+              </div>
+
+              <div className="w-full h-px bg-white/10"></div>
+
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div>
+                    <p className="text-white/30 text-sm tracking-wider mb-4">Traditional</p>
+                    <p className="text-white/50 font-light">Manual processes. Human-dependent workflows. Reactive decision-making. Scale by hiring.</p>
+                  </div>
+                  <div>
+                    <p className="text-white/30 text-sm tracking-wider mb-4">AI-First</p>
+                    <p className="text-white font-light">Automated intelligence. AI-augmented teams. Predictive insights. Scale through systems.</p>
                   </div>
                 </div>
               </div>
@@ -156,161 +69,160 @@ export default function AIFirstPage() {
           </div>
         </section>
 
-        {/* Benefits Section */}
-        <section className="px-6 py-24 bg-slate-950">
+        {/* Benefits - Simple grid */}
+        <section className="px-6 py-32 bg-black">
           <div className="max-w-6xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
               viewport={{ once: true }}
-              className="text-center mb-16"
+              className="space-y-16"
             >
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">Why Become AI-First?</h2>
-              <p className="text-xl text-white/70">
-                The benefits go far beyond just automation
-              </p>
-            </motion.div>
+              <h2 className="text-3xl md:text-5xl font-light text-white text-center">The outcome</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {benefits.map((benefit, index) => (
-                <motion.div
-                  key={benefit.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="bg-slate-900/50 border border-white/10 rounded-2xl p-8 hover:border-white/20 transition-all duration-300"
-                >
-                  <div className="text-5xl mb-4">{benefit.icon}</div>
-                  <h3 className="text-xl font-bold mb-3">{benefit.title}</h3>
-                  <p className="text-white/70 leading-relaxed">{benefit.description}</p>
-                </motion.div>
-              ))}
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10 border border-white/10">
+                <div className="bg-black p-12">
+                  <h3 className="text-xl font-light text-white mb-3">Speed</h3>
+                  <p className="text-white/50 font-light text-sm leading-relaxed">
+                    Operations that took days now take minutes.
+                  </p>
+                </div>
+                <div className="bg-black p-12">
+                  <h3 className="text-xl font-light text-white mb-3">Efficiency</h3>
+                  <p className="text-white/50 font-light text-sm leading-relaxed">
+                    40-60% cost reduction while improving output quality.
+                  </p>
+                </div>
+                <div className="bg-black p-12">
+                  <h3 className="text-xl font-light text-white mb-3">Intelligence</h3>
+                  <p className="text-white/50 font-light text-sm leading-relaxed">
+                    Real-time insights drive every decision.
+                  </p>
+                </div>
+                <div className="bg-black p-12">
+                  <h3 className="text-xl font-light text-white mb-3">Scale</h3>
+                  <p className="text-white/50 font-light text-sm leading-relaxed">
+                    Growth without proportional increase in headcount.
+                  </p>
+                </div>
+                <div className="bg-black p-12">
+                  <h3 className="text-xl font-light text-white mb-3">Experience</h3>
+                  <p className="text-white/50 font-light text-sm leading-relaxed">
+                    Faster, more personalized customer service.
+                  </p>
+                </div>
+                <div className="bg-black p-12">
+                  <h3 className="text-xl font-light text-white mb-3">Advantage</h3>
+                  <p className="text-white/50 font-light text-sm leading-relaxed">
+                    Market leadership through technological edge.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* Steps Section */}
-        <section className="px-6 py-24 bg-gradient-to-b from-slate-950 to-black">
-          <div className="max-w-5xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="text-center mb-20"
-            >
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                How to Become AI-First in 4 Simple Steps
-              </h2>
-              <p className="text-xl text-white/70 max-w-3xl mx-auto">
-                We've made the transition easy. Here's exactly how we'll guide you through it.
-              </p>
-            </motion.div>
-
-            <div className="space-y-12">
-              {steps.map((step, index) => (
-                <motion.div
-                  key={step.number}
-                  initial={{ opacity: 0, x: -30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="relative"
-                >
-                  <div className="flex flex-col md:flex-row gap-8 bg-slate-900/30 border border-white/10 rounded-2xl p-8 hover:border-white/20 transition-all duration-300">
-                    <div className="flex-shrink-0">
-                      <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
-                        <span className="text-3xl font-bold">{step.number}</span>
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-3xl font-bold mb-4">{step.title}</h3>
-                      <p className="text-xl text-white/80 mb-6 leading-relaxed">{step.description}</p>
-                      <ul className="space-y-2">
-                        {step.details.map((detail, idx) => (
-                          <li key={idx} className="flex items-start text-white/70">
-                            <span className="text-blue-400 mr-3">▹</span>
-                            <span>{detail}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                  {index < steps.length - 1 && (
-                    <div className="hidden md:block absolute left-10 top-full w-0.5 h-12 bg-gradient-to-b from-white/20 to-transparent"></div>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Complexity Section */}
-        <section className="px-6 py-24 bg-black">
+        {/* The Process - Simplified */}
+        <section className="px-6 py-32 bg-black">
           <div className="max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-slate-900 to-slate-950 border border-white/20 rounded-3xl p-12 text-center"
+              className="space-y-20"
             >
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                We Handle the Complexity
-              </h2>
-              <p className="text-xl text-white/80 leading-relaxed mb-8">
-                You don't need to understand machine learning, neural networks, or API integrations.
-                That's our job. Your job is to focus on your business while we transform it with AI.
-              </p>
-              <div className="inline-flex flex-col sm:flex-row gap-4">
-                <span className="text-white/60">You focus on:</span>
-                <div className="flex flex-wrap gap-3 justify-center">
-                  <span className="bg-blue-500/20 text-blue-300 px-4 py-2 rounded-full text-sm">Your Vision</span>
-                  <span className="bg-purple-500/20 text-purple-300 px-4 py-2 rounded-full text-sm">Your Goals</span>
-                  <span className="bg-green-500/20 text-green-300 px-4 py-2 rounded-full text-sm">Your Growth</span>
+              <h2 className="text-3xl md:text-5xl font-light text-white text-center">The transformation</h2>
+
+              <div className="space-y-16">
+                <div className="space-y-4">
+                  <p className="text-white/30 text-xs tracking-wider">01</p>
+                  <h3 className="text-2xl md:text-3xl font-light text-white">Assess</h3>
+                  <p className="text-white/50 font-light leading-relaxed">
+                    We analyze your operations, identify opportunities, and prioritize impact areas.
+                  </p>
                 </div>
-              </div>
-              <div className="inline-flex flex-col sm:flex-row gap-4 mt-6">
-                <span className="text-white/60">We handle:</span>
-                <div className="flex flex-wrap gap-3 justify-center">
-                  <span className="bg-slate-700 text-white/70 px-4 py-2 rounded-full text-sm">The Tech</span>
-                  <span className="bg-slate-700 text-white/70 px-4 py-2 rounded-full text-sm">The Integration</span>
-                  <span className="bg-slate-700 text-white/70 px-4 py-2 rounded-full text-sm">The Complexity</span>
+
+                <div className="w-full h-px bg-white/10"></div>
+
+                <div className="space-y-4">
+                  <p className="text-white/30 text-xs tracking-wider">02</p>
+                  <h3 className="text-2xl md:text-3xl font-light text-white">Design</h3>
+                  <p className="text-white/50 font-light leading-relaxed">
+                    Custom strategy. Tailored systems. Built for your specific market and needs.
+                  </p>
+                </div>
+
+                <div className="w-full h-px bg-white/10"></div>
+
+                <div className="space-y-4">
+                  <p className="text-white/30 text-xs tracking-wider">03</p>
+                  <h3 className="text-2xl md:text-3xl font-light text-white">Integrate</h3>
+                  <p className="text-white/50 font-light leading-relaxed">
+                    Seamless deployment into existing systems. Minimal disruption. Maximum impact.
+                  </p>
+                </div>
+
+                <div className="w-full h-px bg-white/10"></div>
+
+                <div className="space-y-4">
+                  <p className="text-white/30 text-xs tracking-wider">04</p>
+                  <h3 className="text-2xl md:text-3xl font-light text-white">Optimize</h3>
+                  <p className="text-white/50 font-light leading-relaxed">
+                    Continuous improvement. Performance monitoring. Scale what works.
+                  </p>
                 </div>
               </div>
             </motion.div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="px-6 py-24 bg-gradient-to-b from-black to-slate-950">
+        {/* Simple statement about complexity */}
+        <section className="px-6 py-32 bg-black">
+          <div className="max-w-3xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              viewport={{ once: true }}
+              className="space-y-12"
+            >
+              <h2 className="text-3xl md:text-5xl font-light text-white">
+                We handle the complexity
+              </h2>
+              <p className="text-xl text-white/50 font-light leading-relaxed">
+                You focus on your business. We deliver the systems.
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="px-6 py-32 bg-black">
           <div className="max-w-4xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
               viewport={{ once: true }}
+              className="space-y-12"
             >
-              <h2 className="text-5xl md:text-6xl font-bold mb-8">
-                Ready to Transform Your Business?
+              <h2 className="text-4xl md:text-6xl font-light text-white">
+                Start the transformation
               </h2>
-              <p className="text-xl text-white/70 mb-12 leading-relaxed">
-                Let's build your AI-first future together. The sooner you start, the bigger your advantage.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <div className="flex gap-12 justify-center items-center text-sm">
                 <Link
                   href="/contact"
-                  className="bg-white text-black font-bold text-lg px-12 py-5 rounded-full hover:bg-white/90 transition-all duration-300 shadow-2xl hover:shadow-white/20 hover:scale-105"
+                  className="inline-block tracking-widest uppercase text-white/70 hover:text-white transition-colors duration-300 border-b border-white/30 hover:border-white pb-1"
                 >
-                  Schedule a Consultation
+                  Schedule consultation →
                 </Link>
                 <Link
                   href="/"
-                  className="bg-transparent border-2 border-white text-white font-bold text-lg px-12 py-5 rounded-full hover:bg-white hover:text-black transition-all duration-300 hover:scale-105"
+                  className="inline-block tracking-widest uppercase text-white/40 hover:text-white/70 transition-colors duration-300"
                 >
-                  ← Back to Home
+                  ← Back
                 </Link>
               </div>
             </motion.div>

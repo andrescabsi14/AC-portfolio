@@ -33,17 +33,19 @@ export default function ContactPage() {
     <>
       <Header />
       <main className="bg-black text-white min-h-screen pt-24">
-        <section className="px-6 py-24">
-          <div className="max-w-4xl mx-auto">
+        <section className="px-6 py-32">
+          <div className="max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center mb-16"
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              className="text-center mb-20"
             >
-              <h1 className="text-5xl md:text-6xl font-bold mb-6">Let's Talk About Your AI Future</h1>
-              <p className="text-xl text-white/70 max-w-2xl mx-auto">
-                Ready to transform your business? Schedule a consultation and let's discuss how AI can give you the competitive edge.
+              <h1 className="text-5xl md:text-7xl font-light mb-8 leading-tight tracking-tight">
+                Let's talk
+              </h1>
+              <p className="text-xl text-white/50 font-light">
+                Schedule a consultation to discuss AI integration for your business.
               </p>
             </motion.div>
 
@@ -51,13 +53,12 @@ export default function ContactPage() {
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-3xl p-12"
+                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
               >
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-white/80 mb-2">
-                      Your Name *
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  <div className="space-y-3">
+                    <label htmlFor="name" className="block text-xs tracking-wider text-white/30 uppercase">
+                      Name
                     </label>
                     <input
                       type="text"
@@ -66,14 +67,14 @@ export default function ContactPage() {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-white/40 transition-colors"
+                      className="w-full px-0 py-3 bg-transparent border-0 border-b border-white/10 text-white font-light focus:outline-none focus:border-white/30 transition-colors"
                       placeholder="John Doe"
                     />
                   </div>
 
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-white/80 mb-2">
-                      Email Address *
+                  <div className="space-y-3">
+                    <label htmlFor="email" className="block text-xs tracking-wider text-white/30 uppercase">
+                      Email
                     </label>
                     <input
                       type="email"
@@ -82,14 +83,14 @@ export default function ContactPage() {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-white/40 transition-colors"
+                      className="w-full px-0 py-3 bg-transparent border-0 border-b border-white/10 text-white font-light focus:outline-none focus:border-white/30 transition-colors"
                       placeholder="john@company.com"
                     />
                   </div>
 
-                  <div>
-                    <label htmlFor="company" className="block text-sm font-medium text-white/80 mb-2">
-                      Company Name
+                  <div className="space-y-3">
+                    <label htmlFor="company" className="block text-xs tracking-wider text-white/30 uppercase">
+                      Company
                     </label>
                     <input
                       type="text"
@@ -97,14 +98,14 @@ export default function ContactPage() {
                       name="company"
                       value={formData.company}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-white/40 transition-colors"
+                      className="w-full px-0 py-3 bg-transparent border-0 border-b border-white/10 text-white font-light focus:outline-none focus:border-white/30 transition-colors"
                       placeholder="Your Company Inc."
                     />
                   </div>
 
-                  <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-white/80 mb-2">
-                      Tell us about your needs *
+                  <div className="space-y-3">
+                    <label htmlFor="message" className="block text-xs tracking-wider text-white/30 uppercase">
+                      Message
                     </label>
                     <textarea
                       id="message"
@@ -113,93 +114,65 @@ export default function ContactPage() {
                       rows={6}
                       value={formData.message}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-white/40 transition-colors resize-none"
-                      placeholder="Tell us about your business challenges and how you'd like AI to help..."
+                      className="w-full px-0 py-3 bg-transparent border-0 border-b border-white/10 text-white font-light focus:outline-none focus:border-white/30 transition-colors resize-none"
+                      placeholder="Tell us about your business needs..."
                     />
                   </div>
 
-                  <button
-                    type="submit"
-                    className="w-full bg-white text-black font-bold text-lg px-12 py-4 rounded-full hover:bg-white/90 transition-all duration-300 shadow-2xl hover:shadow-white/20 hover:scale-105"
-                  >
-                    Send Message
-                  </button>
+                  <div className="pt-8">
+                    <button
+                      type="submit"
+                      className="text-sm tracking-widest uppercase text-white/70 hover:text-white transition-colors duration-300 border-b border-white/30 hover:border-white pb-1"
+                    >
+                      Send message →
+                    </button>
+                  </div>
                 </form>
 
-                <div className="mt-12 pt-8 border-t border-white/10">
-                  <p className="text-center text-white/60 mb-6">Or reach out directly:</p>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <div className="mt-20 pt-12 border-t border-white/10">
+                  <p className="text-xs tracking-wider text-white/30 uppercase mb-8">Or reach out directly</p>
+                  <div className="flex flex-col gap-4 text-white/50 font-light">
                     <a
                       href="mailto:hello@andrescabrera.com"
-                      className="text-white hover:text-white/80 transition-colors flex items-center gap-2"
+                      className="hover:text-white transition-colors"
                     >
-                      <span>📧</span>
-                      <span>hello@andrescabrera.com</span>
+                      hello@andrescabrera.com
                     </a>
-                    <span className="hidden sm:block text-white/30">|</span>
                     <a
                       href="https://linkedin.com/in/andrescabrera"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-white hover:text-white/80 transition-colors flex items-center gap-2"
+                      className="hover:text-white transition-colors"
                     >
-                      <span>💼</span>
-                      <span>LinkedIn</span>
+                      LinkedIn
                     </a>
                   </div>
                 </div>
               </motion.div>
             ) : (
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6 }}
-                className="bg-slate-900/50 backdrop-blur-sm border border-white/10 rounded-3xl p-12 text-center"
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="text-center py-20"
               >
-                <div className="text-6xl mb-6">✅</div>
-                <h2 className="text-3xl font-bold mb-4">Message Sent!</h2>
-                <p className="text-xl text-white/70 mb-8">
-                  Thank you for reaching out. I'll get back to you within 24 hours to discuss how we can transform your business with AI.
-                </p>
-                <Link
-                  href="/"
-                  className="inline-block bg-white text-black font-bold text-lg px-10 py-4 rounded-full hover:bg-white/90 transition-all duration-300 shadow-xl hover:scale-105"
-                >
-                  Back to Home
-                </Link>
+                <div className="space-y-8">
+                  <div className="w-16 h-px bg-white/30 mx-auto"></div>
+                  <h2 className="text-3xl md:text-5xl font-light">Message sent</h2>
+                  <p className="text-xl text-white/50 font-light">
+                    I'll get back to you within 24 hours.
+                  </p>
+                  <div className="pt-8">
+                    <Link
+                      href="/"
+                      className="inline-block text-sm tracking-widest uppercase text-white/40 hover:text-white/70 transition-colors duration-300"
+                    >
+                      ← Back to home
+                    </Link>
+                  </div>
+                </div>
               </motion.div>
             )}
-          </div>
-        </section>
-
-        <section className="px-6 py-24 bg-gradient-to-b from-black to-slate-950">
-          <div className="max-w-4xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <h2 className="text-3xl md:text-4xl font-bold mb-8">What Happens Next?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-                <div className="text-center">
-                  <div className="text-4xl mb-4">1️⃣</div>
-                  <h3 className="text-xl font-bold mb-2">We Connect</h3>
-                  <p className="text-white/70">I'll reach out within 24 hours to schedule a consultation call.</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl mb-4">2️⃣</div>
-                  <h3 className="text-xl font-bold mb-2">We Analyze</h3>
-                  <p className="text-white/70">Together, we'll identify your biggest opportunities for AI integration.</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl mb-4">3️⃣</div>
-                  <h3 className="text-xl font-bold mb-2">We Transform</h3>
-                  <p className="text-white/70">I'll create a custom roadmap to make your business AI-first.</p>
-                </div>
-              </div>
-            </motion.div>
           </div>
         </section>
       </main>
