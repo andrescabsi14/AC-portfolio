@@ -7,8 +7,6 @@ import Footer from '@/components/ui/Footer';
 import IntroSection from '@/components/sections/IntroSection';
 import AIChatSectionNew from '@/components/sections/AIChatSectionNew';
 import WorldExperienceSection from '@/components/sections/WorldExperienceSection';
-import NetworkingSection from '@/components/sections/NetworkingSection';
-import RecognitionSection from '@/components/sections/RecognitionSection';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -230,12 +228,6 @@ export default function Home() {
 
         {/* World Experience Section */}
         <WorldExperienceSection />
-
-        {/* Networking Section */}
-        <NetworkingSection />
-
-        {/* Recognition Section */}
-        <RecognitionSection />
 
         {/* Cinematic Story Copy */}
         <section

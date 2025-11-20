@@ -37,32 +37,30 @@ export default function AboutUsIntroSection({ onIntroAnimationComplete }: AboutU
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [hasAnimated, onNameAnimationComplete]);
+  }, [hasAnimated, onIntroAnimationComplete]);
 
   useEffect(() => {
     if (!nameRef.current || !taglineRef.current || !sectionRef.current) return;
 
-    // GSAP Parallax effect for name
+    // GSAP Parallax effect for name (smooth scroll without fade)
     gsap.to(nameRef.current, {
-      y: -200,
-      opacity: 0.5,
-      scale: 0.8,
+      y: -150,
+      scale: 0.9,
       scrollTrigger: {
         trigger: sectionRef.current,
         start: 'top top',
-        end: 'bottom top',
+        end: 'bottom 30%',
         scrub: 1.5,
       },
     });
 
-    // GSAP Parallax effect for tagline (slower movement)
+    // GSAP Parallax effect for tagline (slower movement, no fade)
     gsap.to(taglineRef.current, {
       y: -100,
-      opacity: 0,
       scrollTrigger: {
         trigger: sectionRef.current,
         start: 'top top',
-        end: 'bottom top',
+        end: 'bottom 30%',
         scrub: 1,
       },
     });
@@ -100,7 +98,7 @@ export default function AboutUsIntroSection({ onIntroAnimationComplete }: AboutU
   };
 
   return (
-    <section ref={sectionRef} className="relative h-screen w-full overflow-hidden bg-black">
+    <section ref={sectionRef} className="relative w-full overflow-visible bg-black flex flex-col justify-center" style={{ minHeight: '100vh' }}>
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black z-10" />
@@ -109,7 +107,7 @@ export default function AboutUsIntroSection({ onIntroAnimationComplete }: AboutU
       </div>
 
       {/* Content */}
-      <div className="relative z-20 h-full flex flex-col items-center justify-center px-6">
+      <div className="relative z-20 flex flex-col items-center justify-center px-6">
         {/* Name with GSAP parallax */}
         <div ref={nameRef} className="text-center mb-8">
           <motion.h1
@@ -122,7 +120,7 @@ export default function AboutUsIntroSection({ onIntroAnimationComplete }: AboutU
               textShadow: '0 0 70px rgba(255,255,255,0.1)',
             }}
           >
-            About Us
+            Andres Cabrera
           </motion.h1>
         </div>
 
