@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader, useThree, ThreeEvent } from '@react-three/fiber';
 import { OrbitControls, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { projects, Project } from '@/data/projects';
@@ -223,25 +223,30 @@ const Earth = ({
 
   const loadedRef = useRef(false);
   const materialRef = useRef<THREE.ShaderMaterial | null>(null);
+  const pointerStateRef = useRef({
+    isDragging: false,
+    lastX: 0,
+    lastY: 0,
+  });
+  const initialRotationSet = useRef(false);
 
-const shaderMaterial = useMemo(() => {
-  const mat = new THREE.ShaderMaterial({
-    uniforms: {
-      uDayMap: { value: dayTexture },
-      uNightMap: { value: nightTexture },
-      uCloudsMap: { value: cloudsTexture },
-      uHighDayMap: { value: highDayTexture },
-      uHighNightMap: { value: highNightTexture },
-      uLightDir: { value: new THREE.Vector3(1, 0.2, 0.5).normalize() },
-      uGlobeRotation: { value: 0 }, // Track the Y-axis rotation to keep day/night fixed
-      uTimeOfDay: { value: timeOfDay },
-      uTerminatorSoftness: { value: 0.2 },
-      uSunPhase: { value: 0 }, // 0 = night, 1 = dawn, 2 = day, 3 = dusk
-      uPhaseProgress: { value: 0 }, // 0 to 1 progress through phase
-      uDawnDuskColor: { value: new THREE.Vector3(1.0, 0.6, 0.2) }, // Orange
-      uTextureBlend: { value: 0 }, // 0 = low-res, 1 = high-res
-      uIsExpanded: { value: isExpanded ? 1.0 : 0.0 }, // 1.0 = expanded, 0.0 = not expanded
-    },
+  const shaderMaterial = useMemo(() => {
+    const mat = new THREE.ShaderMaterial({
+      uniforms: {
+        uDayMap: { value: dayTexture },
+        uNightMap: { value: nightTexture },
+        uCloudsMap: { value: cloudsTexture },
+        uHighDayMap: { value: highDayTexture },
+        uHighNightMap: { value: highNightTexture },
+        uLightDir: { value: new THREE.Vector3(1, 0.2, 0.5).normalize() },
+        uTimeOfDay: { value: timeOfDay },
+        uTerminatorSoftness: { value: 0.2 },
+        uSunPhase: { value: 0 }, // 0 = night, 1 = dawn, 2 = day, 3 = dusk
+        uPhaseProgress: { value: 0 }, // 0 to 1 progress through phase
+        uDawnDuskColor: { value: new THREE.Vector3(1.0, 0.6, 0.2) }, // Orange
+        uTextureBlend: { value: 0 }, // 0 = low-res, 1 = high-res
+        uIsExpanded: { value: isExpanded ? 1.0 : 0.0 }, // 1.0 = expanded, 0.0 = not expanded
+      },
       vertexShader: `
         varying vec3 vNormal;
         varying vec2 vUv;
@@ -263,7 +268,6 @@ const shaderMaterial = useMemo(() => {
         uniform sampler2D uHighDayMap;
         uniform sampler2D uHighNightMap;
         uniform vec3 uLightDir;
-        uniform float uGlobeRotation;
         uniform float uTerminatorSoftness;
         uniform float uSunPhase;
         uniform float uPhaseProgress;
@@ -274,19 +278,7 @@ const shaderMaterial = useMemo(() => {
         void main() {
           vec3 normal = normalize(vNormal);
 
-          // Rotate light direction by inverse of globe rotation to keep day/night fixed in world space
-          // As the globe rotates, we counter-rotate the light so it stays aligned with the actual sun position
-          float angle = uGlobeRotation;
-          float cosA = cos(angle);
-          float sinA = sin(angle);
-
-          vec3 origLightDir = normalize(uLightDir);
-          vec3 lightDir = vec3(
-            origLightDir.x * cosA + origLightDir.z * sinA,
-            origLightDir.y,
-            -origLightDir.x * sinA + origLightDir.z * cosA
-          );
-          lightDir = normalize(lightDir);
+          vec3 lightDir = normalize(uLightDir);
 
           // More precise day/night boundary calculation
           float intensity = dot(normal, lightDir);
@@ -363,6 +355,42 @@ const shaderMaterial = useMemo(() => {
     }
   }, [dayTexture, nightTexture, onLoaded]);
 
+  useEffect(() => {
+    if (!isExpanded) {
+      pointerStateRef.current.isDragging = false;
+    }
+  }, [isExpanded]);
+
+  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
+    if (!isExpanded) return;
+    event.stopPropagation();
+    pointerStateRef.current.isDragging = true;
+    pointerStateRef.current.lastX = event.clientX;
+    pointerStateRef.current.lastY = event.clientY;
+  };
+
+  const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
+    if (!isExpanded || !pointerStateRef.current.isDragging || !meshRef.current) return;
+    event.stopPropagation();
+    const deltaX = event.clientX - pointerStateRef.current.lastX;
+    const deltaY = event.clientY - pointerStateRef.current.lastY;
+    pointerStateRef.current.lastX = event.clientX;
+    pointerStateRef.current.lastY = event.clientY;
+
+    const rotationSpeed = 0.005;
+    meshRef.current.rotation.y += deltaX * rotationSpeed;
+    meshRef.current.rotation.x += deltaY * rotationSpeed;
+    meshRef.current.rotation.x = THREE.MathUtils.clamp(
+      meshRef.current.rotation.x,
+      -Math.PI / 2,
+      Math.PI / 2
+    );
+  };
+
+  const handlePointerUp = () => {
+    pointerStateRef.current.isDragging = false;
+  };
+
   const tiltQuaternion = useMemo(() => {
     const axis = new THREE.Vector3(0, 0, 1);
     return new THREE.Quaternion().setFromAxisAngle(axis, THREE.MathUtils.degToRad(23.5));
@@ -370,55 +398,47 @@ const shaderMaterial = useMemo(() => {
 
   useFrame((_, delta) => {
     if (meshRef.current) {
-      // Only rotate mesh when NOT expanded
-      // When expanded, keep mesh still so day/night pattern is truly fixed as camera rotates around it
-      if (!isExpanded) {
+      if (!initialRotationSet.current) {
+        meshRef.current.rotation.x = THREE.MathUtils.degToRad(1.3);
+        meshRef.current.rotation.z = THREE.MathUtils.degToRad(180);
+        initialRotationSet.current = true;
+      }
+
+      if (!pointerStateRef.current.isDragging) {
         meshRef.current.rotation.y += delta * 0.02;
       }
-      meshRef.current.rotation.x = THREE.MathUtils.degToRad(1.3);
-      // Rotate 180 degrees to fix upside-down orientation
-      meshRef.current.rotation.z = THREE.MathUtils.degToRad(180);
     }
 
-      if (materialRef.current) {
-        // Calculate sun direction based on actual real-time (not just state updates every 60s)
-        // This creates a FIXED day/night terminator in world space
-        // As time progresses, different locations come into and out of daylight
-        const now = new Date();
-        const localHours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
-        const dynamicTimeOfDay = (localHours % 24) / 24;
+    if (materialRef.current) {
+      // Calculate sun direction based on actual real-time
+      const now = new Date();
+      const localHours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+      const dynamicTimeOfDay = (localHours % 24) / 24;
 
-        const sunAngle = dynamicTimeOfDay * Math.PI * 2;
-        const sunDirection = new THREE.Vector3(
-          Math.cos(sunAngle),
-          0.2,
-          Math.sin(sunAngle)
-        );
-        sunDirection.applyQuaternion(tiltQuaternion).normalize();
-        materialRef.current.uniforms.uLightDir.value.copy(sunDirection);
+      const sunAngle = dynamicTimeOfDay * Math.PI * 2;
+      const sunDirection = new THREE.Vector3(
+        Math.cos(sunAngle),
+        0.2,
+        Math.sin(sunAngle)
+      );
+      sunDirection.applyQuaternion(tiltQuaternion).normalize();
+      materialRef.current.uniforms.uLightDir.value.copy(sunDirection);
 
-        // Update globe rotation to keep day/night lighting fixed in world space
-        // When not expanded: counter-rotate light as globe spins
-        // When expanded: keep rotation at 0 so light stays fixed in world space
-        if (meshRef.current) {
-          materialRef.current.uniforms.uGlobeRotation.value = isExpanded ? 0 : meshRef.current.rotation.y;
-        }
+      materialRef.current.uniforms.uTimeOfDay.value = timeOfDay;
+      materialRef.current.uniforms.uIsExpanded.value = isExpanded ? 1.0 : 0.0;
 
-        materialRef.current.uniforms.uTimeOfDay.value = timeOfDay;
-        materialRef.current.uniforms.uIsExpanded.value = isExpanded ? 1.0 : 0.0;
+      // Update sun phase uniforms
+      const phaseMap: { [key: string]: number } = { night: 0, dawn: 1, day: 2, dusk: 3 };
+      materialRef.current.uniforms.uSunPhase.value = phaseMap[sunPhase] || 0;
+      materialRef.current.uniforms.uPhaseProgress.value = phaseProgress;
 
-        // Update sun phase uniforms
-        const phaseMap: { [key: string]: number } = { night: 0, dawn: 1, day: 2, dusk: 3 };
-        materialRef.current.uniforms.uSunPhase.value = phaseMap[sunPhase] || 0;
-        materialRef.current.uniforms.uPhaseProgress.value = phaseProgress;
-
-        // Animate texture blend (3 seconds = 3000ms)
-        const targetBlend = isExpanded ? 1 : 0;
-        const blendSpeed = delta * (1 / 3); // Full transition in 3 seconds
-        blendFactorRef.current += (targetBlend - blendFactorRef.current) * blendSpeed;
-        materialRef.current.uniforms.uTextureBlend.value = blendFactorRef.current;
-      }
-    });
+      // Animate texture blend (3 seconds = 3000ms)
+      const targetBlend = isExpanded ? 1 : 0;
+      const blendSpeed = delta * (1 / 3); // Full transition in 3 seconds
+      blendFactorRef.current += (targetBlend - blendFactorRef.current) * blendSpeed;
+      materialRef.current.uniforms.uTextureBlend.value = blendFactorRef.current;
+    }
+  });
 
   useEffect(() => {
     return () => {
@@ -427,7 +447,17 @@ const shaderMaterial = useMemo(() => {
   }, [shaderMaterial]);
 
   return (
-    <mesh ref={meshRef} castShadow receiveShadow scale={[scale, scale, -scale]}>
+    <mesh
+      ref={meshRef}
+      castShadow
+      receiveShadow
+      scale={[scale, scale, -scale]}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+    >
       <sphereGeometry args={[1, 128, 128]} />
       <primitive object={shaderMaterial} attach="material" />
     </mesh>
@@ -531,7 +561,7 @@ export default function WorldExperienceSection() {
       orbitControls: {
         enableRotate: false,
         autoRotate: false,
-        autoRotateSpeed: 0.4,
+        autoRotateSpeed: 0,
         minDistance: 1.8,
         maxDistance: 5.5,
       },
@@ -552,9 +582,9 @@ export default function WorldExperienceSection() {
         initialZ: 0.8,
       },
       orbitControls: {
-        enableRotate: true,
-        autoRotate: true,
-        autoRotateSpeed: 0.01,
+        enableRotate: false,
+        autoRotate: false,
+        autoRotateSpeed: 0,
         minDistance: 2.0,
         maxDistance: 8.0,
       },
@@ -573,13 +603,6 @@ export default function WorldExperienceSection() {
   const [phaseProgress, setPhaseProgress] = useState(0);
   const scrollLockPosition = useRef(0);
   const controlsRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (controlsRef.current) {
-      const autoRotateConfig = isExpanded ? GLOBE_CONFIG.expanded.orbitControls.autoRotate : GLOBE_CONFIG.notExpanded.orbitControls.autoRotate;
-      controlsRef.current.autoRotate = autoRotateConfig;
-    }
-  }, [isExpanded, GLOBE_CONFIG]);
 
   // Calculate sun position for New York
   useEffect(() => {
