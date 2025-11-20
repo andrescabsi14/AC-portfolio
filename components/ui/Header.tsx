@@ -10,11 +10,12 @@ import { cn } from '@/lib/utils';
 const navItems: {
   id: string;
   label: string;
+  href?: string;
   hiddenOnMobile?: boolean;
 }[] = [
-  { id: 'about', label: 'About' },
-  { id: 'world-experience', label: 'Experience' },
-  { id: 'networking', label: 'Networking', hiddenOnMobile: true },
+  { id: 'services', label: 'Services', href: '/#services' },
+  { id: 'ai-first', label: 'Become AI-First', href: '/ai-first' },
+  { id: 'contact', label: 'Contact', href: '/contact', hiddenOnMobile: true },
 ];
 
 export default function Header() {
@@ -148,7 +149,7 @@ export default function Header() {
               onMouseLeave={() => setHoveredNavItem(null)}
             >
               <Link
-                href={item.id === 'about' ? '/about' : `#${item.id}`}
+                href={item.href || `#${item.id}`}
                 className={cn(
                   'text-xs font-medium tracking-widest uppercase transition-all duration-300',
                   activeSection === item.id
@@ -169,12 +170,14 @@ export default function Header() {
             </div>
           ))}
 
-          <Button
-            variant="outline"
-            className="ml-4 h-auto border border-secondary-foreground/30 px-6 py-2.5 text-xs font-medium tracking-widest uppercase text-secondary-foreground hover:bg-secondary-foreground/10"
-          >
-            Contact
-          </Button>
+          <Link href="/contact">
+            <Button
+              variant="outline"
+              className="ml-4 h-auto border border-secondary-foreground/30 px-6 py-2.5 text-xs font-medium tracking-widest uppercase text-secondary-foreground hover:bg-secondary-foreground/10"
+            >
+              Get Started
+            </Button>
+          </Link>
         </nav>
       </div>
     </motion.header>
