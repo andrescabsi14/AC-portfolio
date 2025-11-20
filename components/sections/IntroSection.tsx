@@ -127,14 +127,22 @@ export default function IntroSection({ onNameAnimationComplete }: IntroSectionPr
         </div>
 
         {/* AI First Experiences - positioned below name */}
-        <div ref={taglineRef} className="text-center">
+        <div ref={taglineRef} className="text-center max-w-5xl mx-auto">
           <motion.p
             initial={hasAnimated ? false : { opacity: 0, y: 30 }}
             animate={hasAnimated ? false : { opacity: 1, y: 0 }}
             transition={{ duration: 1.2, delay: 2, ease: [0.22, 1, 0.36, 1] }}
-            className="text-2xl md:text-3xl lg:text-4xl font-light tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-gray-500"
+            className="text-2xl md:text-3xl lg:text-4xl font-light tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-gray-500 mb-6"
           >
-            AI First Experiences
+            AI Integration Services
+          </motion.p>
+          <motion.p
+            initial={hasAnimated ? false : { opacity: 0, y: 30 }}
+            animate={hasAnimated ? false : { opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, delay: 2.5, ease: [0.22, 1, 0.36, 1] }}
+            className="text-lg md:text-xl lg:text-2xl font-light text-gray-400 max-w-3xl mx-auto"
+          >
+            Transform your business into an AI-first company. Stay ahead of the competition.
           </motion.p>
         </div>
       </div>
