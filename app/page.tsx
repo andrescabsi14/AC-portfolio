@@ -11,6 +11,7 @@ import ServicesOverviewSection from '@/components/sections/ServicesOverviewSecti
 import ProblemsSection from '@/components/sections/ProblemsSection';
 import PersonalGuaranteeSection from '@/components/sections/PersonalGuaranteeSection';
 import CTASection from '@/components/sections/CTASection';
+import AIReadySection from '@/components/sections/AIReadySection';
 
 // Only render NameLoader on client to avoid hydration issues with animations
 const NameLoader = dynamic(() => import('@/components/ui/NameLoader'), { ssr: false });
@@ -87,6 +88,9 @@ export default function Home() {
 
         {/* CTA Section */}
         <CTASection />
+
+        {/* AI-Ready Guides Section */}
+        <AIReadySection />
 
         {/* AI Chat Section */}
         <AIChatSectionNew />
