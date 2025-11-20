@@ -134,7 +134,7 @@ export default function IntroSection({ onNameAnimationComplete }: IntroSectionPr
             transition={{ duration: 1.2, delay: 2, ease: [0.22, 1, 0.36, 1] }}
             className="text-2xl md:text-3xl lg:text-4xl font-light tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-gray-500 mb-6"
           >
-            AI Integration Services
+            AI First
           </motion.p>
           <motion.p
             initial={hasAnimated ? false : { opacity: 0, y: 30 }}
