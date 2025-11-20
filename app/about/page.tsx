@@ -6,6 +6,7 @@ import Footer from '@/components/ui/Footer';
 import AboutUsIntroSection from '@/components/sections/AboutUsIntroSection';
 import RecognitionSection from '@/components/sections/RecognitionSection';
 import NetworkingSection from '@/components/sections/NetworkingSection';
+import AIReadyCTA from '@/components/sections/AIReadyCTA';
 
 export default function AboutPage() {
   // Add smooth snap scrolling
@@ -27,6 +28,12 @@ export default function AboutPage() {
         <AboutUsIntroSection />
         <RecognitionSection />
         <NetworkingSection />
+      
+      <section className="bg-black px-6 py-12 md:py-16">
+        <div className="mx-auto max-w-6xl">
+          <AIReadyCTA />
+        </div>
+      </section>
       </main>
       <Footer />
     </>

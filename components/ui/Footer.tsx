@@ -10,9 +10,30 @@ const navLinks = [
 ];
 
 const socialLinks = [
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/andrescabrera' },
-  { label: 'GitHub', href: 'https://github.com/adacabrera' },
-  { label: 'Email', href: 'mailto:hello@andrescabrera.com' },
+  { label: 'LinkedIn', href: 'https://linkedin.com/in/andrescabrera', icon: 'linkedin' },
+  { label: 'GitHub', href: 'https://github.com/adacabrera', icon: 'github' },
+  { label: 'Twitter', href: 'https://twitter.com/andrescabrera', icon: 'twitter' },
+  { label: 'Medium', href: 'https://medium.com/@andrescabrera', icon: 'medium' },
+  { label: 'Email', href: 'mailto:hello@andrescabrera.com', icon: 'email' },
+];
+
+const footerLinks = [
+  {
+    title: 'Resources',
+    links: [
+      { label: 'AI-Ready Guide', href: '/ai-ready' },
+      { label: 'Articles', href: '/articles' },
+      { label: 'Case Studies', href: '/case-studies' },
+    ]
+  },
+  {
+    title: 'Company',
+    links: [
+      { label: 'About', href: '/about' },
+      { label: 'Contact', href: '/contact' },
+      { label: 'Community', href: '/community' },
+    ]
+  },
 ];
 
 export default function Footer() {
@@ -39,47 +60,71 @@ export default function Footer() {
           </Button>
         </div>
 
-        <div className="grid gap-6 rounded-2xl border border-white/5 bg-white/5 p-6 backdrop-blur">
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.3em] text-white/60">Navigate</p>
-              <div className="flex flex-wrap gap-3 text-sm">
-                {navLinks.map((link) => (
+        {/* Main Footer Content */}
+        <div className="grid gap-8 md:grid-cols-5">
+          {/* Brand Column */}
+          <div className="space-y-3 md:col-span-2">
+            <h3 className="text-xl font-semibold text-white">Andrés Cabrera</h3>
+            <p className="text-sm text-white/70">
+              Building AI-first solutions that make measurable impact. From NYC to the world.
+            </p>
+            <div className="flex flex-wrap gap-3 pt-2">
+              {socialLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/70 transition hover:border-white/40 hover:text-white"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Links Columns */}
+          {footerLinks.map((section) => (
+            <div key={section.title} className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">
+                {section.title}
+              </p>
+              <ul className="space-y-2">
+                {section.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-white/70 transition hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+
+          {/* Navigation Column */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/60">
+              Navigate
+            </p>
+            <ul className="space-y-2">
+              {navLinks.map((link) => (
+                <li key={link.label}>
                   <Link
-                    key={link.label}
                     href={link.href}
-                    className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/70 transition hover:border-white/40 hover:text-white"
+                    className="text-sm text-white/70 transition hover:text-white"
                   >
                     {link.label}
                   </Link>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.3em] text-white/60">Reach out</p>
-              <p className="text-sm text-white/70">hello@andrescabrera.com</p>
-              <p className="text-sm text-white/70">Available for product teams everywhere.</p>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.3em] text-white/60">On socials</p>
-              <div className="flex flex-wrap gap-3 text-sm">
-                {socialLinks.map((link) => (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/70 transition hover:border-white/40 hover:text-white"
-                  >
-                    {link.label}
-                  </a>
-                ))}
-              </div>
-            </div>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
+
+
 
         <div className="flex flex-col gap-6 border-t border-white/5 pt-6 text-xs text-white/60 md:flex-row md:items-center md:justify-between">
           <span>© {new Date().getFullYear()} Andrés Cabrera. All rights reserved.</span>
