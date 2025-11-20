@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Header from "@/components/ui/Header";
 import Footer from "@/components/ui/Footer";
+import InteractiveChatSection from "@/components/sections/ai-first/InteractiveChatSection";
+import IndustriesSection from "@/components/sections/ai-first/IndustriesSection";
 import { useEffect } from "react";
 
 export default function AIFirstPage() {
@@ -208,6 +210,12 @@ export default function AIFirstPage() {
             </motion.div>
           </div>
         </section>
+
+        {/* Interactive Chat Section */}
+        <InteractiveChatSection />
+
+        {/* Industries Section */}
+        <IndustriesSection />
 
         {/* CTA */}
         <section className="px-6 py-32 bg-black">

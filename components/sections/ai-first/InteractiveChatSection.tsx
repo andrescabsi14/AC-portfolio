@@ -64,28 +64,22 @@ export default function InteractiveChatSection() {
 
   return (
     <section
-      className="relative min-h-screen flex items-center justify-center py-32 overflow-hidden"
+      className="px-6 py-32 bg-black"
       style={{ scrollSnapAlign: 'start' }}
     >
-      {/* Ambient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-blue-950/20 to-black" />
-
-      <div className="relative z-10 max-w-4xl mx-auto px-6 w-full">
+      <div className="max-w-4xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-16 space-y-8"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-light text-white">
             Discover what we can do for you
           </h2>
-          <p className="text-2xl md:text-3xl text-white/70 mb-3">
-            ...in <span className="text-blue-400 font-semibold">seconds</span>
-          </p>
-          <p className="text-lg text-white/50">
-            You don't believe me? Try it:
+          <p className="text-lg md:text-xl text-white/50 font-light leading-relaxed">
+            Describe your biggest operational challenge, and we'll show you exactly how AI can transform it. Personalized recommendations in minutes.
           </p>
         </motion.div>
 
@@ -105,11 +99,11 @@ export default function InteractiveChatSection() {
                     key={index}
                     className={`p-4 rounded-lg ${
                       msg.role === 'user'
-                        ? 'bg-blue-500/10 ml-12 text-right'
+                        ? 'bg-white/5 ml-12 text-right'
                         : 'bg-white/5 mr-12'
                     }`}
                   >
-                    <p className="text-white/70 text-sm">{msg.message}</p>
+                    <p className="text-white/50 text-sm font-light">{msg.message}</p>
                   </div>
                 ))}
               </motion.div>
@@ -129,11 +123,11 @@ export default function InteractiveChatSection() {
                     key={index}
                     className={`p-4 rounded-lg ${
                       msg.role === 'user'
-                        ? 'bg-blue-500/20 ml-12 text-right'
+                        ? 'bg-white/10 ml-12 text-right'
                         : 'bg-white/10 mr-12'
                     }`}
                   >
-                    <p className="text-white text-base">{msg.message}</p>
+                    <p className="text-white text-base font-light">{msg.message}</p>
                   </div>
                 ))}
               </motion.div>
@@ -160,11 +154,11 @@ export default function InteractiveChatSection() {
                           repeat: Infinity,
                           delay: i * 0.2,
                         }}
-                        className="w-2 h-2 rounded-full bg-blue-400"
+                        className="w-2 h-2 rounded-full bg-white/50"
                       />
                     ))}
                   </div>
-                  <span className="text-white/50 text-sm">Analyzing your process...</span>
+                  <span className="text-white/50 text-sm font-light">Analyzing your process...</span>
                 </div>
               </motion.div>
             )}
@@ -181,36 +175,11 @@ export default function InteractiveChatSection() {
                 onClick={handleActivate}
                 className="w-full group"
               >
-                <motion.div
-                  animate={{
-                    boxShadow: [
-                      '0 0 20px rgba(59, 130, 246, 0.3)',
-                      '0 0 40px rgba(59, 130, 246, 0.5)',
-                      '0 0 20px rgba(59, 130, 246, 0.3)',
-                    ],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                  }}
-                  className="relative p-5 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300"
-                >
-                  <p className="text-white/40 text-lg group-hover:text-white/60 transition-colors">
-                    Click here to start...
+                <div className="relative p-8 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-all duration-300">
+                  <p className="text-white/50 text-lg font-light group-hover:text-white/70 transition-colors">
+                    Tell us about your biggest operational challenge
                   </p>
-                  {/* Pulsing glow indicator */}
-                  <motion.div
-                    animate={{
-                      opacity: [0.5, 1, 0.5],
-                      scale: [1, 1.05, 1],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                    }}
-                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/5 to-purple-500/5"
-                  />
-                </motion.div>
+                </div>
               </motion.button>
             ) : (
               <motion.form
@@ -228,12 +197,12 @@ export default function InteractiveChatSection() {
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
                     placeholder="What is your biggest problematic process right now?"
-                    className="w-full p-6 pr-32 rounded-xl bg-white/5 border border-blue-500/30 text-white placeholder-white/40 text-lg focus:outline-none focus:border-blue-400/50 focus:bg-white/10 transition-all"
+                    className="w-full p-6 pr-32 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 text-lg font-light focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
                   />
                   <Button
                     type="submit"
                     disabled={!userInput.trim() || isThinking}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed font-light"
                   >
                     Send
                   </Button>
@@ -246,9 +215,9 @@ export default function InteractiveChatSection() {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="mt-3 text-center text-blue-400 text-sm"
+                      className="mt-3 text-center text-white/50 text-sm font-light"
                     >
-                      You don't have anything to lose. Try it—you'll be amazed! ✨
+                      Share your challenge and we'll provide personalized recommendations
                     </motion.p>
                   )}
                 </AnimatePresence>
@@ -261,16 +230,15 @@ export default function InteractiveChatSection() {
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
           viewport={{ once: true }}
           className="mt-12 text-center"
         >
-          <p className="text-white/50 text-sm max-w-2xl mx-auto leading-relaxed">
-            This replaces the traditional "Contact Us" form. Our AI agent will ask a few questions
-            and send you personalized recommendations—free of charge. You can implement them with
-            anyone, but we know what we do, and this is just the surface. We work hand in hand
-            with you to achieve extraordinary results.
-          </p>
+          <div className="max-w-3xl mx-auto">
+            <p className="text-white/50 text-sm font-light leading-relaxed">
+              No high-pressure sales pitch. No forms that lead to follow-up calls. Just intelligent analysis and concrete recommendations you can implement immediately.
+            </p>
+          </div>
         </motion.div>
       </div>
     </section>
