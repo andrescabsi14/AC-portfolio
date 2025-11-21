@@ -260,7 +260,6 @@ const Earth = ({
   sunPhase = 'day',
   phaseProgress = 7,
   meshRef,
-  children,
 }: {
   onLoaded: () => void;
   scale?: number;
@@ -269,7 +268,6 @@ const Earth = ({
   sunPhase?: string;
   phaseProgress?: number;
   meshRef: RefObject<THREE.Mesh | null>;
-  children?: React.ReactNode;
 }) => {
   const blendFactorRef = useRef(0);
 
@@ -534,23 +532,20 @@ const Earth = ({
   }, [shaderMaterial]);
 
   return (
-    <group>
-      <mesh
-        ref={meshRef}
-        castShadow
-        receiveShadow
-        scale={[scale, scale, -scale]}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-      >
-        <sphereGeometry args={[1, isExpanded ? 64 : 32, isExpanded ? 64 : 32]} />
-        <primitive object={shaderMaterial} attach="material" />
-      </mesh>
-      {children}
-    </group>
+    <mesh
+      ref={meshRef}
+      castShadow
+      receiveShadow
+      scale={[scale, scale, -scale]}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerLeave={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+    >
+      <sphereGeometry args={[1, isExpanded ? 64 : 32, isExpanded ? 64 : 32]} />
+      <primitive object={shaderMaterial} attach="material" />
+    </mesh>
   );
 };
 
@@ -963,71 +958,72 @@ export default function WorldExperienceSection() {
                     sunPhase={sunPhase}
                     phaseProgress={phaseProgress}
                     meshRef={globeMeshRef}
-                  >
-                    {/* Markers positioned at geographic locations on the globe - only render after Earth is fully loaded */}
-                    {isExpanded && globeLoadedOnce && (
-                      <group scale={[1, 1, -1]}>
-                        <group>
-                          {projectMarkers.map((marker) => (
-                            <group key={marker.id}>
-                              <mesh
-                                position={marker.transform.position}
-                                quaternion={marker.transform.quaternion}
-                              >
-                                <cylinderGeometry args={[0.01, 0.01, marker.transform.height, 8]} />
-                                <meshStandardMaterial color="#0ea5e9" emissive="#38bdf8" emissiveIntensity={0.7} />
-                              </mesh>
-                              <mesh
-                                position={marker.transform.tipPosition}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  handleProjectSelect(marker);
-                                }}
-                                onPointerOver={() => {
-                                  document.body.style.cursor = 'pointer';
-                                }}
-                                onPointerOut={() => {
-                                  document.body.style.cursor = 'default';
-                                }}
-                              >
-                                <sphereGeometry args={[0.035, 12, 12]} />
-                                <meshStandardMaterial color="#38bdf8" emissive="#0ea5e9" emissiveIntensity={0.9} metalness={0.2} />
-                              </mesh>
-                            </group>
-                          ))}
-                        </group>
-                        <group>
-                          {momentMarkers.map((marker) => (
-                            <group key={marker.id}>
-                              <mesh
-                                position={marker.transform.position}
-                                quaternion={marker.transform.quaternion}
-                              >
-                                <cylinderGeometry args={[0.008, 0.008, marker.transform.height, 8]} />
-                                <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.6} />
-                              </mesh>
-                              <mesh
-                                position={marker.transform.tipPosition}
-                                onPointerOver={() => {
-                                  document.body.style.cursor = 'pointer';
-                                }}
-                                onPointerOut={() => {
-                                  document.body.style.cursor = 'default';
-                                }}
-                              >
-                                <sphereGeometry args={[0.025, 12, 12]} />
-                                <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.8} metalness={0.1} />
-                              </mesh>
-                            </group>
-                          ))}
-                        </group>
-                        <CurrentLocationPulse />
-                      </group>
-                    )}
-                  </Earth>
+                  />
                   <CloudLayer />
                   {isExpanded && <Atmosphere />}
                   {isExpanded && <OuterGlow />}
+                  {/* Markers positioned at geographic locations on the globe - only render after Earth is fully loaded */}
+                  {isExpanded && globeLoadedOnce && (
+                    <MarkersGroup>
+                      <group scale={[1.1, 1.1, -1.1]}>
+                        <group>
+                          {projectMarkers.map((marker) => (
+                          <group key={marker.id}>
+                            <mesh
+                              position={marker.transform.position}
+                              quaternion={marker.transform.quaternion}
+                            >
+                              <cylinderGeometry args={[0.01, 0.01, marker.transform.height, 8]} />
+                              <meshStandardMaterial color="#0ea5e9" emissive="#38bdf8" emissiveIntensity={0.7} />
+                            </mesh>
+                            <mesh
+                              position={marker.transform.tipPosition}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleProjectSelect(marker);
+                              }}
+                              onPointerOver={() => {
+                                document.body.style.cursor = 'pointer';
+                              }}
+                              onPointerOut={() => {
+                                document.body.style.cursor = 'default';
+                              }}
+                            >
+                              <sphereGeometry args={[0.035, 12, 12]} />
+                              <meshStandardMaterial color="#38bdf8" emissive="#0ea5e9" emissiveIntensity={0.9} metalness={0.2} />
+                            </mesh>
+                          </group>
+                        ))}
+                      </group>
+                      <group>
+                        {momentMarkers.map((marker) => (
+                          <group key={marker.id}>
+                            <mesh
+                              position={marker.transform.position}
+                              quaternion={marker.transform.quaternion}
+                            >
+                              <cylinderGeometry args={[0.008, 0.008, marker.transform.height, 8]} />
+                              <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.6} />
+                            </mesh>
+                            <mesh
+                              position={marker.transform.tipPosition}
+                              onPointerOver={() => {
+                                document.body.style.cursor = 'pointer';
+                              }}
+                              onPointerOut={() => {
+                                document.body.style.cursor = 'default';
+                              }}
+                            >
+                              <sphereGeometry args={[0.025, 12, 12]} />
+                              <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.8} metalness={0.1} />
+                            </mesh>
+                          </group>
+                        ))}
+                      </group>
+                        <CurrentLocationPulse />
+                      </group>
+                    </MarkersGroup>
+                  )}
                 </Suspense>
                 <CameraController isExpanded={isExpanded} config={GLOBE_CONFIG} />
                 <OrbitControls
