@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
 import IntroSection from '@/components/sections/IntroSection';
@@ -11,13 +12,15 @@ import PersonalGuaranteeSection from '@/components/sections/PersonalGuaranteeSec
 import CTASection from '@/components/sections/CTASection';
 
 export default function Home() {
+  const [introAnimationComplete, setIntroAnimationComplete] = useState(false);
+
   return (
     <main className="relative bg-black overflow-x-hidden">
-      {/* Header */}
-      <Header />
+      {/* Header - shows after intro animation */}
+      <Header showAnimation={!introAnimationComplete} />
 
       {/* Intro Section with Name Animation */}
-      <IntroSection />
+      <IntroSection onAnimationComplete={() => setIntroAnimationComplete(true)} />
 
        
 

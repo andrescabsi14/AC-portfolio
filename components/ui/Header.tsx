@@ -18,7 +18,11 @@ const navItems: {
   { id: 'ai-first', label: 'AI First', href: '/ai-first' },
 ];
 
-export default function Header() {
+interface HeaderProps {
+  showAnimation?: boolean;
+}
+
+export default function Header({ showAnimation = true }: HeaderProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [activeSection, setActiveSection] = useState('');
   const [isNameHovered, setIsNameHovered] = useState(false);
@@ -96,7 +100,7 @@ export default function Header() {
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -50 }}
+      initial={{ opacity: showAnimation ? 0 : 1, y: showAnimation ? -50 : 0 }}
       animate={{
         y: isAboutPage ? 0 : shouldShow ? 0 : -100,
         opacity: 1,
@@ -104,18 +108,23 @@ export default function Header() {
       transition={{
         duration: 0.8,
         ease: 'easeOut',
-        delay: 0.3,
+        delay: showAnimation ? 4.3 : 0,
       }}
       className="fixed inset-x-0 top-0 z-50 bg-secondary/80 backdrop-blur-sm"
     >
       <div className="mx-auto max-w-7xl flex h-16 items-center justify-between px-8">
         {/* Brand/Name */}
-        <Link
-          href="/"
-          className="flex flex-col items-start py-1 cursor-pointer"
-          onMouseEnter={() => setIsNameHovered(true)}
-          onMouseLeave={() => setIsNameHovered(false)}
+        <motion.div
+          initial={showAnimation ? { opacity: 0 } : { opacity: 1 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: showAnimation ? 4.3 : 0 }}
         >
+          <Link
+            href="/"
+            className="flex flex-col items-start py-1 cursor-pointer"
+            onMouseEnter={() => setIsNameHovered(true)}
+            onMouseLeave={() => setIsNameHovered(false)}
+          >
           {/* Andrés */}
           <div className="overflow-hidden h-6">
             <motion.span
@@ -139,6 +148,7 @@ export default function Header() {
             </motion.span>
           </div>
         </Link>
+        </motion.div>
 
         {/* Navigation */}
         <nav className="flex items-center gap-8">
