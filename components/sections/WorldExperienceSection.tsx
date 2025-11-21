@@ -550,15 +550,16 @@ const Earth = ({
 };
 
 const CurrentLocationPulse = () => {
+  const baseRadius = 1.045; // Slightly above the globe surface
+
   const position = useMemo(() => {
-    const vec = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1.04);
-    return [vec.x, vec.y, vec.z] as [number, number, number];
+    const vec = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, baseRadius);
+    return vec;
   }, []);
 
   const direction = useMemo(() => {
-    const vec = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1.04);
-    return vec.normalize();
-  }, []);
+    return position.clone().normalize();
+  }, [position]);
 
   const coreRef = useRef<THREE.Mesh>(null);
   const ring1Ref = useRef<THREE.Mesh>(null);
@@ -580,46 +581,61 @@ const CurrentLocationPulse = () => {
     // Animate pulse rings with different speeds and delays
     if (ring1Ref.current) {
       const progress1 = (time * 0.8) % 2;
-      const scale1 = 1 + progress1 * 1.5;
+      const scale1 = 1 + progress1 * 2;
       const opacity1 = Math.max(0, 1 - progress1 / 2);
+
+      // Position ring slightly outward as it expands
+      const offset1 = direction.clone().multiplyScalar(0.001 * progress1);
+      ring1Ref.current.position.copy(offset1);
       ring1Ref.current.scale.setScalar(scale1);
-      (ring1Ref.current.material as THREE.MeshBasicMaterial).opacity = opacity1 * 0.6;
+      (ring1Ref.current.material as THREE.MeshBasicMaterial).opacity = opacity1 * 0.7;
     }
 
     if (ring2Ref.current) {
       const progress2 = ((time * 0.8) + 0.66) % 2;
-      const scale2 = 1 + progress2 * 1.5;
+      const scale2 = 1 + progress2 * 2;
       const opacity2 = Math.max(0, 1 - progress2 / 2);
+
+      const offset2 = direction.clone().multiplyScalar(0.001 * progress2);
+      ring2Ref.current.position.copy(offset2);
       ring2Ref.current.scale.setScalar(scale2);
-      (ring2Ref.current.material as THREE.MeshBasicMaterial).opacity = opacity2 * 0.6;
+      (ring2Ref.current.material as THREE.MeshBasicMaterial).opacity = opacity2 * 0.7;
     }
 
     if (ring3Ref.current) {
       const progress3 = ((time * 0.8) + 1.33) % 2;
-      const scale3 = 1 + progress3 * 1.5;
+      const scale3 = 1 + progress3 * 2;
       const opacity3 = Math.max(0, 1 - progress3 / 2);
+
+      const offset3 = direction.clone().multiplyScalar(0.001 * progress3);
+      ring3Ref.current.position.copy(offset3);
       ring3Ref.current.scale.setScalar(scale3);
-      (ring3Ref.current.material as THREE.MeshBasicMaterial).opacity = opacity3 * 0.6;
+      (ring3Ref.current.material as THREE.MeshBasicMaterial).opacity = opacity3 * 0.7;
     }
   });
 
-  // Calculate rotation to face outward from globe center
+  // Calculate rotation to orient rings perpendicular to globe surface
   const quaternion = useMemo(() => {
-    return new THREE.Quaternion().setFromUnitVectors(
-      new THREE.Vector3(0, 0, 1),
-      direction
-    );
+    // Create a quaternion that rotates the ring to face along the direction vector
+    const up = new THREE.Vector3(0, 1, 0);
+    const right = new THREE.Vector3().crossVectors(up, direction).normalize();
+    const actualUp = new THREE.Vector3().crossVectors(direction, right).normalize();
+
+    const matrix = new THREE.Matrix4();
+    matrix.makeBasis(right, actualUp, direction);
+
+    return new THREE.Quaternion().setFromRotationMatrix(matrix);
   }, [direction]);
 
   return (
-    <group position={position}>
+    <group position={[position.x, position.y, position.z]}>
       {/* Core glowing sphere */}
       <mesh ref={coreRef}>
-        <sphereGeometry args={[0.025, 16, 16]} />
+        <sphereGeometry args={[0.03, 16, 16]} />
         <meshStandardMaterial
           color="#fcd34d"
           emissive="#fcd34d"
-          emissiveIntensity={1.2}
+          emissiveIntensity={1.5}
           metalness={0.3}
           roughness={0.2}
         />
@@ -627,33 +643,33 @@ const CurrentLocationPulse = () => {
 
       {/* Pulse ring 1 */}
       <mesh ref={ring1Ref} quaternion={quaternion}>
-        <ringGeometry args={[0.035, 0.045, 32]} />
+        <torusGeometry args={[0.04, 0.004, 16, 32]} />
         <meshBasicMaterial
           color="#fcd34d"
           transparent
-          opacity={0.6}
+          opacity={0.7}
           side={THREE.DoubleSide}
         />
       </mesh>
 
       {/* Pulse ring 2 */}
       <mesh ref={ring2Ref} quaternion={quaternion}>
-        <ringGeometry args={[0.035, 0.045, 32]} />
+        <torusGeometry args={[0.04, 0.004, 16, 32]} />
         <meshBasicMaterial
           color="#fcd34d"
           transparent
-          opacity={0.6}
+          opacity={0.7}
           side={THREE.DoubleSide}
         />
       </mesh>
 
       {/* Pulse ring 3 */}
       <mesh ref={ring3Ref} quaternion={quaternion}>
-        <ringGeometry args={[0.035, 0.045, 32]} />
+        <torusGeometry args={[0.04, 0.004, 16, 32]} />
         <meshBasicMaterial
           color="#fcd34d"
           transparent
-          opacity={0.6}
+          opacity={0.7}
           side={THREE.DoubleSide}
         />
       </mesh>
