@@ -554,19 +554,110 @@ const CurrentLocationPulse = () => {
     const vec = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1.04);
     return [vec.x, vec.y, vec.z] as [number, number, number];
   }, []);
-  const glowRef = useRef<THREE.Mesh>(null);
 
-  useFrame((_, delta) => {
-    if (glowRef.current) {
-      glowRef.current.rotation.y += delta * 0.15;
+  const direction = useMemo(() => {
+    const vec = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1.04);
+    return vec.normalize();
+  }, []);
+
+  const coreRef = useRef<THREE.Mesh>(null);
+  const ring1Ref = useRef<THREE.Mesh>(null);
+  const ring2Ref = useRef<THREE.Mesh>(null);
+  const ring3Ref = useRef<THREE.Mesh>(null);
+
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime();
+
+    // Rotate the core marker
+    if (coreRef.current) {
+      coreRef.current.rotation.y += 0.02;
+
+      // Gentle scale pulse on the core
+      const coreScale = 1 + Math.sin(time * 2) * 0.15;
+      coreRef.current.scale.setScalar(coreScale);
+    }
+
+    // Animate pulse rings with different speeds and delays
+    if (ring1Ref.current) {
+      const progress1 = (time * 0.8) % 2;
+      const scale1 = 1 + progress1 * 1.5;
+      const opacity1 = Math.max(0, 1 - progress1 / 2);
+      ring1Ref.current.scale.setScalar(scale1);
+      (ring1Ref.current.material as THREE.MeshBasicMaterial).opacity = opacity1 * 0.6;
+    }
+
+    if (ring2Ref.current) {
+      const progress2 = ((time * 0.8) + 0.66) % 2;
+      const scale2 = 1 + progress2 * 1.5;
+      const opacity2 = Math.max(0, 1 - progress2 / 2);
+      ring2Ref.current.scale.setScalar(scale2);
+      (ring2Ref.current.material as THREE.MeshBasicMaterial).opacity = opacity2 * 0.6;
+    }
+
+    if (ring3Ref.current) {
+      const progress3 = ((time * 0.8) + 1.33) % 2;
+      const scale3 = 1 + progress3 * 1.5;
+      const opacity3 = Math.max(0, 1 - progress3 / 2);
+      ring3Ref.current.scale.setScalar(scale3);
+      (ring3Ref.current.material as THREE.MeshBasicMaterial).opacity = opacity3 * 0.6;
     }
   });
 
+  // Calculate rotation to face outward from globe center
+  const quaternion = useMemo(() => {
+    return new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 0, 1),
+      direction
+    );
+  }, [direction]);
+
   return (
-    <mesh ref={glowRef} position={position}>
-      <sphereGeometry args={[0.045, 16, 16]} />
-      <meshStandardMaterial color="#fcd34d" emissive="#fcd34d" emissiveIntensity={0.8} />
-    </mesh>
+    <group position={position}>
+      {/* Core glowing sphere */}
+      <mesh ref={coreRef}>
+        <sphereGeometry args={[0.025, 16, 16]} />
+        <meshStandardMaterial
+          color="#fcd34d"
+          emissive="#fcd34d"
+          emissiveIntensity={1.2}
+          metalness={0.3}
+          roughness={0.2}
+        />
+      </mesh>
+
+      {/* Pulse ring 1 */}
+      <mesh ref={ring1Ref} quaternion={quaternion}>
+        <ringGeometry args={[0.035, 0.045, 32]} />
+        <meshBasicMaterial
+          color="#fcd34d"
+          transparent
+          opacity={0.6}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* Pulse ring 2 */}
+      <mesh ref={ring2Ref} quaternion={quaternion}>
+        <ringGeometry args={[0.035, 0.045, 32]} />
+        <meshBasicMaterial
+          color="#fcd34d"
+          transparent
+          opacity={0.6}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+
+      {/* Pulse ring 3 */}
+      <mesh ref={ring3Ref} quaternion={quaternion}>
+        <ringGeometry args={[0.035, 0.045, 32]} />
+        <meshBasicMaterial
+          color="#fcd34d"
+          transparent
+          opacity={0.6}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </group>
   );
 };
 
