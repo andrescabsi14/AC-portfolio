@@ -115,13 +115,12 @@ const calculateSunPosition = (lat: number, lng: number, date: Date) => {
 
 const latLngToCartesian = (lat: number, lng: number, radius = 1.02): THREE.Vector3 => {
   const phi = (90 - lat) * (Math.PI / 180);
-  const theta = lng * (Math.PI / 180);
-
-  const x = radius * Math.sin(phi) * Math.cos(theta);
-  const y = radius * Math.cos(phi);
-  const z = radius * Math.sin(phi) * Math.sin(theta);
-
-  return new THREE.Vector3(x, y, z);
+  const theta = (lng + 180) * (Math.PI / 180);
+  return new THREE.Vector3(
+    radius * Math.sin(phi) * Math.cos(theta),
+    radius * Math.cos(phi),
+    -radius * Math.sin(phi) * Math.sin(theta)  // Negate z to match Earth's negative z-scale
+  );
 };
 
 const getMarkerTransform = (
@@ -1457,7 +1456,7 @@ function WorldExperienceSectionContent() {
                   {/* Markers positioned at geographic locations on the globe - only render after Earth is fully loaded */}
                   {isExpanded && globeLoadedOnce && (
                     <MarkersGroup>
-                      <group scale={[1.1, 1.1, -1.1]}>
+                      <group scale={[1.1, 1.1, 1.1]}>
                         <group>
                           {projectMarkers.map((marker) => (
                             <group key={marker.id}>
