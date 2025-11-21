@@ -8,6 +8,11 @@ import * as THREE from 'three';
 import { projects, Project } from '@/data/projects';
 import ProjectLightbox from '@/components/ui/ProjectLightbox';
 import { Button } from '@/components/ui/button';
+import { AdminControlPanel } from '@/components/ui/AdminControlPanel';
+import { GlobeConfigProvider, useGlobeConfig } from '@/contexts/GlobeConfigContext';
+
+// Admin mode toggle - set to true to enable admin controls
+const ADMIN = true;
 
 // Context for sharing the globe mesh reference
 const GlobeContext = createContext<{ globeMeshRef: RefObject<THREE.Mesh | null> } | null>(null);
@@ -36,17 +41,103 @@ const CURRENT_LOCATION = {
   label: 'Current Location: New York',
 };
 
+const normalizeHexColor = (value: string) => {
+  if (!value || !value.startsWith('#')) {
+    return value;
+  }
+
+  const hex = value.slice(1);
+  if (hex.length === 8) {
+    return `#${hex.slice(0, 6)}`;
+  }
+
+  return value;
+};
+
 // Globe moments with coordinates
 const GLOBE_MOMENT_LOCATIONS = [
-  { title: 'Bogotá — the origin.', lat: 4.7110, lng: -74.0055 },
-  { title: 'Dallas — the mayor\'s office.', lat: 32.7767, lng: -96.7970 },
-  { title: 'Detroit — congressmen, city leaders, and the awakening of a global perspective.', lat: 42.3314, lng: -83.0458 },
-  { title: 'Washington D.C. — the U.S. Department of State, seventh floor.', lat: 38.8951, lng: -77.0369 },
-  { title: 'Copenhagen & Aarhus — representing the Americas as a DTU Young Influencer at the C40 World Mayors Summit.', lat: 55.6761, lng: 12.5683 },
-  { title: 'Lima — the APEC Summit.', lat: -12.0464, lng: -77.0428 },
-  { title: 'Spain, Bolivia, Memphis — entrepreneurship, culture, and the belief that ideas move faster than borders.', lat: 40.4637, lng: -3.7492 },
-  { title: 'Santa Clara & Silicon Valley — invited to share approaches to frontier technology.', lat: 37.3541, lng: -121.9552 },
-  { title: 'New York — the city he saw in 2014 from the still-unfinished Hudson Yards.', lat: 40.7128, lng: -74.0060 },
+  {
+    title: 'Bogotá',
+    subtitle: 'The origin.',
+    description:
+      'Where the journey began — growing up in Bogotá, learning to build without permission and think beyond the neighborhood.',
+    image: '/images/globe/bogota-origin.jpg',
+    lat: 4.7110,
+    lng: -74.0055,
+  },
+  {
+    title: 'Dallas',
+    subtitle: 'The mayor\'s office.',
+    description:
+      'A first taste of U.S. civic leadership — conversations inside the mayor’s office about cities, innovation, and opportunity.',
+    image: '/images/globe/dallas-mayor.jpg',
+    lat: 32.7767,
+    lng: -96.7970,
+  },
+  {
+    title: 'Detroit',
+    subtitle: 'Congressmen, city leaders, and the awakening of a global perspective.',
+    description:
+      'In Detroit, meetings with congressmen and city leaders expanded a local story into a global mission for impact.',
+    image: '/images/globe/detroit-leaders.jpg',
+    lat: 42.3314,
+    lng: -83.0458,
+  },
+  {
+    title: 'Washington D.C.',
+    subtitle: 'The U.S. Department of State, seventh floor.',
+    description:
+      'On the seventh floor of the State Department, policy, diplomacy, and entrepreneurship collided in a single hallway.',
+    image: '/images/globe/washington-state-dept.jpg',
+    lat: 38.8951,
+    lng: -77.0369,
+  },
+  {
+    title: 'Copenhagen & Aarhus',
+    subtitle:
+      'Representing the Americas as a DTU Young Influencer at the C40 World Mayors Summit.',
+    description:
+      'Representing the Americas among mayors, climate leaders, and innovators, shaping conversations about cities and the future.',
+    image: '/images/globe/copenhagen-aarhus-c40.jpg',
+    lat: 55.6761,
+    lng: 12.5683,
+  },
+  {
+    title: 'Lima',
+    subtitle: 'The APEC Summit.',
+    description:
+      'At APEC in Lima, the focus shifted from local startups to the geopolitics of trade, technology, and shared prosperity.',
+    image: '/images/globe/lima-apec.jpg',
+    lat: -12.0464,
+    lng: -77.0428,
+  },
+  {
+    title: 'Spain, Bolivia, Memphis',
+    subtitle: 'Entrepreneurship, culture, and the belief that ideas move faster than borders.',
+    description:
+      'Workshops, talks, and collaborations across three continents proving that good ideas can outrun passports and borders.',
+    image: '/images/globe/spain-bolivia-memphis.jpg',
+    lat: 40.4637,
+    lng: -3.7492,
+  },
+  {
+    title: 'Santa Clara & Silicon Valley',
+    subtitle: 'Invited to share approaches to frontier technology.',
+    description:
+      'In the heart of Silicon Valley, sharing experiments at the edge of AI, Web3, and the next wave of tools for builders.',
+    image: '/images/globe/silicon-valley-frontier-tech.jpg',
+    lat: 37.3541,
+    lng: -121.9552,
+  },
+  {
+    title: 'New York',
+    subtitle: 'The city first seen in 2014 from the still-unfinished Hudson Yards.',
+    description:
+      'Looking over an unfinished Hudson Yards in 2014 and deciding that one day, the work would belong in this skyline.',
+    image: '/images/globe/new-york-hudson-yards.jpg',
+    lat: 40.7128,
+    lng: -74.0060,
+  },
 ];
 
 // Sun position calculator for a given location and date
@@ -114,30 +205,64 @@ const latLngToCartesian = (lat: number, lng: number, radius = 1.02): THREE.Vecto
   return new THREE.Vector3(
     radius * Math.sin(phi) * Math.cos(theta),
     radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.sin(theta)
+    -radius * Math.sin(phi) * Math.sin(theta)  // Negate z to match Earth's negative z-scale
   );
 };
 
-const LINE_MARKER_RADIUS = 1.03;
-const LINE_MARKER_HEIGHT = 0.35;
-
-const getMarkerTransform = (lat: number, lng: number) => {
-  const positionVec = latLngToCartesian(lat, lng, LINE_MARKER_RADIUS);
+const getMarkerTransform = (
+  lat: number,
+  lng: number,
+  distance: number = 1.05,
+  height: number = 0.1
+) => {
+  const positionVec = latLngToCartesian(lat, lng, distance);
   const direction = positionVec.clone().normalize();
-  const center = direction.clone().multiplyScalar(LINE_MARKER_RADIUS - LINE_MARKER_HEIGHT / 2);
+  // Position cylinder center so it starts at the tip and extends toward the globe center
+  const center = direction.clone().multiplyScalar(distance - height / 2);
   const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
   return {
     position: [center.x, center.y, center.z] as [number, number, number],
     tipPosition: [positionVec.x, positionVec.y, positionVec.z] as [number, number, number],
     quaternion,
-    height: LINE_MARKER_HEIGHT,
+    height,
   };
 };
 
-const Atmosphere = () => {
+const Atmosphere = ({
+  color = '#0077be',
+  intensity = 0.4,
+  scale = 1.05,
+  positionX = 0,
+  positionY = 0,
+  positionZ = 0,
+  blur = 0,
+  glow = 0,
+  terminatorSoftness = 0.25,
+}: {
+  color?: string;
+  intensity?: number;
+  scale?: number;
+  positionX?: number;
+  positionY?: number;
+  positionZ?: number;
+  blur?: number;
+  glow?: number;
+  terminatorSoftness?: number;
+}) => {
+  // Parse color to RGB
+  const rgb = parseInt(color.replace('#', ''), 16);
+  const r = ((rgb >> 16) & 255) / 255;
+  const g = ((rgb >> 8) & 255) / 255;
+  const b = (rgb & 255) / 255;
+
   const material = useMemo(
     () =>
       new THREE.ShaderMaterial({
+        uniforms: {
+          uColor: { value: new THREE.Vector3(r, g, b) },
+          uIntensity: { value: intensity },
+          uTerminatorSoftness: { value: terminatorSoftness },
+        },
         vertexShader: `
           varying vec3 vNormal;
           void main() {
@@ -147,16 +272,23 @@ const Atmosphere = () => {
         `,
         fragmentShader: `
           varying vec3 vNormal;
+          uniform vec3 uColor;
+          uniform float uIntensity;
+          uniform float uTerminatorSoftness;
           void main() {
-            float intensity = pow(0.5 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.2);
-            gl_FragColor = vec4(0.0, 0.57, 1.0, intensity);
+            vec3 viewDir = vec3(0.0, 0.0, 1.0);
+            float facing = dot(vNormal, viewDir);
+            float softness = smoothstep(-uTerminatorSoftness, uTerminatorSoftness, facing);
+            float glow = pow(clamp(0.7 - softness * 0.7, 0.0, 1.0), 2.2);
+            float alpha = (glow * 0.6 + softness * 0.4) * uIntensity;
+            gl_FragColor = vec4(uColor, alpha);
           }
         `,
         blending: THREE.AdditiveBlending,
         transparent: true,
         depthWrite: false,
       }),
-    []
+    [r, g, b, intensity, terminatorSoftness]
   );
 
   useEffect(() => {
@@ -169,21 +301,54 @@ const Atmosphere = () => {
   useFrame((_, delta) => {
     if (ref.current) {
       ref.current.rotation.y += delta * 0.02; // Unexpanded
+      ref.current.position.x = positionX;
+      ref.current.position.y = positionY;
+      ref.current.position.z = positionZ;
+      if (material.uniforms.uIntensity) {
+        material.uniforms.uIntensity.value = intensity + glow;
+      }
+      if (material.uniforms.uTerminatorSoftness) {
+        material.uniforms.uTerminatorSoftness.value = terminatorSoftness;
+      }
     }
   });
 
   return (
-    <mesh ref={ref} scale={1.05}>
+    <mesh ref={ref} position={[positionX, positionY, positionZ]} scale={scale}>
       <sphereGeometry args={[1, 64, 64]} />
       <primitive object={material} attach="material" />
     </mesh>
   );
 };
 
-const OuterGlow = () => {
+const OuterGlow = ({
+  color = '#0857f7',
+  intensity = 0.9,
+  scale = 1.15,
+  positionX = 0,
+  positionY = 0,
+  positionZ = 0
+}: {
+  color?: string;
+  intensity?: number;
+  scale?: number;
+  positionX?: number;
+  positionY?: number;
+  positionZ?: number;
+}) => {
+  // Parse color to RGB
+  const rgb = parseInt(color.replace('#', ''), 16);
+  const r = ((rgb >> 16) & 255) / 255;
+  const g = ((rgb >> 8) & 255) / 255;
+  const b = (rgb & 255) / 255;
+
   const material = useMemo(
     () =>
       new THREE.ShaderMaterial({
+        uniforms: {
+          uGlowColor: { value: new THREE.Vector3(r, g, b) },
+          uIntensity: { value: intensity },
+        },
         vertexShader: `
           varying vec3 vNormal;
           void main() {
@@ -193,17 +358,18 @@ const OuterGlow = () => {
         `,
         fragmentShader: `
           varying vec3 vNormal;
+          uniform vec3 uGlowColor;
+          uniform float uIntensity;
           void main() {
             float intensity = pow(1.05 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 4.5);
-            vec3 glowColor = vec3(0.08, 0.4, 1.0);
-            gl_FragColor = vec4(glowColor, intensity * 0.9);
+            gl_FragColor = vec4(uGlowColor, intensity * uIntensity);
           }
         `,
         blending: THREE.AdditiveBlending,
         transparent: true,
         depthWrite: false,
       }),
-    []
+    [r, g, b, intensity]
   );
 
   useEffect(() => {
@@ -211,14 +377,30 @@ const OuterGlow = () => {
   }, [material]);
 
   return (
-    <mesh scale={[1.15, 1.15, 1.15]}>
+    <mesh position={[positionX, positionY, positionZ]} scale={[scale, scale, scale]}>
       <sphereGeometry args={[1, 64, 64]} />
       <primitive object={material} attach="material" />
     </mesh>
   );
 };
 
-const CloudLayer = () => {
+const CloudLayer = ({
+  opacity = 0.6,
+  scale = 1.08,
+  positionX = 0,
+  positionY = 0,
+  positionZ = 0,
+  blur = 0,
+  rotationSpeed = 0.02
+}: {
+  opacity?: number;
+  scale?: number;
+  positionX?: number;
+  positionY?: number;
+  positionZ?: number;
+  blur?: number;
+  rotationSpeed?: number;
+}) => {
   const cloudsTexture = useLoader(THREE.TextureLoader, CLOUDS_TEXTURE_URL);
   cloudsTexture.flipY = false;
 
@@ -229,25 +411,91 @@ const CloudLayer = () => {
   }, [cloudsTexture]);
 
   const meshRef = useRef<THREE.Mesh>(null);
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const globeMeshRef = useGlobeMesh();
+
+  const material = useMemo(() => {
+    const mat = new THREE.ShaderMaterial({
+      uniforms: {
+        uTexture: { value: cloudsTexture },
+        uOpacity: { value: opacity },
+        uBlur: { value: blur },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D uTexture;
+        uniform float uOpacity;
+        uniform float uBlur;
+        varying vec2 vUv;
+
+        void main() {
+          vec2 correctedUv = vec2(vUv.x, 1.0 - vUv.y);
+          vec4 texColor = vec4(0.0);
+
+          // Apply blur effect - sample texture at multiple offsets
+          if (uBlur > 0.0) {
+            float blurAmount = uBlur * 0.01;
+
+            // 9-tap box blur (unrolled)
+            texColor += texture2D(uTexture, correctedUv + vec2(-1.0, -1.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(0.0, -1.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(1.0, -1.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(-1.0, 0.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(0.0, 0.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(1.0, 0.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(-1.0, 1.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(0.0, 1.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(1.0, 1.0) * blurAmount);
+            texColor /= 9.0;
+          } else {
+            texColor = texture2D(uTexture, correctedUv);
+          }
+
+          texColor.a *= uOpacity;
+          gl_FragColor = texColor;
+        }
+      `,
+      transparent: true,
+      depthWrite: false,
+    });
+    materialRef.current = mat;
+    return mat;
+  }, [cloudsTexture]);
+
+  useEffect(() => {
+    return () => {
+      material.dispose();
+    };
+  }, [material]);
 
   useFrame((_, delta) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y -= delta * 0.02;
+      if (globeMeshRef.current) {
+        meshRef.current.quaternion.copy(globeMeshRef.current.quaternion);
+      } else {
+        meshRef.current.rotation.y += delta * rotationSpeed;
+      }
+      meshRef.current.position.x = positionX;
+      meshRef.current.position.y = positionY;
+      meshRef.current.position.z = positionZ;
+    }
+
+    if (materialRef.current) {
+      materialRef.current.uniforms.uOpacity.value = opacity;
+      materialRef.current.uniforms.uBlur.value = blur;
     }
   });
 
   return (
-    <mesh ref={meshRef} scale={[1.08, 1.08, 1.08]}>
+    <mesh ref={meshRef} position={[positionX, positionY, positionZ]} scale={[scale, scale, scale]}>
       <sphereGeometry args={[1, 64, 64]} />
-      <meshStandardMaterial
-        map={cloudsTexture}
-        transparent={true}
-        opacity={0.6}
-        emissive="#ffffff"
-        emissiveMap={cloudsTexture}
-        emissiveIntensity={0.3}
-        depthWrite={false}
-      />
+      <primitive object={material} attach="material" ref={materialRef} />
     </mesh>
   );
 };
@@ -260,6 +508,14 @@ const Earth = ({
   sunPhase = 'day',
   phaseProgress = 7,
   meshRef,
+  terminatorSoftness = 0.35,
+  lightDir = new THREE.Vector3(1, 0.2, 0.5),
+  rotationSpeed = 0.02,
+  segments = 64,
+  blur = 0,
+  positionX = 0,
+  positionY = 0,
+  positionZ = 0,
 }: {
   onLoaded: () => void;
   scale?: number;
@@ -268,6 +524,14 @@ const Earth = ({
   sunPhase?: string;
   phaseProgress?: number;
   meshRef: RefObject<THREE.Mesh | null>;
+  terminatorSoftness?: number;
+  lightDir?: THREE.Vector3;
+  rotationSpeed?: number;
+  segments?: number;
+  blur?: number;
+  positionX?: number;
+  positionY?: number;
+  positionZ?: number;
 }) => {
   const blendFactorRef = useRef(0);
 
@@ -304,14 +568,15 @@ const Earth = ({
         uCloudsMap: { value: cloudsTexture },
         uHighDayMap: { value: highDayTexture },
         uHighNightMap: { value: highNightTexture },
-        uLightDir: { value: new THREE.Vector3(1, 0.2, 0.5).normalize() },
+        uLightDir: { value: lightDir.clone().normalize() },
         uTimeOfDay: { value: timeOfDay },
-        uTerminatorSoftness: { value: 0.35 }, // Wider terminator for more realistic atmosphere
+        uTerminatorSoftness: { value: terminatorSoftness },
         uSunPhase: { value: 0 }, // 0 = night, 1 = dawn, 2 = day, 3 = dusk
         uPhaseProgress: { value: 0 }, // 0 to 1 progress through phase
         uDawnDuskColor: { value: new THREE.Vector3(1.0, 0.6, 0.8) }, // Orange
         uTextureBlend: { value: 0 }, // 0 = low-res, 1 = high-res
         uIsExpanded: { value: isExpanded ? 1.0 : 0.0 }, // 1.0 = expanded, 0.0 = not expanded
+        uBlur: { value: blur }, // 0 = no blur, >0 = blur effect
       },
       vertexShader: `
         varying vec3 vNormal;
@@ -343,6 +608,25 @@ const Earth = ({
         uniform vec3 uDawnDuskColor;
         uniform float uTextureBlend;
         uniform float uIsExpanded;
+        uniform float uBlur;
+
+        // Texture blur function - applies 9-tap box blur
+        vec3 blurTexture(sampler2D tex, vec2 uv, float blurAmount) {
+          vec3 result = vec3(0.0);
+
+          // 9-tap box blur (unrolled)
+          result += texture2D(tex, uv + vec2(-1.0, -1.0) * blurAmount).rgb;
+          result += texture2D(tex, uv + vec2(0.0, -1.0) * blurAmount).rgb;
+          result += texture2D(tex, uv + vec2(1.0, -1.0) * blurAmount).rgb;
+          result += texture2D(tex, uv + vec2(-1.0, 0.0) * blurAmount).rgb;
+          result += texture2D(tex, uv + vec2(0.0, 0.0) * blurAmount).rgb;
+          result += texture2D(tex, uv + vec2(1.0, 0.0) * blurAmount).rgb;
+          result += texture2D(tex, uv + vec2(-1.0, 1.0) * blurAmount).rgb;
+          result += texture2D(tex, uv + vec2(0.0, 1.0) * blurAmount).rgb;
+          result += texture2D(tex, uv + vec2(1.0, 1.0) * blurAmount).rgb;
+
+          return result / 9.0;
+        }
 
         void main() {
           // Use world-space normal for fixed lighting direction (light stays in place when globe rotates)
@@ -357,14 +641,18 @@ const Earth = ({
           float transitionEnd = uTerminatorSoftness;
           float dayFactor = smoothstep(transitionStart, transitionEnd, intensity);
 
-          // Sample low-res textures
-          vec3 lowDayColor = texture2D(uDayMap, vUv).rgb;
-          vec3 lowNightColor = texture2D(uNightMap, vUv).rgb;
-          vec3 cloudsColor = texture2D(uCloudsMap, vUv).rgb;
+        // Determine blur amount for texture sampling
+        float blurAmount = uBlur > 0.0 ? uBlur * 0.005 : 0.0;
+        vec2 correctedUv = vec2(vUv.x, 1.0 - vUv.y);
 
-          // Sample high-res textures
-          vec3 highDayColor = texture2D(uHighDayMap, vUv).rgb;
-          vec3 highNightColor = texture2D(uHighNightMap, vUv).rgb;
+        // Sample low-res textures with optional blur
+        vec3 lowDayColor = blurAmount > 0.0 ? blurTexture(uDayMap, correctedUv, blurAmount) : texture2D(uDayMap, correctedUv).rgb;
+        vec3 lowNightColor = blurAmount > 0.0 ? blurTexture(uNightMap, correctedUv, blurAmount) : texture2D(uNightMap, correctedUv).rgb;
+        vec3 cloudsColor = blurAmount > 0.0 ? blurTexture(uCloudsMap, correctedUv, blurAmount) : texture2D(uCloudsMap, correctedUv).rgb;
+
+        // Sample high-res textures with optional blur
+        vec3 highDayColor = blurAmount > 0.0 ? blurTexture(uHighDayMap, correctedUv, blurAmount) : texture2D(uHighDayMap, correctedUv).rgb;
+        vec3 highNightColor = blurAmount > 0.0 ? blurTexture(uHighNightMap, correctedUv, blurAmount) : texture2D(uHighNightMap, correctedUv).rgb;
 
           // When not expanded, show only clouds; when expanded, use day texture
           vec3 displayDayColor = mix(cloudsColor, lowDayColor, uIsExpanded);
@@ -426,7 +714,7 @@ const Earth = ({
     });
     materialRef.current = mat;
     return mat;
-  }, [dayTexture, nightTexture, cloudsTexture, highDayTexture, highNightTexture, timeOfDay, sunPhase, phaseProgress, isExpanded]);
+  }, [dayTexture, nightTexture, cloudsTexture, highDayTexture, highNightTexture, timeOfDay, sunPhase, phaseProgress, isExpanded, terminatorSoftness, lightDir, blur]);
 
   useEffect(() => {
     if (!loadedRef.current && dayTexture && nightTexture) {
@@ -478,18 +766,69 @@ const Earth = ({
 
   const phaseMap = useMemo(() => ({ night: 0, dawn: 1, day: 2, dusk: 3 } as Record<string, number>), []);
   const frameCountRef = useRef(0);
+  const expandAnimationRef = useRef({
+    isAnimating: false,
+    progress: 0,
+    startQuaternion: new THREE.Quaternion(),
+    targetQuaternion: new THREE.Quaternion(),
+  });
+  const hasAnimatedToNYCRef = useRef(false);
+
+  // Handle globe centering when expanded
+  useEffect(() => {
+    if (isExpanded && !hasAnimatedToNYCRef.current && meshRef.current) {
+      hasAnimatedToNYCRef.current = true;
+
+      // Store the starting quaternion
+      expandAnimationRef.current.startQuaternion.copy(meshRef.current.quaternion);
+
+      // Calculate target rotation to center NYC
+      // NYC position on globe
+      const nycCartesian = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1);
+
+      // Create quaternion that rotates NYC point to face camera (positive Z direction)
+      const targetDir = new THREE.Vector3(nycCartesian.x, nycCartesian.y, nycCartesian.z).normalize();
+      const cameraDir = new THREE.Vector3(0, 0, 1); // Camera looks at positive Z
+
+      expandAnimationRef.current.targetQuaternion.setFromUnitVectors(targetDir, cameraDir);
+
+      // Start animation
+      expandAnimationRef.current.isAnimating = true;
+      expandAnimationRef.current.progress = 0;
+    } else if (!isExpanded) {
+      // Reset when not expanded
+      hasAnimatedToNYCRef.current = false;
+      expandAnimationRef.current.isAnimating = false;
+    }
+  }, [isExpanded]);
 
   useFrame((_, delta) => {
     if (meshRef.current) {
       if (!initialRotationSet.current) {
-        meshRef.current.rotation.x = THREE.MathUtils.degToRad(1.3);
-        meshRef.current.rotation.z = THREE.MathUtils.degToRad(180);
+        meshRef.current.rotation.x = THREE.MathUtils.degToRad(0);
+        meshRef.current.rotation.z = THREE.MathUtils.degToRad(0);
         initialRotationSet.current = true;
       }
 
-      if (!pointerStateRef.current.isDragging) {
-        meshRef.current.rotation.y += delta * 0.02;
+      // Handle NYC centering animation
+      if (expandAnimationRef.current.isAnimating) {
+        expandAnimationRef.current.progress += delta * 1.5; // 1.5x speed for smooth animation
+
+        if (expandAnimationRef.current.progress >= 1) {
+          // Animation complete
+          meshRef.current.quaternion.copy(expandAnimationRef.current.targetQuaternion);
+          expandAnimationRef.current.isAnimating = false;
+        } else {
+          // Interpolate between start and target quaternion
+          meshRef.current.quaternion.copy(expandAnimationRef.current.startQuaternion);
+          meshRef.current.quaternion.slerp(expandAnimationRef.current.targetQuaternion, expandAnimationRef.current.progress);
+        }
       }
+
+      if (!pointerStateRef.current.isDragging) {
+        meshRef.current.rotation.y += delta * rotationSpeed;
+      }
+      meshRef.current.position.set(positionX, positionY, positionZ);
     }
 
     if (materialRef.current) {
@@ -512,6 +851,7 @@ const Earth = ({
 
       materialRef.current.uniforms.uTimeOfDay.value = timeOfDay;
       materialRef.current.uniforms.uIsExpanded.value = isExpanded ? 1.0 : 0.0;
+      materialRef.current.uniforms.uBlur.value = blur;
 
       // Update sun phase uniforms
       materialRef.current.uniforms.uSunPhase.value = phaseMap[sunPhase] || 0;
@@ -536,6 +876,7 @@ const Earth = ({
       ref={meshRef}
       castShadow
       receiveShadow
+      position={[positionX, positionY, positionZ]}
       scale={[scale, scale, -scale]}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -543,35 +884,126 @@ const Earth = ({
       onPointerLeave={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
-      <sphereGeometry args={[1, isExpanded ? 64 : 32, isExpanded ? 64 : 32]} />
+      <sphereGeometry args={[1, isExpanded ? segments : 32, isExpanded ? segments : 32]} />
       <primitive object={shaderMaterial} attach="material" />
     </mesh>
   );
 };
 
-const CurrentLocationPulse = () => {
-  const position = useMemo(() => {
-    const vec = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1.04);
-    return [vec.x, vec.y, vec.z] as [number, number, number];
+const CurrentLocationPulse = ({
+  color = '#a21111ff',
+  pulseSize = 0.02,
+  pulseSpeed = 0.6,
+  visibility = 1
+}: {
+  color?: string;
+  pulseSize?: number;
+  pulseSpeed?: number;
+  visibility?: number;
+}) => {
+  const transform = useMemo(() => {
+    return getMarkerTransform(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng);
   }, []);
-  const glowRef = useRef<THREE.Mesh>(null);
 
-  useFrame((_, delta) => {
-    if (glowRef.current) {
-      glowRef.current.rotation.y += delta * 0.15;
+  const position = transform.tipPosition;
+
+  const coreRef = useRef<THREE.Mesh>(null);
+  const pulse1Ref = useRef<THREE.Mesh>(null);
+  const pulse2Ref = useRef<THREE.Mesh>(null);
+  const pulse3Ref = useRef<THREE.Mesh>(null);
+
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime();
+
+    // Gentle rotation and pulse on the core
+    if (coreRef.current) {
+      coreRef.current.rotation.y += 0.02;
+      const coreScale = 1 + Math.sin(time * 2) * 0.1;
+      coreRef.current.scale.setScalar(coreScale);
+      (coreRef.current.material as THREE.MeshStandardMaterial).opacity = visibility;
+    }
+
+    // Pulse wave 1
+    if (pulse1Ref.current) {
+      const progress1 = (time * pulseSpeed) % 2.5;
+      const scale1 = 1 + progress1 * 3;
+      const opacity1 = Math.max(0, 1 - progress1 / 2.5);
+      pulse1Ref.current.scale.setScalar(scale1);
+      (pulse1Ref.current.material as THREE.MeshBasicMaterial).opacity = opacity1 * 0.5 * visibility;
+    }
+
+    // Pulse wave 2
+    if (pulse2Ref.current) {
+      const progress2 = ((time * pulseSpeed) + 0.83) % 2.5;
+      const scale2 = 1 + progress2 * 3;
+      const opacity2 = Math.max(0, 1 - progress2 / 2.5);
+      pulse2Ref.current.scale.setScalar(scale2);
+      (pulse2Ref.current.material as THREE.MeshBasicMaterial).opacity = opacity2 * 0.5 * visibility;
+    }
+
+    // Pulse wave 3
+    if (pulse3Ref.current) {
+      const progress3 = ((time * pulseSpeed) + 1.66) % 2.5;
+      const scale3 = 1 + progress3 * 3;
+      const opacity3 = Math.max(0, 1 - progress3 / 2.5);
+      pulse3Ref.current.scale.setScalar(scale3);
+      (pulse3Ref.current.material as THREE.MeshBasicMaterial).opacity = opacity3 * 0.5 * visibility;
     }
   });
 
   return (
-    <mesh ref={glowRef} position={position}>
-      <sphereGeometry args={[0.045, 16, 16]} />
-      <meshStandardMaterial color="#fcd34d" emissive="#fcd34d" emissiveIntensity={0.8} />
-    </mesh>
+    <group position={position}>
+      {/* Core glowing marker */}
+      <mesh ref={coreRef} scale={pulseSize / 0.02}>
+        <sphereGeometry args={[0.02, 16, 16]} />
+        <meshStandardMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={2}
+          toneMapped={false}
+          transparent
+        />
+      </mesh>
+
+      {/* Expanding pulse spheres with additive blending */}
+      <mesh ref={pulse1Ref}>
+        <sphereGeometry args={[pulseSize * 1.25, 16, 16]} />
+        <meshBasicMaterial
+          color="#6a6a6aff"
+          transparent
+          opacity={0.5}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+
+      <mesh ref={pulse2Ref}>
+        <sphereGeometry args={[pulseSize * 1.25, 16, 16]} />
+        <meshBasicMaterial
+          color="#6a6a6aff"
+          transparent
+          opacity={0.5}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+
+      <mesh ref={pulse3Ref}>
+        <sphereGeometry args={[pulseSize * 1.25, 16, 16]} />
+        <meshBasicMaterial
+          color="#6a6a6aff"
+          transparent
+          opacity={0.5}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
   );
 };
 
 
-const SoftStars = () => {
+const SoftStars = ({ visibility = 1 }: { visibility?: number }) => {
   const pointsRef = useRef<THREE.Points>(null);
   const baseColorsRef = useRef<Float32Array | null>(null);
   const twinkleOffsetsRef = useRef<Float32Array | null>(null);
@@ -635,12 +1067,12 @@ const SoftStars = () => {
       size: 0.22, // Balanced star size
       sizeAttenuation: true,
       transparent: true,
-      opacity: 0.95,
+      opacity: visibility * 0.95,
       fog: false,
       map: starTexture,
       vertexColors: true, // Use vertex colors for brightness variation
     });
-  }, [starTexture]);
+  }, [starTexture, visibility]);
 
   // Animate twinkling
   useFrame(({ clock }) => {
@@ -676,7 +1108,7 @@ const SoftStars = () => {
   return <points ref={pointsRef} geometry={geometry} material={material} />;
 };
 
-const StarsParallax = () => {
+const StarsParallax = ({ visibility = 1 }: { visibility?: number }) => {
   const starsRef = useRef<THREE.Group>(null);
   const globeMeshRef = useGlobeMesh();
 
@@ -692,9 +1124,261 @@ const StarsParallax = () => {
 
   return (
     <group ref={starsRef}>
-      <SoftStars />
+      <SoftStars visibility={visibility} />
     </group>
   );
+};
+
+// Texture and normal map generator for realistic metallic marker appearance
+const createMetallicMaterials = (color: string) => {
+  const normalizedColor = normalizeHexColor(color);
+  const rgb = parseInt(normalizedColor.replace('#', ''), 16);
+  const r = (rgb >> 16) & 255;
+  const g = (rgb >> 8) & 255;
+  const b = rgb & 255;
+
+  // Create main texture
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return { texture: new THREE.CanvasTexture(canvas), normalMap: new THREE.CanvasTexture(canvas) };
+
+  // Create detailed metallic surface with strong contrast
+  const imageData = ctx.createImageData(256, 256);
+  const data = imageData.data;
+
+  for (let i = 0; i < 256; i++) {
+    for (let j = 0; j < 256; j++) {
+      const index = (i * 256 + j) * 4;
+
+      // Multiple layers of noise for realistic metallic finish
+      let noise = 0;
+      let amplitude = 1;
+      let maxAmplitude = 0;
+
+      for (let octave = 0; octave < 5; octave++) {
+        const freq = Math.pow(2, octave);
+        noise += amplitude * Math.sin((i * freq) / 64) * Math.cos((j * freq) / 64);
+        maxAmplitude += amplitude;
+        amplitude *= 0.5;
+      }
+      noise = (noise / maxAmplitude + 1) / 2;
+
+      // Scratches and micro-details
+      const scratch = Math.sin(i * 0.3) * Math.cos(j * 0.2) * 0.5;
+      const dust = Math.random() * 0.3;
+      const metallic = noise * 0.6 + scratch * 0.25 + dust * 0.15;
+
+      // Create strong metallic highlights
+      const highlight = Math.pow(Math.max(0, metallic - 0.3) * 2, 1.5) * 0.6;
+
+      // Apply with strong metallic shine
+      const finalValue = Math.min(1, metallic + highlight);
+      data[index] = Math.min(255, r + finalValue * 100);
+      data[index + 1] = Math.min(255, g + finalValue * 100);
+      data[index + 2] = Math.min(255, b + finalValue * 100);
+      data[index + 3] = 255;
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+
+  // Add heavy directional brushed pattern
+  ctx.globalAlpha = 0.3;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 150; i++) {
+    const startX = Math.random() * 256;
+    const startY = Math.random() * 256;
+    const length = Math.random() * 120 + 40;
+    const angle = (Math.random() * 0.4 - 0.2) + (Math.PI / 4); // Directional bias
+
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(startX + Math.cos(angle) * length, startY + Math.sin(angle) * length);
+    ctx.stroke();
+  }
+
+  // Add some darker scratches
+  ctx.globalAlpha = 0.25;
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < 100; i++) {
+    const startX = Math.random() * 256;
+    const startY = Math.random() * 256;
+    const length = Math.random() * 60 + 20;
+    const angle = Math.random() * Math.PI * 2;
+
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(startX + Math.cos(angle) * length, startY + Math.sin(angle) * length);
+    ctx.stroke();
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.magFilter = THREE.LinearFilter;
+  texture.minFilter = THREE.LinearMipmapLinearFilter;
+
+  // Create normal map for depth
+  const normalCanvas = document.createElement('canvas');
+  normalCanvas.width = 256;
+  normalCanvas.height = 256;
+  const normalCtx = normalCanvas.getContext('2d');
+  if (!normalCtx) return { texture, normalMap: new THREE.CanvasTexture(normalCanvas) };
+
+  const normalImageData = normalCtx.createImageData(256, 256);
+  const normalData = normalImageData.data;
+
+  for (let i = 0; i < 256; i++) {
+    for (let j = 0; j < 256; j++) {
+      const index = (i * 256 + j) * 4;
+
+      // Generate normal map with strong detail
+      const noise1 = Math.sin(i * 0.5) * Math.cos(j * 0.3);
+      const noise2 = Math.sin(i * 0.2) * Math.cos(j * 0.4) * 0.5;
+      const detail = (noise1 + noise2) * 0.5;
+
+      // Normal map: encode as RGB
+      // Use detail for bumpy surface
+      normalData[index] = 128 + detail * 100; // X component
+      normalData[index + 1] = 128 + Math.sin(j * 0.4) * 50; // Y component
+      normalData[index + 2] = 200 + detail * 30; // Z component (mostly up)
+      normalData[index + 3] = 255;
+    }
+  }
+  normalCtx.putImageData(normalImageData, 0, 0);
+
+  const normalMap = new THREE.CanvasTexture(normalCanvas);
+  normalMap.magFilter = THREE.LinearFilter;
+  normalMap.minFilter = THREE.LinearMipmapLinearFilter;
+
+  return { texture, normalMap };
+};
+
+// Reusable marker component with hover effect
+const MarkerSphere = ({
+  position,
+  color,
+  emissiveColor,
+  hoverColor = '#19bdefff',
+  hoverEmissiveColor = '#19bdefff',
+  size = 0.005,
+  onHover,
+  onClick,
+  metalness = 0.7,
+  roughness = 0.2,
+  segments = 16,
+}: {
+  position: [number, number, number];
+  color: string;
+  emissiveColor: string;
+  size?: number;
+  onHover?: (isHovering: boolean) => void;
+  onClick?: () => void;
+  metalness?: number;
+  roughness?: number;
+  segments?: number;
+}) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const targetScaleRef = useRef(1);
+
+  const sanitizedColor = useMemo(() => normalizeHexColor(color), [color]);
+  const sanitizedEmissiveColor = useMemo(() => normalizeHexColor(emissiveColor), [emissiveColor]);
+  const sanitizedHoverColor = useMemo(() => normalizeHexColor(hoverColor), [hoverColor]);
+  const sanitizedHoverEmissiveColor = useMemo(
+    () => normalizeHexColor(hoverEmissiveColor),
+    [hoverEmissiveColor]
+  );
+
+  const { texture, normalMap } = useMemo(() => createMetallicMaterials(sanitizedColor), [sanitizedColor]);
+  const defaultColor = useMemo(
+    () => new THREE.Color(sanitizedColor).multiplyScalar(0.7),
+    [sanitizedColor]
+  );
+  const hoverColorValue = useMemo(() => new THREE.Color(sanitizedHoverColor), [sanitizedHoverColor]);
+  const defaultEmissive = useMemo(
+    () => new THREE.Color(sanitizedEmissiveColor).multiplyScalar(0.8),
+    [sanitizedEmissiveColor]
+  );
+  const hoverEmissive = useMemo(() => new THREE.Color(sanitizedHoverEmissiveColor), [sanitizedHoverEmissiveColor]);
+
+  useEffect(() => {
+    return () => {
+      texture.dispose();
+      normalMap.dispose();
+    };
+  }, [texture, normalMap]);
+
+  useFrame(({ clock }) => {
+    if (meshRef.current) {
+      // Smooth scale animation
+      targetScaleRef.current = isHovered ? 1.4 : 1;
+      const currentScale = meshRef.current.scale.x;
+      meshRef.current.scale.setScalar(currentScale + (targetScaleRef.current - currentScale) * 0.1);
+
+      // Only rotate while hovered for dynamic touch
+      if (isHovered) {
+        meshRef.current.rotation.y += 0.02;
+
+        // Pulse on hover
+        const pulse = 1 + Math.sin(clock.getElapsedTime() * 3) * 0.05;
+        meshRef.current.scale.multiplyScalar(pulse / currentScale);
+      }
+
+      // Update emissive intensity on hover
+      const material = meshRef.current.material as THREE.MeshStandardMaterial;
+      const targetIntensity = isHovered ? 1.5 : 0.9;
+      material.emissiveIntensity += (targetIntensity - material.emissiveIntensity) * 0.1;
+      material.color.lerp(isHovered ? hoverColorValue : defaultColor, 0.12);
+      material.emissive.lerp(isHovered ? hoverEmissive : defaultEmissive, 0.08);
+    }
+  });
+
+  return (
+    <mesh
+      ref={meshRef}
+      position={position}
+      onClick={(event) => {
+        event.stopPropagation();
+      }}
+      onPointerOver={() => {
+        setIsHovered(true);
+        onHover?.(true);
+        document.body.style.cursor = 'pointer';
+      }}
+      onPointerOut={() => {
+        setIsHovered(false);
+        onHover?.(false);
+        document.body.style.cursor = 'default';
+      }}
+    >
+      <sphereGeometry args={[size, segments, segments]} />
+      <meshStandardMaterial
+        map={texture}
+        normalMap={normalMap}
+        color={defaultColor.getStyle()}
+        emissive={defaultEmissive.getStyle()}
+        emissiveIntensity={0.9}
+        metalness={metalness}
+        roughness={roughness}
+      />
+    </mesh>
+  );
+};
+
+const MarkersGroup = ({ children }: { children: React.ReactNode }) => {
+  const markersRef = useRef<THREE.Group>(null);
+  const globeMeshRef = useGlobeMesh();
+
+  useFrame(() => {
+    if (markersRef.current && globeMeshRef.current) {
+      // Sync markers rotation with globe rotation
+      markersRef.current.rotation.copy(globeMeshRef.current.rotation);
+    }
+  });
+
+  return <group ref={markersRef}>{children}</group>;
 };
 
 const CameraController = ({ isExpanded, config }: { isExpanded: boolean; config: any }) => {
@@ -713,7 +1397,8 @@ const CameraController = ({ isExpanded, config }: { isExpanded: boolean; config:
   return null;
 };
 
-export default function WorldExperienceSection() {
+function WorldExperienceSectionContent() {
+  const { config } = useGlobeConfig();
   const GLOBE_CONFIG = {
     notExpanded: {
       cameraZ: 1.5,
@@ -743,17 +1428,17 @@ export default function WorldExperienceSection() {
   const projectMarkers = useMemo(() => {
     return projects.map((project) => ({
       ...project,
-      transform: getMarkerTransform(project.location.lat, project.location.lng),
+      transform: getMarkerTransform(project.location.lat, project.location.lng, config.markerDistanceFromGlobe, config.markerLineHeight),
     }));
-  }, []);
+  }, [config.markerDistanceFromGlobe, config.markerLineHeight]);
 
   const momentMarkers = useMemo(() => {
     return GLOBE_MOMENT_LOCATIONS.map((location, index) => ({
       ...location,
       id: `moment-${index}`,
-      transform: getMarkerTransform(location.lat, location.lng),
+      transform: getMarkerTransform(location.lat, location.lng, config.markerDistanceFromGlobe, config.markerLineHeight),
     }));
-  }, []);
+  }, [config.markerDistanceFromGlobe, config.markerLineHeight]);
 
   const openGlobe = useCallback(() => {
     scrollPositionRef.current = window.scrollY;
@@ -830,6 +1515,10 @@ export default function WorldExperienceSection() {
     setGlobeLoadedOnce(true);
   };
 
+  const dynamicGlobePositionX = isExpanded ? config.globePositionX : 0;
+  const dynamicGlobePositionY = isExpanded ? config.globePositionY : 0;
+  const dynamicGlobePositionZ = isExpanded ? config.globePositionZ : 0;
+
   return (
     <>
       <section
@@ -853,83 +1542,132 @@ export default function WorldExperienceSection() {
               gl={{ antialias: true, alpha: false }}
             >
               <GlobeProvider globeRef={globeMeshRef}>
-                <ambientLight intensity={isExpanded ? 0.3 : 0.2} />
-                <directionalLight position={[5, 5, 5]} intensity={isExpanded ? 0.9 : 0.7} />
-                {isExpanded && <StarsParallax />}
+                <ambientLight intensity={isExpanded ? config.ambientLightIntensity : 0.2} />
+                <directionalLight position={[5, 5, 5]} intensity={isExpanded ? config.directionalLightIntensity : 0.7} />
+                {isExpanded && <StarsParallax visibility={config.starVisibility} />}
                 <Suspense fallback={null}>
                   <Earth
                     onLoaded={handleGlobeLoaded}
-                    scale={1.1}
+                    scale={config.globeScale}
                     timeOfDay={timeOfDay}
                     isExpanded={isExpanded}
                     sunPhase={sunPhase}
                     phaseProgress={phaseProgress}
                     meshRef={globeMeshRef}
+                    terminatorSoftness={config.terminatorSoftness}
+                    lightDir={new THREE.Vector3(config.lightDir.x, config.lightDir.y, config.lightDir.z)}
+                    rotationSpeed={config.rotationSpeed}
+                    segments={config.globeSegments}
+                    blur={config.globeBlur}
+                    positionX={dynamicGlobePositionX}
+                    positionY={dynamicGlobePositionY}
+                    positionZ={dynamicGlobePositionZ}
                   />
-                  <CloudLayer />
-                  {isExpanded && <Atmosphere />}
-                  {isExpanded && <OuterGlow />}
+                  <CloudLayer
+                    opacity={config.cloudOpacity}
+                    scale={config.cloudScale}
+                    positionX={config.cloudPositionX}
+                    positionY={config.cloudPositionY}
+                    positionZ={config.cloudPositionZ}
+                    blur={config.cloudBlur}
+                    rotationSpeed={config.rotationSpeed}
+                  />
+                  {isExpanded && (
+                  <Atmosphere
+                    color={config.atmosphereColor}
+                    intensity={config.atmosphereIntensity}
+                    scale={config.atmosphereScale}
+                    positionX={config.atmospherePositionX}
+                    positionY={config.atmospherePositionY}
+                    positionZ={config.atmospherePositionZ}
+                    blur={config.atmosphereBlur}
+                    glow={config.atmosphereGlow}
+                    terminatorSoftness={config.terminatorSoftness}
+                  />
+                  )}
+                  {isExpanded && (
+                    <OuterGlow
+                      color={config.glowColor}
+                      intensity={config.glowIntensity}
+                      scale={config.glowScale}
+                      positionX={config.glowPositionX}
+                      positionY={config.glowPositionY}
+                      positionZ={config.glowPositionZ}
+                    />
+                  )}
                   {/* Markers positioned at geographic locations on the globe - only render after Earth is fully loaded */}
                   {isExpanded && globeLoadedOnce && (
-                    <group>
-                      {projectMarkers.map((marker) => (
-                        <group key={marker.id}>
-                          <mesh
-                            position={marker.transform.position}
-                            quaternion={marker.transform.quaternion}
-                          >
-                            <cylinderGeometry args={[0.01, 0.01, marker.transform.height, 8]} />
-                            <meshStandardMaterial color="#0ea5e9" emissive="#38bdf8" emissiveIntensity={0.7} />
-                          </mesh>
-                          <mesh
-                            position={marker.transform.tipPosition}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              handleProjectSelect(marker);
-                            }}
-                            onPointerOver={() => {
-                              document.body.style.cursor = 'pointer';
-                            }}
-                            onPointerOut={() => {
-                              document.body.style.cursor = 'default';
-                            }}
-                          >
-                            <sphereGeometry args={[0.035, 12, 12]} />
-                            <meshStandardMaterial color="#38bdf8" emissive="#0ea5e9" emissiveIntensity={0.9} metalness={0.2} />
-                          </mesh>
+                    <MarkersGroup>
+                      <group scale={[1.1, 1.1, 1.1]}>
+                        <group>
+                          {projectMarkers.map((marker) => (
+                            <group key={marker.id}>
+                              <mesh
+                                position={marker.transform.position}
+                                quaternion={marker.transform.quaternion}
+                              >
+                                <cylinderGeometry args={[config.markerCylinderBaseRadius, config.markerCylinderBaseRadius, marker.transform.height, 8]} />
+                                <meshStandardMaterial
+                                  color={normalizeHexColor(config.projectMarkerCylinderColor)}
+                                  emissive={normalizeHexColor(config.projectMarkerCylinderEmissive)}
+                                  emissiveIntensity={0.7}
+                                />
+                              </mesh>
+                              <MarkerSphere
+                                position={marker.transform.tipPosition}
+                                color={config.projectMarkerColor}
+                                emissiveColor={config.projectMarkerEmissive}
+                                size={config.projectMarkerTipRadius}
+                                metalness={config.projectMarkerMetalness}
+                                roughness={config.projectMarkerRoughness}
+                                segments={config.projectMarkerSegments}
+                                hoverColor={config.projectMarkerHoverColor}
+                                hoverEmissiveColor={config.projectMarkerHoverEmissive}
+                                onClick={() => {
+                                  handleProjectSelect(marker);
+                                }}
+                              />
+                            </group>
+                          ))}
                         </group>
-                      ))}
-                    </group>
-                  )}
-                  {isExpanded && globeLoadedOnce && (
-                    <group>
-                      {momentMarkers.map((marker) => (
-                        <group key={marker.id}>
-                          <mesh
-                            position={marker.transform.position}
-                            quaternion={marker.transform.quaternion}
-                          >
-                            <cylinderGeometry args={[0.008, 0.008, marker.transform.height, 8]} />
-                            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.6} />
-                          </mesh>
-                          <mesh
-                            position={marker.transform.tipPosition}
-                            onPointerOver={() => {
-                              document.body.style.cursor = 'pointer';
-                            }}
-                            onPointerOut={() => {
-                              document.body.style.cursor = 'default';
-                            }}
-                          >
-                            <sphereGeometry args={[0.025, 12, 12]} />
-                            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.8} metalness={0.1} />
-                          </mesh>
+                        <group>
+                          {momentMarkers.map((marker) => (
+                            <group key={marker.id}>
+                              <mesh
+                                position={marker.transform.position}
+                                quaternion={marker.transform.quaternion}
+                              >
+                                <cylinderGeometry args={[config.markerCylinderBaseRadius, config.markerCylinderBaseRadius, marker.transform.height, 8]} />
+                                <meshStandardMaterial
+                                  color={normalizeHexColor(config.momentMarkerCylinderColor)}
+                                  emissive={normalizeHexColor(config.momentMarkerCylinderEmissive)}
+                                  emissiveIntensity={0.6}
+                                />
+                              </mesh>
+                              <MarkerSphere
+                                position={marker.transform.tipPosition}
+                                color={config.momentMarkerColor}
+                                emissiveColor={config.momentMarkerEmissive}
+                                size={config.momentMarkerTipRadius}
+                                metalness={config.momentMarkerMetalness}
+                                roughness={config.momentMarkerRoughness}
+                                segments={config.momentMarkerSegments}
+                                hoverColor={config.momentMarkerHoverColor}
+                                hoverEmissiveColor={config.momentMarkerHoverEmissive}
+                              />
+                            </group>
+                          ))}
                         </group>
-                      ))}
-                    </group>
+                        <CurrentLocationPulse
+                          color={config.currentLocationColor}
+                          pulseSize={config.currentLocationPulseSize}
+                          pulseSpeed={config.currentLocationPulseSpeed}
+                          visibility={config.currentLocationVisibility}
+                        />
+                      </group>
+                    </MarkersGroup>
                   )}
                 </Suspense>
-                {isExpanded && globeLoadedOnce && <CurrentLocationPulse />}
                 <CameraController isExpanded={isExpanded} config={GLOBE_CONFIG} />
                 <OrbitControls
                   ref={controlsRef}
@@ -964,7 +1702,7 @@ export default function WorldExperienceSection() {
 
         <motion.div
           className="absolute px-6 text-center z-20"
-          animate={isExpanded ? { top: 100, left: '50%', width: '100%', transform: 'translateX(-50%)' } : { top: '50%', left: '50%', width: '100%', transform: 'translate(-50%, -50%)' }}
+          animate={isExpanded ? { top: 20, left: '50%', width: '100%', transform: 'translateX(-50%)' } : { top: '50%', left: '50%', width: '100%', transform: 'translate(-50%, -50%)' }}
           transition={{ duration: 0.5, ease: 'easeInOut' }}
         >
           <motion.h2
@@ -1011,7 +1749,7 @@ export default function WorldExperienceSection() {
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.3 }}
                 onClick={closeGlobe}
-                className="fixed top-6 right-6 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-colors pointer-events-auto"
+                className="fixed cursor-pointer top-6 right-6 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-colors pointer-events-auto"
               >
                 <svg
                   width="20"
@@ -1029,6 +1767,9 @@ export default function WorldExperienceSection() {
               </motion.button>
             )}
           </AnimatePresence>
+
+          {/* Admin Control Panel */}
+          {ADMIN && <AdminControlPanel isExpanded={isExpanded} />}
           </div>
 
           <AnimatePresence>
@@ -1043,5 +1784,13 @@ export default function WorldExperienceSection() {
         <div className="fixed inset-0 z-40" onClick={closeGlobe} />
       )}
     </>
+  );
+}
+
+export default function WorldExperienceSection() {
+  return (
+    <GlobeConfigProvider>
+      <WorldExperienceSectionContent />
+    </GlobeConfigProvider>
   );
 }

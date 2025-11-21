@@ -91,7 +91,7 @@ const articleCategories = [
 export default function AIReadyPage() {
   return (
     <>
-      <Header />
+      <Header showAnimation={false} />
       <main className="relative bg-black overflow-x-hidden">
         {/* Hero Section */}
         <section className="relative mx-auto max-w-6xl px-6 py-32 text-center">

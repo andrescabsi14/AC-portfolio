@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import ScrollIndicator from '@/components/ui/ScrollIndicator';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,12 +14,9 @@ interface IntroSectionProps {
 
 export default function IntroSection({ onAnimationComplete }: IntroSectionProps) {
   const [hasAnimated, setHasAnimated] = useState(false);
-  const [scrollIndicatorVisible, setScrollIndicatorVisible] = useState(true);
-  const [scrollIndicatorFixed, setScrollIndicatorFixed] = useState(false);
   const nameRef = useRef<HTMLDivElement>(null);
   const taglineRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Check if intro animation has played
@@ -68,37 +66,7 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
       },
     });
 
-    // Scroll indicator behavior
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const sectionHeight = sectionRef.current?.offsetHeight || 0;
-
-      if (scrollY > 50 && scrollY < sectionHeight - 100) {
-        // Fade out when scrolling starts
-        setScrollIndicatorVisible(false);
-        setScrollIndicatorFixed(false);
-      } else if (scrollY >= sectionHeight - 100) {
-        // Fade in with fixed position after first section
-        setScrollIndicatorVisible(true);
-        setScrollIndicatorFixed(true);
-      } else {
-        // Show in original position when at top
-        setScrollIndicatorVisible(true);
-        setScrollIndicatorFixed(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const handleScrollIndicatorClick = () => {
-    const sectionHeight = sectionRef.current?.offsetHeight || 0;
-    window.scrollTo({
-      top: sectionHeight,
-      behavior: 'smooth',
-    });
-  };
 
   return (
     <motion.section
@@ -228,43 +196,7 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
       </div>
 
       {/* Scroll Indicator */}
-      <motion.div
-        ref={scrollIndicatorRef}
-        initial={{ opacity: 1 }}
-        animate={{
-          opacity: hasAnimated ? 1 : (scrollIndicatorVisible ? 1 : 0),
-        }}
-        transition={{ duration: 0.4, delay: hasAnimated ? 0 : 1.3, ease: 'easeInOut' }}
-        className={`${
-          scrollIndicatorFixed
-            ? 'fixed bottom-8 left-1/2 -translate-x-1/2'
-            : 'absolute bottom-12 left-1/2 -translate-x-1/2'
-        } z-30 cursor-pointer`}
-        onClick={handleScrollIndicatorClick}
-      >
-        <motion.div
-          animate={{ y: [0, 10, 0], opacity: [0, 1] }}
-          transition={{
-            y: { duration: 2, repeat: Infinity, ease: 'easeInOut', delay: 4 },
-            opacity: { duration: 2, delay: 4, ease: 'easeInOut' }
-          }}
-          className="text-gray-400 text-sm flex flex-col items-center gap-2 hover:text-gray-200 transition-colors"
-        >
-          <span className="text-xs font-light tracking-widest uppercase">Scroll</span>
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 5v14M19 12l-7 7-7-7" />
-          </svg>
-        </motion.div>
-      </motion.div>
+      <ScrollIndicator sectionRef={sectionRef} initialDelay={hasAnimated ? 0 : 1.3} />
     </motion.section>
   );
 }

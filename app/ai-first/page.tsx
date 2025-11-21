@@ -11,20 +11,142 @@ import DataSovereigntySection from "@/components/sections/ai-first/DataSovereign
 import AIFirstVision from "@/components/sections/ai-first/AIFirstVision";
 import { useEffect } from "react";
 
+const aiFirstCopy = {
+  hero: {
+    title: "What it means to be AI-first",
+    description:
+      "It's not about using AI everywhere. It's about integrating intelligence strategically—where it delivers the most value.",
+  },
+  definition: {
+    title: "The AI-first approach",
+    paragraphs: [
+      'When designing a process, your first question becomes: "How can AI make this better?"',
+      "Not as an afterthought. As a foundation.",
+    ],
+    comparisons: [
+      {
+        label: "Traditional",
+        text: "Manual processes. Human-dependent workflows. Reactive decision-making. Scale by hiring.",
+      },
+      {
+        label: "AI-First",
+        text: "Automated intelligence. AI-augmented teams. Predictive insights. Scale through systems.",
+      },
+    ],
+  },
+  benefits: {
+    title: "The outcome",
+    highlightColor: "#4f809bff",
+    underlineColor: "#fff",
+    items: [
+      { title: "Speed", highlight: "Operations", detail: "that took days now take minutes." },
+      {
+        title: "Efficiency",
+        highlight: "40-60% cost reduction",
+        detail: "while improving output quality.",
+      },
+      {
+        title: "Intelligence",
+        highlight: "Real-time insights",
+        detail: "drive every decision.",
+      },
+      {
+        title: "Scale",
+        highlight: "Growth",
+        detail: "without proportional increase in headcount.",
+      },
+      {
+        title: "Experience",
+        highlight: "Faster, more personalized",
+        detail: "customer service.",
+      },
+      {
+        title: "Advantage",
+        highlight: "Market leadership",
+        detail: "through technological edge.",
+      },
+    ],
+  },
+  complexity: {
+    title: "We handle the complexity",
+    description: "You focus on your business. We deliver the systems.",
+    button: { label: "Schedule a conversation", href: "/contact" },
+  },
+  process: {
+    title: "The transformation",
+    steps: [
+      {
+        order: "01",
+        title: "Assess",
+        description:
+          "We analyze your operations, identify opportunities, and prioritize impact areas.",
+      },
+      {
+        order: "02",
+        title: "Design",
+        description: "Custom strategy. Tailored systems. Built for your specific market and needs.",
+      },
+      {
+        order: "03",
+        title: "Integrate",
+        description: "Seamless deployment into existing systems. Minimal disruption. Maximum impact.",
+      },
+      {
+        order: "04",
+        title: "Optimize",
+        description: "Continuous improvement. Performance monitoring. Scale what works.",
+      },
+    ],
+  },
+  finalCta: {
+    title: "Start the transformation",
+    contact: { label: "Schedule consultation →", href: "/contact" },
+    back: { label: "← Back", href: "/" },
+  },
+};
+
 export default function AIFirstPage() {
-    // Add smooth snap scrolling
+  // Add smooth snap scrolling
   useEffect(() => {
-    document.documentElement.style.scrollSnapType = 'y proximity';
-    document.documentElement.style.scrollBehavior = 'smooth';
+    document.documentElement.style.scrollSnapType = "y proximity";
+    document.documentElement.style.scrollBehavior = "smooth";
 
     return () => {
-      document.documentElement.style.scrollSnapType = '';
-      document.documentElement.style.scrollBehavior = '';
+      document.documentElement.style.scrollSnapType = "";
+      document.documentElement.style.scrollBehavior = "";
     };
   }, []);
+  const { hero, definition, benefits, complexity, process, finalCta } = aiFirstCopy;
+  const highlightColor = benefits.highlightColor;
+  const underlineColor = benefits.underlineColor;
+  const benefitBorderColor = "#ffffff34";
+  const benefitBgColor = `${highlightColor}28`;
+  const paragraphColor = "#ffffffaa";
+  const benefitColumns = 3;
+  const benefitRows = Math.ceil(benefits.items.length / benefitColumns);
+  const getBenefitCellClasses = (index: number) => {
+    const classes = ["border border-transparent"];
+    if (index % benefitColumns === 0) classes.push("border-l-0");
+    if ((index + 1) % benefitColumns === 0) classes.push("border-r-0");
+    if (index < benefitColumns) classes.push("border-t-0");
+    if (index >= benefitColumns * (benefitRows - 1)) classes.push("border-b-0");
+    return classes.join(" ");
+  };
+  const benefitsContainerVariants = {
+    hidden: { opacity: 0, y: 30 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { staggerChildren: 0.12, delayChildren: 0.2 },
+    },
+  };
+  const benefitItemVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.98 },
+    show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: "easeOut" } },
+  };
   return (
     <>
-      <Header />
+      <Header showAnimation={false} />
       <main className="relative bg-black overflow-x-hidden">
         {/* Hero Section */}
         <section className="min-h-screen flex items-center justify-center px-6 py-32">
@@ -35,11 +157,9 @@ export default function AIFirstPage() {
               transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
               className="space-y-12"
             >
-              <h1 className="text-5xl md:text-7xl font-light leading-tight tracking-tight">
-                What it means to be AI-first
-              </h1>
+              <h1 className="text-5xl md:text-7xl font-light leading-tight tracking-tight">{hero.title}</h1>
               <p className="text-xl md:text-2xl text-white/50 font-light leading-relaxed max-w-3xl mx-auto">
-                It's not about using AI everywhere. It's about integrating intelligence strategically—where it delivers the most value.
+                {hero.description}
               </p>
             </motion.div>
           </div>
@@ -56,14 +176,11 @@ export default function AIFirstPage() {
               className="space-y-16"
             >
               <div className="space-y-8">
-                <h2 className="text-3xl md:text-5xl font-light text-white">The AI-first approach</h2>
+                <h2 className="text-3xl md:text-5xl font-light text-white">{definition.title}</h2>
                 <div className="space-y-6 text-lg md:text-xl text-white/50 font-light leading-relaxed">
-                  <p>
-                    When designing a process, your first question becomes: "How can AI make this better?"
-                  </p>
-                  <p>
-                    Not as an afterthought. As a foundation.
-                  </p>
+                  {definition.paragraphs.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
                 </div>
               </div>
 
@@ -71,14 +188,12 @@ export default function AIFirstPage() {
 
               <div className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div>
-                    <p className="text-white/30 text-sm tracking-wider mb-4">Traditional</p>
-                    <p className="text-white/50 font-light">Manual processes. Human-dependent workflows. Reactive decision-making. Scale by hiring.</p>
-                  </div>
-                  <div>
-                    <p className="text-white/30 text-sm tracking-wider mb-4">AI-First</p>
-                    <p className="text-white font-light">Automated intelligence. AI-augmented teams. Predictive insights. Scale through systems.</p>
-                  </div>
+                  {definition.comparisons.map((comparison) => (
+                    <div key={comparison.label}>
+                      <p className="text-white/30 text-sm tracking-wider mb-4">{comparison.label}</p>
+                      <p className="text-white/50 font-light">{comparison.text}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </motion.div>
@@ -95,46 +210,55 @@ export default function AIFirstPage() {
               viewport={{ once: true }}
               className="space-y-16"
             >
-              <h2 className="text-3xl md:text-5xl font-light text-white text-center">The outcome</h2>
+              <h2
+                className="text-3xl md:text-5xl font-light text-center decoration-2"
+                style={{ color: underlineColor, textDecorationColor: underlineColor }}
+              >
+                {benefits.title}
+              </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10 border border-white/10">
-                <div className="bg-black p-12">
-                  <h3 className="text-xl font-light text-white mb-3">Speed</h3>
-                  <p className="text-white/50 font-light text-sm leading-relaxed">
-                    Operations that took days now take minutes.
-                  </p>
-                </div>
-                <div className="bg-black p-12">
-                  <h3 className="text-xl font-light text-white mb-3">Efficiency</h3>
-                  <p className="text-white/50 font-light text-sm leading-relaxed">
-                    40-60% cost reduction while improving output quality.
-                  </p>
-                </div>
-                <div className="bg-black p-12">
-                  <h3 className="text-xl font-light text-white mb-3">Intelligence</h3>
-                  <p className="text-white/50 font-light text-sm leading-relaxed">
-                    Real-time insights drive every decision.
-                  </p>
-                </div>
-                <div className="bg-black p-12">
-                  <h3 className="text-xl font-light text-white mb-3">Scale</h3>
-                  <p className="text-white/50 font-light text-sm leading-relaxed">
-                    Growth without proportional increase in headcount.
-                  </p>
-                </div>
-                <div className="bg-black p-12">
-                  <h3 className="text-xl font-light text-white mb-3">Experience</h3>
-                  <p className="text-white/50 font-light text-sm leading-relaxed">
-                    Faster, more personalized customer service.
-                  </p>
-                </div>
-                <div className="bg-black p-12">
-                  <h3 className="text-xl font-light text-white mb-3">Advantage</h3>
-                  <p className="text-white/50 font-light text-sm leading-relaxed">
-                    Market leadership through technological edge.
-                  </p>
-                </div>
-              </div>
+              <motion.div
+                className="grid grid-cols-1 md:grid-cols-3 gap-px p-0"
+                style={{ backgroundColor: benefitBgColor }}
+                variants={benefitsContainerVariants}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.3 }}
+              >
+                {benefits.items.map((benefit, index) => (
+                  <motion.div
+                    key={benefit.title}
+                    className={`bg-black p-12 ${getBenefitCellClasses(index)}`}
+                    style={{ borderColor: benefitBorderColor }}
+                    variants={benefitItemVariants}
+                  >
+                    <h3
+                      className="text-xl font-medium mb-3 decoration-2"
+                      style={{ color: underlineColor, textDecorationColor: underlineColor }}
+                    >
+                      {benefit.title}
+                    </h3>
+                    <p
+                      className="text-sm leading-relaxed decoration-1"
+                      style={{
+                        color: paragraphColor,
+                        textDecorationColor: underlineColor,
+                      }}
+                    >
+                      <span
+                        className="underline decoration-2"
+                        style={{
+                          color: underlineColor,
+                          textDecorationColor: underlineColor,
+                        }}
+                      >
+                        {benefit.highlight}
+                      </span>{" "}
+                      {benefit.detail}
+                    </p>
+                  </motion.div>
+                ))}
+              </motion.div>
             </motion.div>
           </div>
         </section>
@@ -149,67 +273,57 @@ export default function AIFirstPage() {
               viewport={{ once: true }}
               className="space-y-20"
             >
-              <h2 className="text-3xl md:text-5xl font-light text-white text-center">The transformation</h2>
+              <h2 className="text-3xl md:text-5xl font-light text-white text-center">{process.title}</h2>
 
               <div className="space-y-16">
-                <div className="space-y-4">
-                  <p className="text-white/30 text-xs tracking-wider">01</p>
-                  <h3 className="text-2xl md:text-3xl font-light text-white">Assess</h3>
-                  <p className="text-white/50 font-light leading-relaxed">
-                    We analyze your operations, identify opportunities, and prioritize impact areas.
-                  </p>
-                </div>
-
-                <div className="w-full h-px bg-white/10"></div>
-
-                <div className="space-y-4">
-                  <p className="text-white/30 text-xs tracking-wider">02</p>
-                  <h3 className="text-2xl md:text-3xl font-light text-white">Design</h3>
-                  <p className="text-white/50 font-light leading-relaxed">
-                    Custom strategy. Tailored systems. Built for your specific market and needs.
-                  </p>
-                </div>
-
-                <div className="w-full h-px bg-white/10"></div>
-
-                <div className="space-y-4">
-                  <p className="text-white/30 text-xs tracking-wider">03</p>
-                  <h3 className="text-2xl md:text-3xl font-light text-white">Integrate</h3>
-                  <p className="text-white/50 font-light leading-relaxed">
-                    Seamless deployment into existing systems. Minimal disruption. Maximum impact.
-                  </p>
-                </div>
-
-                <div className="w-full h-px bg-white/10"></div>
-
-                <div className="space-y-4">
-                  <p className="text-white/30 text-xs tracking-wider">04</p>
-                  <h3 className="text-2xl md:text-3xl font-light text-white">Optimize</h3>
-                  <p className="text-white/50 font-light leading-relaxed">
-                    Continuous improvement. Performance monitoring. Scale what works.
-                  </p>
-                </div>
+                {process.steps.map((step, index) => (
+                  <div key={step.title}>
+                    <div className="space-y-4">
+                      <p className="text-white/30 text-xs tracking-wider">{step.order}</p>
+                      <h3 className="text-2xl md:text-3xl font-light text-white">{step.title}</h3>
+                      <p className="text-white/50 font-light leading-relaxed">{step.description}</p>
+                    </div>
+                    {index < process.steps.length - 1 && <div className="w-full h-px bg-white/10"></div>}
+                  </div>
+                ))}
               </div>
             </motion.div>
           </div>
         </section>
 
         {/* Simple statement about complexity */}
-        <section className="px-6 py-32 bg-black">
-          <div className="max-w-3xl mx-auto text-center">
+        <section
+          className="px-6 py-32 relative min-h-screen bg-black overflow-hidden"
+          style={{
+            backgroundImage:
+              "linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1600&q=80')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundAttachment: "fixed",
+          }}
+        >
+          <div className="absolute inset-0 bg-black/50"></div>
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent opacity-60"
+            animate={{ y: [0, -50, 0] }}
+            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <div className="relative max-w-3xl mx-auto text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
               viewport={{ once: true }}
-              className="space-y-12"
+              className="space-y-8"
             >
-              <h2 className="text-3xl md:text-5xl font-light text-white">
-                We handle the complexity
-              </h2>
-              <p className="text-xl text-white/50 font-light leading-relaxed">
-                You focus on your business. We deliver the systems.
-              </p>
+              <h2 className="text-3xl md:text-5xl font-light text-white">{complexity.title}</h2>
+              <p className="text-xl text-white/50 font-light leading-relaxed">{complexity.description}</p>
+              <Link
+                href={complexity.button.href}
+                className="inline-flex items-center justify-center rounded-full border border-white/60 px-8 py-3 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-white hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                {complexity.button.label}
+              </Link>
             </motion.div>
           </div>
         </section>
@@ -239,21 +353,19 @@ export default function AIFirstPage() {
               viewport={{ once: true }}
               className="space-y-12"
             >
-              <h2 className="text-4xl md:text-6xl font-light text-white">
-                Start the transformation
-              </h2>
+              <h2 className="text-4xl md:text-6xl font-light text-white">{finalCta.title}</h2>
               <div className="flex gap-12 justify-center items-center text-sm">
                 <Link
-                  href="/contact"
+                  href={finalCta.contact.href}
                   className="inline-block tracking-widest uppercase text-white/70 hover:text-white transition-colors duration-300 border-b border-white/30 hover:border-white pb-1"
                 >
-                  Schedule consultation →
+                  {finalCta.contact.label}
                 </Link>
                 <Link
-                  href="/"
+                  href={finalCta.back.href}
                   className="inline-block tracking-widest uppercase text-white/40 hover:text-white/70 transition-colors duration-300"
                 >
-                  ← Back
+                  {finalCta.back.label}
                 </Link>
               </div>
             </motion.div>

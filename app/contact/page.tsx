@@ -31,7 +31,7 @@ export default function ContactPage() {
 
   return (
     <>
-      <Header />
+      <Header showAnimation={false} />
       <main className="bg-black text-white min-h-screen pt-24">
         <section className="px-6 py-32">
           <div className="max-w-3xl mx-auto">

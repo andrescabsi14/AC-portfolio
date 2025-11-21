@@ -3,6 +3,34 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 
+const sectionConfig = {
+  title: "AI integration for global enterprises",
+  subtitle: "Operating across North America, Europe, and Asia. Building systems that give you competitive advantage."
+};
+
+const servicesData = [
+  {
+    title: "Efficiency",
+    description: "Reduce operational costs. Automate processes. Free your team for strategic work.",
+    color: "#3B82F6"
+  },
+  {
+    title: "Growth",
+    description: "Increase revenue. Accelerate sales cycles. Identify opportunities faster than competitors.",
+    color: "#10B981"
+  },
+  {
+    title: "Intelligence",
+    description: "Real-time insights. Predictive analytics. Data-driven decisions at every level.",
+    color: "#55d9f7ff"
+  },
+  {
+    title: "Advantage",
+    description: "Custom solutions. Market-specific deployment. Stay ahead of your competition.",
+    color: "#F59E0B"
+  }
+];
+
 export default function ServicesOverviewSection() {
   return (
     <section id="services" className="relative min-h-screen flex items-center justify-center px-6 py-32 bg-black">
@@ -17,39 +45,33 @@ export default function ServicesOverviewSection() {
           {/* Main Message */}
           <div className="space-y-8">
             <h2 className="text-5xl md:text-7xl font-light text-white leading-tight tracking-tight">
-              AI integration for<br />global enterprises
+              {sectionConfig.title.split(" for").length > 1 ? (
+                <>
+                  {sectionConfig.title.split(" for")[0]}
+                  <br />
+                  for{sectionConfig.title.split(" for")[1]}
+                </>
+              ) : (
+                sectionConfig.title
+              )}
             </h2>
             <p className="text-xl md:text-2xl text-white/50 font-light max-w-3xl mx-auto leading-relaxed">
-              Operating across North America, Europe, and Asia. Building systems that give you competitive advantage.
+              {sectionConfig.subtitle}
             </p>
           </div>
 
           {/* Simple Value Props - No icons, just elegant typography */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/10 border border-white/10 max-w-4xl mx-auto">
-            <div className="bg-black p-12 md:p-16">
-              <h3 className="text-2xl md:text-3xl font-light text-white mb-4">Efficiency</h3>
-              <p className="text-white/60 font-light leading-relaxed">
-                Reduce operational costs. Automate processes. Free your team for strategic work.
-              </p>
-            </div>
-            <div className="bg-black p-12 md:p-16">
-              <h3 className="text-2xl md:text-3xl font-light text-white mb-4">Growth</h3>
-              <p className="text-white/60 font-light leading-relaxed">
-                Increase revenue. Accelerate sales cycles. Identify opportunities faster than competitors.
-              </p>
-            </div>
-            <div className="bg-black p-12 md:p-16">
-              <h3 className="text-2xl md:text-3xl font-light text-white mb-4">Intelligence</h3>
-              <p className="text-white/60 font-light leading-relaxed">
-                Real-time insights. Predictive analytics. Data-driven decisions at every level.
-              </p>
-            </div>
-            <div className="bg-black p-12 md:p-16">
-              <h3 className="text-2xl md:text-3xl font-light text-white mb-4">Advantage</h3>
-              <p className="text-white/60 font-light leading-relaxed">
-                Custom solutions. Market-specific deployment. Stay ahead of your competition.
-              </p>
-            </div>
+            {servicesData.map((service) => (
+              <div key={service.title} className="bg-black p-12 md:p-16">
+                <h3 className="text-2xl md:text-3xl font-light mb-4" style={{ color: service.color }}>
+                  {service.title}
+                </h3>
+                <p className="text-white/60 font-light leading-relaxed">
+                  {service.description}
+                </p>
+              </div>
+            ))}
           </div>
 
           {/* Single CTA */}
