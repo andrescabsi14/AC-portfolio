@@ -29,6 +29,7 @@ export default function Header({ showAnimation = true }: HeaderProps) {
   const [hoveredNavItem, setHoveredNavItem] = useState<string | null>(null);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
   const lastScrollY = useRef(0);
+  const scrollPositionRef = useRef(0);
   const { scrollY } = useScroll();
   const pathname = usePathname();
   const isAboutPage = pathname === '/about';
@@ -42,15 +43,10 @@ export default function Header({ showAnimation = true }: HeaderProps) {
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const isScrollingDown = currentScrollY > lastScrollY.current;
 
-      // Show header when scrolling down, hide when scrolling up
+      // Hide header when scrolling past threshold
       if (currentScrollY > 300) {
-        if (isScrollingDown) {
-          setIsVisible(true);
-        } else {
-          setIsVisible(false);
-        }
+        setIsVisible(false);
       } else {
         setIsVisible(true);
       }
@@ -61,12 +57,13 @@ export default function Header({ showAnimation = true }: HeaderProps) {
         clearTimeout(scrollTimeout.current);
       }
 
-      // Auto-hide after 3 seconds of no scroll if scrolled past threshold while scrolling up
+      // Show header after scrolling stops (when scroll position stays the same for 1.5 seconds)
       scrollTimeout.current = setTimeout(() => {
-        if (currentScrollY > 300 && !isScrollingDown) {
-          setIsVisible(false);
+        // Only show header if scroll position hasn't changed (scrolling has stopped)
+        if (window.scrollY === currentScrollY && currentScrollY > 300) {
+          setIsVisible(true);
         }
-      }, 3000);
+      }, 1500);
 
       const sections = ['world-experience', 'networking', 'recognition'];
       for (const section of sections) {

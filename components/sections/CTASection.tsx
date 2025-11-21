@@ -35,11 +35,33 @@ export default function CTASection() {
           </div>
 
           {/* Minimal footer info */}
-          <div className="pt-20">
-            <p className="text-white/20 text-xs tracking-wider">
-              North America · Europe · Asia
+          <motion.div
+            className="pt-20"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ amount: 0.8 }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="text-xs tracking-wider">
+              <motion.span
+                animate={{ color: ['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.3)'] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
+                North America
+              </motion.span>
+              {' '}·{' '}
+              <motion.span
+                animate={{ color: ['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.3)'] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}>
+                Europe
+              </motion.span>
+              {' '}·{' '}
+              <motion.span
+                animate={{ color: ['rgba(255,255,255,0.3)', 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0.3)'] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}>
+                Asia
+              </motion.span>
             </p>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
     </section>

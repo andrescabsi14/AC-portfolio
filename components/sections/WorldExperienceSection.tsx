@@ -1,13 +1,28 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, Suspense } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, Suspense, RefObject } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Canvas, useFrame, useLoader, useThree, ThreeEvent } from '@react-three/fiber';
-import { OrbitControls, Stars } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { projects, Project } from '@/data/projects';
 import ProjectLightbox from '@/components/ui/ProjectLightbox';
 import { Button } from '@/components/ui/button';
+
+// Context for sharing the globe mesh reference
+const GlobeContext = createContext<{ globeMeshRef: RefObject<THREE.Mesh | null> } | null>(null);
+
+const useGlobeMesh = () => {
+  const context = useContext(GlobeContext);
+  if (!context) {
+    throw new Error('useGlobeMesh must be used within GlobeContextProvider');
+  }
+  return context.globeMeshRef;
+};
+
+const GlobeProvider = ({ children, globeRef }: { children?: React.ReactNode; globeRef: RefObject<THREE.Mesh | null> }) => {
+  return <GlobeContext.Provider value={{ globeMeshRef: globeRef }}>{children}</GlobeContext.Provider>;
+};
 
 const DAY_TEXTURE_URL = '/8081_earthmap4k.jpg';
 const NIGHT_TEXTURE_URL = '/8081_earthlights4k.jpg';
@@ -103,6 +118,22 @@ const latLngToCartesian = (lat: number, lng: number, radius = 1.02): THREE.Vecto
   );
 };
 
+const LINE_MARKER_RADIUS = 1.03;
+const LINE_MARKER_HEIGHT = 0.35;
+
+const getMarkerTransform = (lat: number, lng: number) => {
+  const positionVec = latLngToCartesian(lat, lng, LINE_MARKER_RADIUS);
+  const direction = positionVec.clone().normalize();
+  const center = direction.clone().multiplyScalar(LINE_MARKER_RADIUS - LINE_MARKER_HEIGHT / 2);
+  const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+  return {
+    position: [center.x, center.y, center.z] as [number, number, number],
+    tipPosition: [positionVec.x, positionVec.y, positionVec.z] as [number, number, number],
+    quaternion,
+    height: LINE_MARKER_HEIGHT,
+  };
+};
+
 const Atmosphere = () => {
   const material = useMemo(
     () =>
@@ -137,7 +168,7 @@ const Atmosphere = () => {
   const ref = useRef<THREE.Mesh>(null);
   useFrame((_, delta) => {
     if (ref.current) {
-      ref.current.rotation.y += delta * 0.02;
+      ref.current.rotation.y += delta * 0.02; // Unexpanded
     }
   });
 
@@ -187,13 +218,48 @@ const OuterGlow = () => {
   );
 };
 
+const CloudLayer = () => {
+  const cloudsTexture = useLoader(THREE.TextureLoader, CLOUDS_TEXTURE_URL);
+  cloudsTexture.flipY = false;
+
+  useEffect(() => {
+    return () => {
+      cloudsTexture.dispose();
+    };
+  }, [cloudsTexture]);
+
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useFrame((_, delta) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y -= delta * 0.02;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} scale={[1.08, 1.08, 1.08]}>
+      <sphereGeometry args={[1, 64, 64]} />
+      <meshStandardMaterial
+        map={cloudsTexture}
+        transparent={true}
+        opacity={0.6}
+        emissive="#ffffff"
+        emissiveMap={cloudsTexture}
+        emissiveIntensity={0.3}
+        depthWrite={false}
+      />
+    </mesh>
+  );
+};
+
 const Earth = ({
   onLoaded,
   scale = 1,
   timeOfDay,
   isExpanded = false,
   sunPhase = 'day',
-  phaseProgress = 0,
+  phaseProgress = 7,
+  meshRef,
 }: {
   onLoaded: () => void;
   scale?: number;
@@ -201,8 +267,8 @@ const Earth = ({
   isExpanded?: boolean;
   sunPhase?: string;
   phaseProgress?: number;
+  meshRef: RefObject<THREE.Mesh | null>;
 }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
   const blendFactorRef = useRef(0);
 
   // Load low-res textures
@@ -210,9 +276,9 @@ const Earth = ({
   const nightTexture = useLoader(THREE.TextureLoader, NIGHT_TEXTURE_URL);
   const cloudsTexture = useLoader(THREE.TextureLoader, CLOUDS_TEXTURE_URL);
 
-  // Load high-res textures
-  const highDayTexture = useLoader(THREE.TextureLoader, HIGH_DAY_TEXTURE_URL);
-  const highNightTexture = useLoader(THREE.TextureLoader, HIGH_NIGHT_TEXTURE_URL);
+  // Load high-res textures only when expanded
+  const highDayTexture = isExpanded ? useLoader(THREE.TextureLoader, HIGH_DAY_TEXTURE_URL) : dayTexture;
+  const highNightTexture = isExpanded ? useLoader(THREE.TextureLoader, HIGH_NIGHT_TEXTURE_URL) : nightTexture;
 
   // Setup texture properties
   dayTexture.flipY = false;
@@ -240,10 +306,10 @@ const Earth = ({
         uHighNightMap: { value: highNightTexture },
         uLightDir: { value: new THREE.Vector3(1, 0.2, 0.5).normalize() },
         uTimeOfDay: { value: timeOfDay },
-        uTerminatorSoftness: { value: 0.2 },
+        uTerminatorSoftness: { value: 0.35 }, // Wider terminator for more realistic atmosphere
         uSunPhase: { value: 0 }, // 0 = night, 1 = dawn, 2 = day, 3 = dusk
         uPhaseProgress: { value: 0 }, // 0 to 1 progress through phase
-        uDawnDuskColor: { value: new THREE.Vector3(1.0, 0.6, 0.2) }, // Orange
+        uDawnDuskColor: { value: new THREE.Vector3(1.0, 0.6, 0.8) }, // Orange
         uTextureBlend: { value: 0 }, // 0 = low-res, 1 = high-res
         uIsExpanded: { value: isExpanded ? 1.0 : 0.0 }, // 1.0 = expanded, 0.0 = not expanded
       },
@@ -251,8 +317,10 @@ const Earth = ({
         varying vec3 vNormal;
         varying vec2 vUv;
         varying vec3 vWorldPos;
+        varying vec3 vWorldNormal;
         void main() {
           vNormal = normalize(normalMatrix * normal);
+          vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
           vUv = uv;
           vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -262,6 +330,7 @@ const Earth = ({
         varying vec3 vNormal;
         varying vec2 vUv;
         varying vec3 vWorldPos;
+        varying vec3 vWorldNormal;
         uniform sampler2D uDayMap;
         uniform sampler2D uNightMap;
         uniform sampler2D uCloudsMap;
@@ -276,14 +345,14 @@ const Earth = ({
         uniform float uIsExpanded;
 
         void main() {
-          vec3 normal = normalize(vNormal);
-
+          // Use world-space normal for fixed lighting direction (light stays in place when globe rotates)
+          vec3 worldNormal = normalize(vWorldNormal);
           vec3 lightDir = normalize(uLightDir);
 
-          // More precise day/night boundary calculation
-          float intensity = dot(normal, lightDir);
+          // More precise day/night boundary calculation using world-space normal
+          float intensity = dot(worldNormal, lightDir);
 
-          // Smooth transition zone (terminator line)
+          // Smooth transition zone (terminator line) - wider for more realistic gradient
           float transitionStart = -uTerminatorSoftness;
           float transitionEnd = uTerminatorSoftness;
           float dayFactor = smoothstep(transitionStart, transitionEnd, intensity);
@@ -314,30 +383,41 @@ const Earth = ({
           if (uSunPhase == 1.0) {
             // Dawn: orange fading to blue as sun rises
             dawnDuskOverlay = mix(uDawnDuskColor, vec3(0.3, 0.6, 0.95), uPhaseProgress);
-            dawnDuskIntensity = 0.4 * (1.0 - uPhaseProgress);
+            dawnDuskIntensity = 0.1 * (1.0 - uPhaseProgress);
           } else if (uSunPhase == 3.0) {
             // Dusk: blue fading to orange as sun sets
-            dawnDuskOverlay = mix(vec3(0.3, 0.6, 0.95), uDawnDuskColor, uPhaseProgress);
+            dawnDuskOverlay = mix(vec3(0.3, 0.6, 0.15), uDawnDuskColor, uPhaseProgress);
             dawnDuskIntensity = 0.4 * uPhaseProgress;
           }
 
           // Apply dawn/dusk color to base color
           baseColor = mix(baseColor, dawnDuskOverlay, dawnDuskIntensity);
 
-          // Atmospheric glow at terminator - softer and blurrier
-          float terminatorGlow = smoothstep(-0.8, 0.2, intensity) * smoothstep(0.8, -0.2, intensity);
-          vec3 atmosphereGlow = vec3(0.3, 0.6, 0.95) * terminatorGlow * 0.2;
+          // Enhanced atmospheric glow at terminator - subtle warm tones
+          float terminatorGlow = smoothstep(-1.0, 0.3, intensity) * smoothstep(1.0, -0.3, intensity);
+          // Add subtle warm orange near terminator, blended with cool blue
+          vec3 warmGlow = vec3(1.0, 0.5, 0.1) * terminatorGlow * 0.005;
+          vec3 blueGlow = vec3(0.3, 0.6, 0.95) * terminatorGlow * 0.15;
+          vec3 atmosphereGlow = warmGlow + blueGlow;
 
-          // Rim light for atmosphere
-          vec3 rimColor = vec3(0.05, 0.35, 0.8) * pow(max(0.0, 1.0 - intensity), 3.5) * 0.3;
+          // Rim light for atmosphere - enhanced fresnel effect with warm accent
+          float rimFactor = pow(max(0.0, 1.0 - abs(intensity)), 2.0);
+          // Add warmth to the rim without being overwhelming
+          vec3 rimColor = vec3(0.2, 0.4, 0.15) * rimFactor * 0.05;
+          vec3 warmAccent = vec3(1.0, 0.6, 0.2) * max(0.0, -intensity) * 0.001; // Warm glow on night side
+          rimColor += warmAccent;
 
-          // City lights glow at night
-          vec3 nightGlow = nightColor * 0.08 * (1.0 - dayFactor);
+          // City lights glow at night - more visible
+          vec3 nightGlow = nightColor * 0.12 * (1.0 - dayFactor);
 
           // Dayside ambient light
-          vec3 dayAmbient = dayColor * 0.1 * dayFactor;
+          vec3 dayAmbient = dayColor * 0.15 * dayFactor;
 
-          vec3 finalColor = baseColor + atmosphereGlow + rimColor + nightGlow + dayAmbient;
+          // Specular highlight on water (based on normal vector characteristics)
+          float waterSpec = max(0.0, dot(worldNormal, lightDir)) * dayFactor;
+          vec3 specularGlow = vec3(1.0, 1.0, 0.95) * waterSpec * 0.2;
+
+          vec3 finalColor = baseColor + atmosphereGlow + rimColor + nightGlow + dayAmbient + specularGlow;
 
           gl_FragColor = vec4(finalColor, 1.0);
         }
@@ -396,6 +476,9 @@ const Earth = ({
     return new THREE.Quaternion().setFromAxisAngle(axis, THREE.MathUtils.degToRad(23.5));
   }, []);
 
+  const phaseMap = useMemo(() => ({ night: 0, dawn: 1, day: 2, dusk: 3 } as Record<string, number>), []);
+  const frameCountRef = useRef(0);
+
   useFrame((_, delta) => {
     if (meshRef.current) {
       if (!initialRotationSet.current) {
@@ -410,25 +493,27 @@ const Earth = ({
     }
 
     if (materialRef.current) {
-      // Calculate sun direction based on actual real-time
-      const now = new Date();
-      const localHours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
-      const dynamicTimeOfDay = (localHours % 24) / 24;
+      // Throttle sun calculation to every 30 frames (~500ms at 60fps)
+      frameCountRef.current++;
+      if (frameCountRef.current % 30 === 0) {
+        const now = new Date();
+        const localHours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+        const dynamicTimeOfDay = (localHours % 24) / 24;
 
-      const sunAngle = dynamicTimeOfDay * Math.PI * 2;
-      const sunDirection = new THREE.Vector3(
-        Math.cos(sunAngle),
-        0.2,
-        Math.sin(sunAngle)
-      );
-      sunDirection.applyQuaternion(tiltQuaternion).normalize();
-      materialRef.current.uniforms.uLightDir.value.copy(sunDirection);
+        const sunAngle = dynamicTimeOfDay * Math.PI * 2;
+        const sunDirection = new THREE.Vector3(
+          Math.cos(sunAngle),
+          0.2,
+          Math.sin(sunAngle)
+        );
+        sunDirection.applyQuaternion(tiltQuaternion).normalize();
+        materialRef.current.uniforms.uLightDir.value.copy(sunDirection);
+      }
 
       materialRef.current.uniforms.uTimeOfDay.value = timeOfDay;
       materialRef.current.uniforms.uIsExpanded.value = isExpanded ? 1.0 : 0.0;
 
       // Update sun phase uniforms
-      const phaseMap: { [key: string]: number } = { night: 0, dawn: 1, day: 2, dusk: 3 };
       materialRef.current.uniforms.uSunPhase.value = phaseMap[sunPhase] || 0;
       materialRef.current.uniforms.uPhaseProgress.value = phaseProgress;
 
@@ -458,57 +543,17 @@ const Earth = ({
       onPointerLeave={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
-      <sphereGeometry args={[1, 128, 128]} />
+      <sphereGeometry args={[1, isExpanded ? 64 : 32, isExpanded ? 64 : 32]} />
       <primitive object={shaderMaterial} attach="material" />
     </mesh>
   );
 };
 
-const Marker = ({
-  project,
-  onSelect,
-}: {
-  project: Project;
-  onSelect: (project: Project) => void;
-}) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const position = useMemo(
-    () => latLngToCartesian(project.location.lat, project.location.lng, 1.03),
-    [project]
-  );
-
-  useFrame((_, delta) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.4;
-    }
-  });
-
-  return (
-    <mesh
-      ref={meshRef}
-      position={position}
-      onClick={(event) => {
-        event.stopPropagation();
-        onSelect(project);
-      }}
-      onPointerOver={() => {
-        document.body.style.cursor = 'pointer';
-      }}
-      onPointerOut={() => {
-        document.body.style.cursor = 'default';
-      }}
-    >
-      <sphereGeometry args={[0.04, 12, 12]} />
-      <meshStandardMaterial color="#38bdf8" emissive="#0ea5e9" emissiveIntensity={0.9} metalness={0.2} />
-    </mesh>
-  );
-};
-
 const CurrentLocationPulse = () => {
-  const position = useMemo(
-    () => latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1.04),
-    []
-  );
+  const position = useMemo(() => {
+    const vec = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1.04);
+    return [vec.x, vec.y, vec.z] as [number, number, number];
+  }, []);
   const glowRef = useRef<THREE.Mesh>(null);
 
   useFrame((_, delta) => {
@@ -526,83 +571,215 @@ const CurrentLocationPulse = () => {
 };
 
 
-const CameraController = ({ isExpanded, config }: { isExpanded: boolean; config: any }) => {
-  const { camera } = useThree();
+const SoftStars = () => {
+  const pointsRef = useRef<THREE.Points>(null);
+  const baseColorsRef = useRef<Float32Array | null>(null);
+  const twinkleOffsetsRef = useRef<Float32Array | null>(null);
+
+  const geometry = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    const positions = new Float32Array(15000); // 5000 stars * 3 coordinates
+    const colors = new Float32Array(15000); // RGB color for each vertex
+    const twinkleOffsets = new Float32Array(5000); // Random offset for twinkling
+
+    for (let i = 0; i < 15000; i += 3) {
+      positions[i] = (Math.random() - 0.5) * 240; // x
+      positions[i + 1] = (Math.random() - 0.5) * 240; // y
+      positions[i + 2] = (Math.random() - 0.5) * 240; // z
+
+      // Random brightness for each star (0.3 to 1.0)
+      const brightness = 0.3 + Math.random() * 0.7;
+      colors[i] = brightness; // r
+      colors[i + 1] = brightness; // g
+      colors[i + 2] = brightness; // b
+    }
+
+    // Random twinkling offsets for each star
+    for (let i = 0; i < 5000; i++) {
+      twinkleOffsets[i] = Math.random() * Math.PI * 2;
+    }
+
+    g.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    g.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    baseColorsRef.current = colors.slice();
+    twinkleOffsetsRef.current = twinkleOffsets;
+
+    return g;
+  }, []);
+
+  // Create glowing star texture with strong light bloom effect
+  const starTexture = useMemo(() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      // Create a bright, energetic glow with strong light emission
+      const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 50);
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');      // Pure white core
+      gradient.addColorStop(0.1, 'rgba(255, 250, 220, 1)');    // Warm white
+      gradient.addColorStop(0.25, 'rgba(220, 240, 255, 0.8)'); // Light blue glow
+      gradient.addColorStop(0.45, 'rgba(180, 210, 255, 0.5)'); // Medium blue glow
+      gradient.addColorStop(0.7, 'rgba(120, 160, 255, 0.2)');  // Fading blue
+      gradient.addColorStop(1, 'rgba(80, 120, 200, 0)');       // Transparent edge
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 64, 64);
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+  }, []);
+
+  const material = useMemo(() => {
+    return new THREE.PointsMaterial({
+      size: 0.22, // Balanced star size
+      sizeAttenuation: true,
+      transparent: true,
+      opacity: 0.95,
+      fog: false,
+      map: starTexture,
+      vertexColors: true, // Use vertex colors for brightness variation
+    });
+  }, [starTexture]);
+
+  // Animate twinkling
+  useFrame(({ clock }) => {
+    if (pointsRef.current && baseColorsRef.current && twinkleOffsetsRef.current) {
+      const colors = geometry.attributes.color.array as Float32Array;
+      const time = clock.getElapsedTime();
+
+      for (let i = 0; i < 5000; i++) {
+        const baseIdx = i * 3;
+        const baseBrightness = baseColorsRef.current[baseIdx];
+        const offset = twinkleOffsetsRef.current[i];
+
+        // Create twinkling effect using sine wave
+        const twinkle = 0.5 + 0.5 * Math.sin(time * 2 + offset);
+        const finalBrightness = baseBrightness * (0.5 + twinkle * 0.5);
+
+        colors[baseIdx] = finalBrightness;
+        colors[baseIdx + 1] = finalBrightness;
+        colors[baseIdx + 2] = finalBrightness;
+      }
+      geometry.attributes.color.needsUpdate = true;
+    }
+  });
+
+  useEffect(() => {
+    return () => {
+      geometry.dispose();
+      material.dispose();
+      starTexture.dispose();
+    };
+  }, [geometry, material, starTexture]);
+
+  return <points ref={pointsRef} geometry={geometry} material={material} />;
+};
+
+const StarsParallax = () => {
+  const starsRef = useRef<THREE.Group>(null);
+  const globeMeshRef = useGlobeMesh();
 
   useFrame(() => {
-    // Only control camera when NOT expanded
-    // When expanded, OrbitControls has full control
-    if (!isExpanded) {
-      const interpolationSpeed = config.notExpanded.camera.interpolationSpeed;
-      const targetZ = config.notExpanded.camera.targetZ;
-
-      camera.position.x += (0 - camera.position.x) * interpolationSpeed;
-      camera.position.y += (0 - camera.position.y) * interpolationSpeed;
-      camera.position.z += (targetZ - camera.position.z) * interpolationSpeed;
+    if (starsRef.current && globeMeshRef.current) {
+      // Rotate stars much slower than the globe for subtle parallax effect
+      const slowMultiplier = 0.1; // Stars rotate at 15% of globe speed
+      starsRef.current.rotation.x = globeMeshRef.current.rotation.x * slowMultiplier;
+      starsRef.current.rotation.y = globeMeshRef.current.rotation.y * slowMultiplier;
+      starsRef.current.rotation.z = globeMeshRef.current.rotation.z * slowMultiplier;
     }
+  });
+
+  return (
+    <group ref={starsRef}>
+      <SoftStars />
+    </group>
+  );
+};
+
+const CameraController = ({ isExpanded, config }: { isExpanded: boolean; config: any }) => {
+  const { camera } = useThree();
+  const interpolationSpeed = 0.08;
+
+  useFrame(() => {
+    const currentConfig = isExpanded ? config.expanded : config.notExpanded;
+    const targetZ = currentConfig.cameraZ;
+
+    camera.position.x += (0 - camera.position.x) * interpolationSpeed;
+    camera.position.y += (0 - camera.position.y) * interpolationSpeed;
+    camera.position.z += (targetZ - camera.position.z) * interpolationSpeed;
   });
 
   return null;
 };
 
 export default function WorldExperienceSection() {
-  // Globe configuration for expanded and non-expanded states
   const GLOBE_CONFIG = {
     notExpanded: {
-      camera: {
-        targetZ: 1.25,
-        interpolationSpeed: 0.08,
-      },
-      canvas: {
-        filter: 'blur(10px) brightness(70%) contrast(300%)',
-        fov: 45,
-        initialZ: 0.8,
-      },
-      orbitControls: {
-        enableRotate: false,
-        autoRotate: false,
-        autoRotateSpeed: 0,
-        minDistance: 1.8,
-        maxDistance: 5.5,
-      },
-      overlays: {
-        dottedOpacity: 1,
-        darkOpacity: 0.3,
-        transitionDuration: 0.5,
-      },
+      cameraZ: 1.5,
+      filter: 'brightness(0.7) contrast(3)',
+      dottedOpacity: 1,
+      darkOpacity: 0.3,
+      overlayDuration: 0.5,
     },
     expanded: {
-      camera: {
-        targetZ: 5.5,
-        interpolationSpeed: 0.08,
-      },
-      canvas: {
-        filter: 'none',
-        fov: 45,
-        initialZ: 0.8,
-      },
-      orbitControls: {
-        enableRotate: false,
-        autoRotate: false,
-        autoRotateSpeed: 0,
-        minDistance: 2.0,
-        maxDistance: 8.0,
-      },
-      overlays: {
-        dottedOpacity: 0,
-        darkOpacity: 0,
-        transitionDuration: 3,
-      },
+      cameraZ: 3.7,
+      filter: 'none',
+      dottedOpacity: 0,
+      darkOpacity: 0.2, // Opacity for the globe
+      overlayDuration: 3,
     },
   };
 
-  const [globeReady, setGlobeReady] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [globeLoadedOnce, setGlobeLoadedOnce] = useState(false);
   const [sunPhase, setSunPhase] = useState('day');
   const [phaseProgress, setPhaseProgress] = useState(0);
-  const scrollLockPosition = useRef(0);
   const controlsRef = useRef<any>(null);
+  const globeMeshRef = useRef<THREE.Mesh>(null);
+  const scrollPositionRef = useRef(0); // Store scroll position for restoration
+
+  const projectMarkers = useMemo(() => {
+    return projects.map((project) => ({
+      ...project,
+      transform: getMarkerTransform(project.location.lat, project.location.lng),
+    }));
+  }, []);
+
+  const momentMarkers = useMemo(() => {
+    return GLOBE_MOMENT_LOCATIONS.map((location, index) => ({
+      ...location,
+      id: `moment-${index}`,
+      transform: getMarkerTransform(location.lat, location.lng),
+    }));
+  }, []);
+
+  const openGlobe = useCallback(() => {
+    scrollPositionRef.current = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = `-${scrollPositionRef.current}px`;
+    setIsExpanded(true);
+  }, []);
+
+  const closeGlobe = useCallback(() => {
+    setIsExpanded(false);
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.top = '';
+    setTimeout(() => {
+      window.scrollTo(0, scrollPositionRef.current);
+    }, 0);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+    };
+  }, []);
 
   // Calculate sun position for New York
   useEffect(() => {
@@ -617,147 +794,172 @@ export default function WorldExperienceSection() {
     return () => clearInterval(interval);
   }, []);
 
-const getTimeRatio = () => {
-  const now = new Date();
-  // Get local time in hours (0-24)
-  const localHours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
-  // Normalize to 0-1 range (0 = midnight, 0.5 = noon)
-  return (localHours % 24) / 24;
-};
-
-useEffect(() => {
-  const html = document.documentElement;
-  const body = document.body;
-
-  if (isExpanded) {
-    scrollLockPosition.current = window.scrollY;
-    // Disable scrolling without changing position
-    html.style.overflow = 'hidden';
-    body.style.overflow = 'hidden';
-    document.documentElement.setAttribute('data-globe-expanded', 'true');
-  } else {
-    // Re-enable scrolling
-    html.style.overflow = '';
-    body.style.overflow = '';
-    document.documentElement.setAttribute('data-globe-expanded', 'false');
-  }
-
-  return () => {
-    html.style.overflow = '';
-    body.style.overflow = '';
-  };
-}, [isExpanded]);
-
-const [timeOfDay, setTimeOfDay] = useState(() => getTimeRatio());
-
-useEffect(() => {
-  const updateTime = () => setTimeOfDay(getTimeRatio());
-  const timer = setInterval(updateTime, 60_000);
-  return () => clearInterval(timer);
-}, []);
-
-// Handle ESC key to close expanded globe view
-useEffect(() => {
-  const handleEscapeKey = (event: KeyboardEvent) => {
-    if (event.key === 'Escape' && isExpanded) {
-      setIsExpanded(false);
-    }
+  const getTimeRatio = () => {
+    const now = new Date();
+    // Get local time in hours (0-24)
+    const localHours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+    // Normalize to 0-1 range (0 = midnight, 0.5 = noon)
+    return (localHours % 24) / 24;
   };
 
-  window.addEventListener('keydown', handleEscapeKey);
-  return () => window.removeEventListener('keydown', handleEscapeKey);
-}, [isExpanded]);
+  const [timeOfDay, setTimeOfDay] = useState(() => getTimeRatio());
+
+  useEffect(() => {
+    const updateTime = () => setTimeOfDay(getTimeRatio());
+    const timer = setInterval(updateTime, 60_000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Handle ESC key to close expanded globe view
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isExpanded) {
+        closeGlobe();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscapeKey);
+    return () => window.removeEventListener('keydown', handleEscapeKey);
+  }, [isExpanded, closeGlobe]);
 
   const handleProjectSelect = (project: Project) => {
     setSelectedProject(project);
   };
 
-  return (
-    <section
-      id="world-experience"
-      className="relative w-full h-screen overflow-hidden bg-black snap-start"
-    >
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-black" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_90%_at_50%_50%,_rgba(20,50,120,0.4),_rgba(0,0,0,1))]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(30,80,180,0.15),_transparent_60%)]" />
-      </div>
+  const handleGlobeLoaded = () => {
+    setGlobeLoadedOnce(true);
+  };
 
-      <div className="relative z-10 w-full flex flex-col h-full">
-        <div className="relative w-full h-full">
-          <Canvas
-            camera={{ position: [0, 0, GLOBE_CONFIG.notExpanded.canvas.initialZ], fov: GLOBE_CONFIG.notExpanded.canvas.fov }}
-            className="absolute inset-0 w-full h-full"
-            style={{
-              filter: isExpanded ? GLOBE_CONFIG.expanded.canvas.filter : GLOBE_CONFIG.notExpanded.canvas.filter,
-            }}
-            gl={{ antialias: true, alpha: false }}
-          >
-            <ambientLight intensity={0.3} />
-            <directionalLight position={[5, 5, 5]} intensity={1.1} />
-            <Stars radius={120} depth={60} count={5000} factor={5} saturation={0.1} fade speed={0.15} />
-            <Suspense fallback={null}>
-              <Earth onLoaded={() => setGlobeReady(true)} scale={1.1} timeOfDay={timeOfDay} isExpanded={isExpanded} sunPhase={sunPhase} phaseProgress={phaseProgress} />
-              <Atmosphere />
-              <OuterGlow />
-            </Suspense>
-            <CurrentLocationPulse />
-            <CameraController isExpanded={isExpanded} config={GLOBE_CONFIG} />
-            {isExpanded && (
-              <>
-                <group>
-                  {projects.map((project) => (
-                    <Marker
-                      key={project.id}
-                      project={project}
-                      onSelect={handleProjectSelect}
-                    />
-                  ))}
-                </group>
-                <group>
-                  {GLOBE_MOMENT_LOCATIONS.map((location, index) => (
-                    <Marker
-                      key={index}
-                      project={{
-                        id: `moment-${index}`,
-                        title: location.title,
-                        location: { lat: location.lat, lng: location.lng },
-                      } as any}
-                      onSelect={() => {}}
-                    />
-                  ))}
-                </group>
-              </>
-            )}
-            <OrbitControls
-              ref={controlsRef}
-              enablePan={false}
-              enableZoom={false}
-              enableRotate={isExpanded ? GLOBE_CONFIG.expanded.orbitControls.enableRotate : GLOBE_CONFIG.notExpanded.orbitControls.enableRotate}
-              autoRotate={isExpanded ? GLOBE_CONFIG.expanded.orbitControls.autoRotate : GLOBE_CONFIG.notExpanded.orbitControls.autoRotate}
-              autoRotateSpeed={isExpanded ? GLOBE_CONFIG.expanded.orbitControls.autoRotateSpeed : GLOBE_CONFIG.notExpanded.orbitControls.autoRotateSpeed}
-              minDistance={isExpanded ? GLOBE_CONFIG.expanded.orbitControls.minDistance : GLOBE_CONFIG.notExpanded.orbitControls.minDistance}
-              maxDistance={isExpanded ? GLOBE_CONFIG.expanded.orbitControls.maxDistance : GLOBE_CONFIG.notExpanded.orbitControls.maxDistance}
-            />
-          </Canvas>
+  return (
+    <>
+      <section
+        id="world-experience"
+        className={`${isExpanded ? 'fixed inset-0 z-50' : 'relative w-full h-screen'} overflow-hidden bg-black snap-start`}
+      >
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <div className="absolute inset-0 bg-black" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_90%_at_50%_50%,_rgba(20,50,120,0.4),_rgba(0,0,0,1))]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(30,80,180,0.15),_transparent_60%)]" />
         </div>
 
-        {/* Dotted Overlay - only visible when not expanded */}
-        <motion.div
-          className="absolute inset-0 pointer-events-none z-10"
-          style={{
-            backgroundImage: `radial-gradient(circle, rgba(0,0,0,var(--dotted-overlay-opacity, 0.25)) 1.5px, transparent 1.5px)`,
-            backgroundSize: '4px 4px',
-          }}
-          animate={{ opacity: isExpanded ? GLOBE_CONFIG.expanded.overlays.dottedOpacity : GLOBE_CONFIG.notExpanded.overlays.dottedOpacity }}
-          transition={{ duration: isExpanded ? GLOBE_CONFIG.expanded.overlays.transitionDuration : GLOBE_CONFIG.notExpanded.overlays.transitionDuration, ease: 'easeInOut' }}
-        />
+        <div className="relative z-10 w-full flex flex-col h-full">
+          <div className="relative w-full h-full">
+            <Canvas
+              camera={{ position: [0, 0, 0.8], fov: 45 }}
+              className="absolute inset-0 w-full h-full"
+              style={{
+                filter: isExpanded ? GLOBE_CONFIG.expanded.filter : GLOBE_CONFIG.notExpanded.filter,
+              }}
+              gl={{ antialias: true, alpha: false }}
+            >
+              <GlobeProvider globeRef={globeMeshRef}>
+                <ambientLight intensity={isExpanded ? 0.3 : 0.2} />
+                <directionalLight position={[5, 5, 5]} intensity={isExpanded ? 0.9 : 0.7} />
+                {isExpanded && <StarsParallax />}
+                <Suspense fallback={null}>
+                  <Earth
+                    onLoaded={handleGlobeLoaded}
+                    scale={1.1}
+                    timeOfDay={timeOfDay}
+                    isExpanded={isExpanded}
+                    sunPhase={sunPhase}
+                    phaseProgress={phaseProgress}
+                    meshRef={globeMeshRef}
+                  />
+                  <CloudLayer />
+                  {isExpanded && <Atmosphere />}
+                  {isExpanded && <OuterGlow />}
+                  {/* Markers positioned at geographic locations on the globe - only render after Earth is fully loaded */}
+                  {isExpanded && globeLoadedOnce && (
+                    <group>
+                      {projectMarkers.map((marker) => (
+                        <group key={marker.id}>
+                          <mesh
+                            position={marker.transform.position}
+                            quaternion={marker.transform.quaternion}
+                          >
+                            <cylinderGeometry args={[0.01, 0.01, marker.transform.height, 8]} />
+                            <meshStandardMaterial color="#0ea5e9" emissive="#38bdf8" emissiveIntensity={0.7} />
+                          </mesh>
+                          <mesh
+                            position={marker.transform.tipPosition}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleProjectSelect(marker);
+                            }}
+                            onPointerOver={() => {
+                              document.body.style.cursor = 'pointer';
+                            }}
+                            onPointerOut={() => {
+                              document.body.style.cursor = 'default';
+                            }}
+                          >
+                            <sphereGeometry args={[0.035, 12, 12]} />
+                            <meshStandardMaterial color="#38bdf8" emissive="#0ea5e9" emissiveIntensity={0.9} metalness={0.2} />
+                          </mesh>
+                        </group>
+                      ))}
+                    </group>
+                  )}
+                  {isExpanded && globeLoadedOnce && (
+                    <group>
+                      {momentMarkers.map((marker) => (
+                        <group key={marker.id}>
+                          <mesh
+                            position={marker.transform.position}
+                            quaternion={marker.transform.quaternion}
+                          >
+                            <cylinderGeometry args={[0.008, 0.008, marker.transform.height, 8]} />
+                            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.6} />
+                          </mesh>
+                          <mesh
+                            position={marker.transform.tipPosition}
+                            onPointerOver={() => {
+                              document.body.style.cursor = 'pointer';
+                            }}
+                            onPointerOut={() => {
+                              document.body.style.cursor = 'default';
+                            }}
+                          >
+                            <sphereGeometry args={[0.025, 12, 12]} />
+                            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.8} metalness={0.1} />
+                          </mesh>
+                        </group>
+                      ))}
+                    </group>
+                  )}
+                </Suspense>
+                {isExpanded && globeLoadedOnce && <CurrentLocationPulse />}
+                <CameraController isExpanded={isExpanded} config={GLOBE_CONFIG} />
+                <OrbitControls
+                  ref={controlsRef}
+                  enablePan={false}
+                  enableZoom={false}
+                  enableRotate={false}
+                  autoRotate={false}
+                  autoRotateSpeed={0}
+                  minDistance={2.0}
+                  maxDistance={8.0}
+                />
+              </GlobeProvider>
+            </Canvas>
+
+            {/* Dotted Overlay - only visible when not expanded */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none z-10"
+              style={{
+                backgroundImage: `radial-gradient(circle, rgba(0,0,0,var(--dotted-overlay-opacity, 0.25)) 1.5px, transparent 1.5px)`,
+                backgroundSize: '4px 4px',
+              }}
+              animate={{ opacity: isExpanded ? GLOBE_CONFIG.expanded.dottedOpacity : GLOBE_CONFIG.notExpanded.dottedOpacity }}
+              transition={{ duration: isExpanded ? GLOBE_CONFIG.expanded.overlayDuration : GLOBE_CONFIG.notExpanded.overlayDuration, ease: 'easeInOut' }}
+            />
 
         {/* Dark Overlay - only visible when not expanded */}
         <motion.div
           className="absolute inset-0 pointer-events-none z-5 bg-black"
-          animate={{ opacity: isExpanded ? GLOBE_CONFIG.expanded.overlays.darkOpacity : GLOBE_CONFIG.notExpanded.overlays.darkOpacity }}
-          transition={{ duration: GLOBE_CONFIG.notExpanded.overlays.transitionDuration, ease: 'easeInOut' }}
+          animate={{ opacity: isExpanded ? GLOBE_CONFIG.expanded.darkOpacity : GLOBE_CONFIG.notExpanded.darkOpacity }}
+          transition={{ duration: isExpanded ? GLOBE_CONFIG.expanded.overlayDuration : GLOBE_CONFIG.notExpanded.overlayDuration, ease: 'easeInOut' }}
         />
 
         <motion.div
@@ -784,7 +986,7 @@ useEffect(() => {
           >
             Global impact across continents
           </motion.p>
-          {globeReady && !isExpanded && (
+          {globeLoadedOnce && !isExpanded && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -792,7 +994,7 @@ useEffect(() => {
               className="pointer-events-auto"
             >
               <Button
-                onClick={() => setIsExpanded(true)}
+                onClick={openGlobe}
                 className="cursor-pointer backdrop-blur-md bg-white/10 border border-white/30 text-white uppercase tracking-widest font-medium hover:bg-white/20 hover:border-white/50 transition-all"
               >
                 Discover My Journey
@@ -801,43 +1003,45 @@ useEffect(() => {
           )}
         </motion.div>
 
-        {globeReady && (
-          <>
-            <AnimatePresence>
-              {isExpanded && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.3 }}
-                  onClick={() => setIsExpanded(false)}
-                  className="fixed top-6 right-6 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-colors pointer-events-auto"
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.3 }}
+                onClick={closeGlobe}
+                className="fixed top-6 right-6 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-colors pointer-events-auto"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-white"
                 >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-white"
-                  >
-                    <path d="M18 6L6 18M6 6l12 12" />
-                  </svg>
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </>
-        )}
-      </div>
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </motion.button>
+            )}
+          </AnimatePresence>
+          </div>
 
-      <AnimatePresence>
-        {selectedProject && (
-          <ProjectLightbox project={selectedProject} onClose={() => setSelectedProject(null)} />
-        )}
-      </AnimatePresence>
-    </section>
+          <AnimatePresence>
+            {selectedProject && (
+              <ProjectLightbox project={selectedProject} onClose={() => setSelectedProject(null)} />
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
+
+      {isExpanded && (
+        <div className="fixed inset-0 z-40" onClick={closeGlobe} />
+      )}
+    </>
   );
 }
