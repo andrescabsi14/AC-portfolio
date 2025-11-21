@@ -41,17 +41,103 @@ const CURRENT_LOCATION = {
   label: 'Current Location: New York',
 };
 
+const normalizeHexColor = (value: string) => {
+  if (!value || !value.startsWith('#')) {
+    return value;
+  }
+
+  const hex = value.slice(1);
+  if (hex.length === 8) {
+    return `#${hex.slice(0, 6)}`;
+  }
+
+  return value;
+};
+
 // Globe moments with coordinates
 const GLOBE_MOMENT_LOCATIONS = [
-  { title: 'Bogotá — the origin.', lat: 4.7110, lng: -74.0055 },
-  { title: 'Dallas — the mayor\'s office.', lat: 32.7767, lng: -96.7970 },
-  { title: 'Detroit — congressmen, city leaders, and the awakening of a global perspective.', lat: 42.3314, lng: -83.0458 },
-  { title: 'Washington D.C. — the U.S. Department of State, seventh floor.', lat: 38.8951, lng: -77.0369 },
-  { title: 'Copenhagen & Aarhus — representing the Americas as a DTU Young Influencer at the C40 World Mayors Summit.', lat: 55.6761, lng: 12.5683 },
-  { title: 'Lima — the APEC Summit.', lat: -12.0464, lng: -77.0428 },
-  { title: 'Spain, Bolivia, Memphis — entrepreneurship, culture, and the belief that ideas move faster than borders.', lat: 40.4637, lng: -3.7492 },
-  { title: 'Santa Clara & Silicon Valley — invited to share approaches to frontier technology.', lat: 37.3541, lng: -121.9552 },
-  { title: 'New York — the city he saw in 2014 from the still-unfinished Hudson Yards.', lat: 40.7128, lng: -74.0060 },
+  {
+    title: 'Bogotá',
+    subtitle: 'The origin.',
+    description:
+      'Where the journey began — growing up in Bogotá, learning to build without permission and think beyond the neighborhood.',
+    image: '/images/globe/bogota-origin.jpg',
+    lat: 4.7110,
+    lng: -74.0055,
+  },
+  {
+    title: 'Dallas',
+    subtitle: 'The mayor\'s office.',
+    description:
+      'A first taste of U.S. civic leadership — conversations inside the mayor’s office about cities, innovation, and opportunity.',
+    image: '/images/globe/dallas-mayor.jpg',
+    lat: 32.7767,
+    lng: -96.7970,
+  },
+  {
+    title: 'Detroit',
+    subtitle: 'Congressmen, city leaders, and the awakening of a global perspective.',
+    description:
+      'In Detroit, meetings with congressmen and city leaders expanded a local story into a global mission for impact.',
+    image: '/images/globe/detroit-leaders.jpg',
+    lat: 42.3314,
+    lng: -83.0458,
+  },
+  {
+    title: 'Washington D.C.',
+    subtitle: 'The U.S. Department of State, seventh floor.',
+    description:
+      'On the seventh floor of the State Department, policy, diplomacy, and entrepreneurship collided in a single hallway.',
+    image: '/images/globe/washington-state-dept.jpg',
+    lat: 38.8951,
+    lng: -77.0369,
+  },
+  {
+    title: 'Copenhagen & Aarhus',
+    subtitle:
+      'Representing the Americas as a DTU Young Influencer at the C40 World Mayors Summit.',
+    description:
+      'Representing the Americas among mayors, climate leaders, and innovators, shaping conversations about cities and the future.',
+    image: '/images/globe/copenhagen-aarhus-c40.jpg',
+    lat: 55.6761,
+    lng: 12.5683,
+  },
+  {
+    title: 'Lima',
+    subtitle: 'The APEC Summit.',
+    description:
+      'At APEC in Lima, the focus shifted from local startups to the geopolitics of trade, technology, and shared prosperity.',
+    image: '/images/globe/lima-apec.jpg',
+    lat: -12.0464,
+    lng: -77.0428,
+  },
+  {
+    title: 'Spain, Bolivia, Memphis',
+    subtitle: 'Entrepreneurship, culture, and the belief that ideas move faster than borders.',
+    description:
+      'Workshops, talks, and collaborations across three continents proving that good ideas can outrun passports and borders.',
+    image: '/images/globe/spain-bolivia-memphis.jpg',
+    lat: 40.4637,
+    lng: -3.7492,
+  },
+  {
+    title: 'Santa Clara & Silicon Valley',
+    subtitle: 'Invited to share approaches to frontier technology.',
+    description:
+      'In the heart of Silicon Valley, sharing experiments at the edge of AI, Web3, and the next wave of tools for builders.',
+    image: '/images/globe/silicon-valley-frontier-tech.jpg',
+    lat: 37.3541,
+    lng: -121.9552,
+  },
+  {
+    title: 'New York',
+    subtitle: 'The city first seen in 2014 from the still-unfinished Hudson Yards.',
+    description:
+      'Looking over an unfinished Hudson Yards in 2014 and deciding that one day, the work would belong in this skyline.',
+    image: '/images/globe/new-york-hudson-yards.jpg',
+    lat: 40.7128,
+    lng: -74.0060,
+  },
 ];
 
 // Sun position calculator for a given location and date
@@ -150,7 +236,8 @@ const Atmosphere = ({
   positionY = 0,
   positionZ = 0,
   blur = 0,
-  glow = 0
+  glow = 0,
+  terminatorSoftness = 0.25,
 }: {
   color?: string;
   intensity?: number;
@@ -160,6 +247,7 @@ const Atmosphere = ({
   positionZ?: number;
   blur?: number;
   glow?: number;
+  terminatorSoftness?: number;
 }) => {
   // Parse color to RGB
   const rgb = parseInt(color.replace('#', ''), 16);
@@ -173,6 +261,7 @@ const Atmosphere = ({
         uniforms: {
           uColor: { value: new THREE.Vector3(r, g, b) },
           uIntensity: { value: intensity },
+          uTerminatorSoftness: { value: terminatorSoftness },
         },
         vertexShader: `
           varying vec3 vNormal;
@@ -185,18 +274,21 @@ const Atmosphere = ({
           varying vec3 vNormal;
           uniform vec3 uColor;
           uniform float uIntensity;
+          uniform float uTerminatorSoftness;
           void main() {
-            // Subtle atmosphere glow that fades at the edges
-            float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.2);
-            float alpha = intensity * uIntensity * 0.35;
+            vec3 viewDir = vec3(0.0, 0.0, 1.0);
+            float facing = dot(vNormal, viewDir);
+            float softness = smoothstep(-uTerminatorSoftness, uTerminatorSoftness, facing);
+            float glow = pow(clamp(0.7 - softness * 0.7, 0.0, 1.0), 2.2);
+            float alpha = (glow * 0.6 + softness * 0.4) * uIntensity;
             gl_FragColor = vec4(uColor, alpha);
           }
         `,
-        blending: THREE.NormalBlending,
+        blending: THREE.AdditiveBlending,
         transparent: true,
         depthWrite: false,
       }),
-    [r, g, b, intensity]
+    [r, g, b, intensity, terminatorSoftness]
   );
 
   useEffect(() => {
@@ -212,9 +304,11 @@ const Atmosphere = ({
       ref.current.position.x = positionX;
       ref.current.position.y = positionY;
       ref.current.position.z = positionZ;
-      // Apply glow effect to material intensity
       if (material.uniforms.uIntensity) {
         material.uniforms.uIntensity.value = intensity + glow;
+      }
+      if (material.uniforms.uTerminatorSoftness) {
+        material.uniforms.uTerminatorSoftness.value = terminatorSoftness;
       }
     }
   });
@@ -318,6 +412,7 @@ const CloudLayer = ({
 
   const meshRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const globeMeshRef = useGlobeMesh();
 
   const material = useMemo(() => {
     const mat = new THREE.ShaderMaterial({
@@ -340,6 +435,7 @@ const CloudLayer = ({
         varying vec2 vUv;
 
         void main() {
+          vec2 correctedUv = vec2(vUv.x, 1.0 - vUv.y);
           vec4 texColor = vec4(0.0);
 
           // Apply blur effect - sample texture at multiple offsets
@@ -347,18 +443,18 @@ const CloudLayer = ({
             float blurAmount = uBlur * 0.01;
 
             // 9-tap box blur (unrolled)
-            texColor += texture2D(uTexture, vUv + vec2(-1.0, -1.0) * blurAmount);
-            texColor += texture2D(uTexture, vUv + vec2(0.0, -1.0) * blurAmount);
-            texColor += texture2D(uTexture, vUv + vec2(1.0, -1.0) * blurAmount);
-            texColor += texture2D(uTexture, vUv + vec2(-1.0, 0.0) * blurAmount);
-            texColor += texture2D(uTexture, vUv + vec2(0.0, 0.0) * blurAmount);
-            texColor += texture2D(uTexture, vUv + vec2(1.0, 0.0) * blurAmount);
-            texColor += texture2D(uTexture, vUv + vec2(-1.0, 1.0) * blurAmount);
-            texColor += texture2D(uTexture, vUv + vec2(0.0, 1.0) * blurAmount);
-            texColor += texture2D(uTexture, vUv + vec2(1.0, 1.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(-1.0, -1.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(0.0, -1.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(1.0, -1.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(-1.0, 0.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(0.0, 0.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(1.0, 0.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(-1.0, 1.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(0.0, 1.0) * blurAmount);
+            texColor += texture2D(uTexture, correctedUv + vec2(1.0, 1.0) * blurAmount);
             texColor /= 9.0;
           } else {
-            texColor = texture2D(uTexture, vUv);
+            texColor = texture2D(uTexture, correctedUv);
           }
 
           texColor.a *= uOpacity;
@@ -380,7 +476,11 @@ const CloudLayer = ({
 
   useFrame((_, delta) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += delta * rotationSpeed;
+      if (globeMeshRef.current) {
+        meshRef.current.quaternion.copy(globeMeshRef.current.quaternion);
+      } else {
+        meshRef.current.rotation.y += delta * rotationSpeed;
+      }
       meshRef.current.position.x = positionX;
       meshRef.current.position.y = positionY;
       meshRef.current.position.z = positionZ;
@@ -413,6 +513,9 @@ const Earth = ({
   rotationSpeed = 0.02,
   segments = 64,
   blur = 0,
+  positionX = 0,
+  positionY = 0,
+  positionZ = 0,
 }: {
   onLoaded: () => void;
   scale?: number;
@@ -426,6 +529,9 @@ const Earth = ({
   rotationSpeed?: number;
   segments?: number;
   blur?: number;
+  positionX?: number;
+  positionY?: number;
+  positionZ?: number;
 }) => {
   const blendFactorRef = useRef(0);
 
@@ -535,17 +641,18 @@ const Earth = ({
           float transitionEnd = uTerminatorSoftness;
           float dayFactor = smoothstep(transitionStart, transitionEnd, intensity);
 
-          // Determine blur amount for texture sampling
-          float blurAmount = uBlur > 0.0 ? uBlur * 0.005 : 0.0;
+        // Determine blur amount for texture sampling
+        float blurAmount = uBlur > 0.0 ? uBlur * 0.005 : 0.0;
+        vec2 correctedUv = vec2(vUv.x, 1.0 - vUv.y);
 
-          // Sample low-res textures with optional blur
-          vec3 lowDayColor = blurAmount > 0.0 ? blurTexture(uDayMap, vUv, blurAmount) : texture2D(uDayMap, vUv).rgb;
-          vec3 lowNightColor = blurAmount > 0.0 ? blurTexture(uNightMap, vUv, blurAmount) : texture2D(uNightMap, vUv).rgb;
-          vec3 cloudsColor = blurAmount > 0.0 ? blurTexture(uCloudsMap, vUv, blurAmount) : texture2D(uCloudsMap, vUv).rgb;
+        // Sample low-res textures with optional blur
+        vec3 lowDayColor = blurAmount > 0.0 ? blurTexture(uDayMap, correctedUv, blurAmount) : texture2D(uDayMap, correctedUv).rgb;
+        vec3 lowNightColor = blurAmount > 0.0 ? blurTexture(uNightMap, correctedUv, blurAmount) : texture2D(uNightMap, correctedUv).rgb;
+        vec3 cloudsColor = blurAmount > 0.0 ? blurTexture(uCloudsMap, correctedUv, blurAmount) : texture2D(uCloudsMap, correctedUv).rgb;
 
-          // Sample high-res textures with optional blur
-          vec3 highDayColor = blurAmount > 0.0 ? blurTexture(uHighDayMap, vUv, blurAmount) : texture2D(uHighDayMap, vUv).rgb;
-          vec3 highNightColor = blurAmount > 0.0 ? blurTexture(uHighNightMap, vUv, blurAmount) : texture2D(uHighNightMap, vUv).rgb;
+        // Sample high-res textures with optional blur
+        vec3 highDayColor = blurAmount > 0.0 ? blurTexture(uHighDayMap, correctedUv, blurAmount) : texture2D(uHighDayMap, correctedUv).rgb;
+        vec3 highNightColor = blurAmount > 0.0 ? blurTexture(uHighNightMap, correctedUv, blurAmount) : texture2D(uHighNightMap, correctedUv).rgb;
 
           // When not expanded, show only clouds; when expanded, use day texture
           vec3 displayDayColor = mix(cloudsColor, lowDayColor, uIsExpanded);
@@ -721,6 +828,7 @@ const Earth = ({
       if (!pointerStateRef.current.isDragging) {
         meshRef.current.rotation.y += delta * rotationSpeed;
       }
+      meshRef.current.position.set(positionX, positionY, positionZ);
     }
 
     if (materialRef.current) {
@@ -768,6 +876,7 @@ const Earth = ({
       ref={meshRef}
       castShadow
       receiveShadow
+      position={[positionX, positionY, positionZ]}
       scale={[scale, scale, -scale]}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -1022,7 +1131,8 @@ const StarsParallax = ({ visibility = 1 }: { visibility?: number }) => {
 
 // Texture and normal map generator for realistic metallic marker appearance
 const createMetallicMaterials = (color: string) => {
-  const rgb = parseInt(color.replace('#', ''), 16);
+  const normalizedColor = normalizeHexColor(color);
+  const rgb = parseInt(normalizedColor.replace('#', ''), 16);
   const r = (rgb >> 16) & 255;
   const g = (rgb >> 8) & 255;
   const b = rgb & 255;
@@ -1150,8 +1260,11 @@ const MarkerSphere = ({
   position,
   color,
   emissiveColor,
+  hoverColor = '#19bdefff',
+  hoverEmissiveColor = '#19bdefff',
   size = 0.005,
   onHover,
+  onClick,
   metalness = 0.7,
   roughness = 0.2,
   segments = 16,
@@ -1161,6 +1274,7 @@ const MarkerSphere = ({
   emissiveColor: string;
   size?: number;
   onHover?: (isHovering: boolean) => void;
+  onClick?: () => void;
   metalness?: number;
   roughness?: number;
   segments?: number;
@@ -1169,7 +1283,25 @@ const MarkerSphere = ({
   const [isHovered, setIsHovered] = useState(false);
   const targetScaleRef = useRef(1);
 
-  const { texture, normalMap } = useMemo(() => createMetallicMaterials(color), [color]);
+  const sanitizedColor = useMemo(() => normalizeHexColor(color), [color]);
+  const sanitizedEmissiveColor = useMemo(() => normalizeHexColor(emissiveColor), [emissiveColor]);
+  const sanitizedHoverColor = useMemo(() => normalizeHexColor(hoverColor), [hoverColor]);
+  const sanitizedHoverEmissiveColor = useMemo(
+    () => normalizeHexColor(hoverEmissiveColor),
+    [hoverEmissiveColor]
+  );
+
+  const { texture, normalMap } = useMemo(() => createMetallicMaterials(sanitizedColor), [sanitizedColor]);
+  const defaultColor = useMemo(
+    () => new THREE.Color(sanitizedColor).multiplyScalar(0.7),
+    [sanitizedColor]
+  );
+  const hoverColorValue = useMemo(() => new THREE.Color(sanitizedHoverColor), [sanitizedHoverColor]);
+  const defaultEmissive = useMemo(
+    () => new THREE.Color(sanitizedEmissiveColor).multiplyScalar(0.8),
+    [sanitizedEmissiveColor]
+  );
+  const hoverEmissive = useMemo(() => new THREE.Color(sanitizedHoverEmissiveColor), [sanitizedHoverEmissiveColor]);
 
   useEffect(() => {
     return () => {
@@ -1185,11 +1317,11 @@ const MarkerSphere = ({
       const currentScale = meshRef.current.scale.x;
       meshRef.current.scale.setScalar(currentScale + (targetScaleRef.current - currentScale) * 0.1);
 
-      // Gentle rotation
-      meshRef.current.rotation.y += 0.02;
-
-      // Pulse on hover
+      // Only rotate while hovered for dynamic touch
       if (isHovered) {
+        meshRef.current.rotation.y += 0.02;
+
+        // Pulse on hover
         const pulse = 1 + Math.sin(clock.getElapsedTime() * 3) * 0.05;
         meshRef.current.scale.multiplyScalar(pulse / currentScale);
       }
@@ -1198,6 +1330,8 @@ const MarkerSphere = ({
       const material = meshRef.current.material as THREE.MeshStandardMaterial;
       const targetIntensity = isHovered ? 1.5 : 0.9;
       material.emissiveIntensity += (targetIntensity - material.emissiveIntensity) * 0.1;
+      material.color.lerp(isHovered ? hoverColorValue : defaultColor, 0.12);
+      material.emissive.lerp(isHovered ? hoverEmissive : defaultEmissive, 0.08);
     }
   });
 
@@ -1223,8 +1357,8 @@ const MarkerSphere = ({
       <meshStandardMaterial
         map={texture}
         normalMap={normalMap}
-        color={color}
-        emissive={emissiveColor}
+        color={defaultColor.getStyle()}
+        emissive={defaultEmissive.getStyle()}
         emissiveIntensity={0.9}
         metalness={metalness}
         roughness={roughness}
@@ -1381,6 +1515,10 @@ function WorldExperienceSectionContent() {
     setGlobeLoadedOnce(true);
   };
 
+  const dynamicGlobePositionX = isExpanded ? config.globePositionX : 0;
+  const dynamicGlobePositionY = isExpanded ? config.globePositionY : 0;
+  const dynamicGlobePositionZ = isExpanded ? config.globePositionZ : 0;
+
   return (
     <>
       <section
@@ -1421,6 +1559,9 @@ function WorldExperienceSectionContent() {
                     rotationSpeed={config.rotationSpeed}
                     segments={config.globeSegments}
                     blur={config.globeBlur}
+                    positionX={dynamicGlobePositionX}
+                    positionY={dynamicGlobePositionY}
+                    positionZ={dynamicGlobePositionZ}
                   />
                   <CloudLayer
                     opacity={config.cloudOpacity}
@@ -1432,16 +1573,17 @@ function WorldExperienceSectionContent() {
                     rotationSpeed={config.rotationSpeed}
                   />
                   {isExpanded && (
-                    <Atmosphere
-                      color={config.atmosphereColor}
-                      intensity={config.atmosphereIntensity}
-                      scale={config.atmosphereScale}
-                      positionX={config.atmospherePositionX}
-                      positionY={config.atmospherePositionY}
-                      positionZ={config.atmospherePositionZ}
-                      blur={config.atmosphereBlur}
-                      glow={config.atmosphereGlow}
-                    />
+                  <Atmosphere
+                    color={config.atmosphereColor}
+                    intensity={config.atmosphereIntensity}
+                    scale={config.atmosphereScale}
+                    positionX={config.atmospherePositionX}
+                    positionY={config.atmospherePositionY}
+                    positionZ={config.atmospherePositionZ}
+                    blur={config.atmosphereBlur}
+                    glow={config.atmosphereGlow}
+                    terminatorSoftness={config.terminatorSoftness}
+                  />
                   )}
                   {isExpanded && (
                     <OuterGlow
@@ -1465,7 +1607,11 @@ function WorldExperienceSectionContent() {
                                 quaternion={marker.transform.quaternion}
                               >
                                 <cylinderGeometry args={[config.markerCylinderBaseRadius, config.markerCylinderBaseRadius, marker.transform.height, 8]} />
-                                <meshStandardMaterial color={config.projectMarkerColor} emissive={config.projectMarkerEmissive} emissiveIntensity={0.7} />
+                                <meshStandardMaterial
+                                  color={normalizeHexColor(config.projectMarkerCylinderColor)}
+                                  emissive={normalizeHexColor(config.projectMarkerCylinderEmissive)}
+                                  emissiveIntensity={0.7}
+                                />
                               </mesh>
                               <MarkerSphere
                                 position={marker.transform.tipPosition}
@@ -1475,10 +1621,10 @@ function WorldExperienceSectionContent() {
                                 metalness={config.projectMarkerMetalness}
                                 roughness={config.projectMarkerRoughness}
                                 segments={config.projectMarkerSegments}
-                                onHover={(isHovering) => {
-                                  if (isHovering) {
-                                    handleProjectSelect(marker);
-                                  }
+                                hoverColor={config.projectMarkerHoverColor}
+                                hoverEmissiveColor={config.projectMarkerHoverEmissive}
+                                onClick={() => {
+                                  handleProjectSelect(marker);
                                 }}
                               />
                             </group>
@@ -1492,7 +1638,11 @@ function WorldExperienceSectionContent() {
                                 quaternion={marker.transform.quaternion}
                               >
                                 <cylinderGeometry args={[config.markerCylinderBaseRadius, config.markerCylinderBaseRadius, marker.transform.height, 8]} />
-                                <meshStandardMaterial color={config.momentMarkerColor} emissive={config.momentMarkerEmissive} emissiveIntensity={0.6} />
+                                <meshStandardMaterial
+                                  color={normalizeHexColor(config.momentMarkerCylinderColor)}
+                                  emissive={normalizeHexColor(config.momentMarkerCylinderEmissive)}
+                                  emissiveIntensity={0.6}
+                                />
                               </mesh>
                               <MarkerSphere
                                 position={marker.transform.tipPosition}
@@ -1502,6 +1652,8 @@ function WorldExperienceSectionContent() {
                                 metalness={config.momentMarkerMetalness}
                                 roughness={config.momentMarkerRoughness}
                                 segments={config.momentMarkerSegments}
+                                hoverColor={config.momentMarkerHoverColor}
+                                hoverEmissiveColor={config.momentMarkerHoverEmissive}
                               />
                             </group>
                           ))}
@@ -1550,7 +1702,7 @@ function WorldExperienceSectionContent() {
 
         <motion.div
           className="absolute px-6 text-center z-20"
-          animate={isExpanded ? { top: 100, left: '50%', width: '100%', transform: 'translateX(-50%)' } : { top: '50%', left: '50%', width: '100%', transform: 'translate(-50%, -50%)' }}
+          animate={isExpanded ? { top: 20, left: '50%', width: '100%', transform: 'translateX(-50%)' } : { top: '50%', left: '50%', width: '100%', transform: 'translate(-50%, -50%)' }}
           transition={{ duration: 0.5, ease: 'easeInOut' }}
         >
           <motion.h2
@@ -1597,7 +1749,7 @@ function WorldExperienceSectionContent() {
                 exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.3 }}
                 onClick={closeGlobe}
-                className="fixed top-6 right-6 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-colors pointer-events-auto"
+                className="fixed cursor-pointer top-6 right-6 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-colors pointer-events-auto"
               >
                 <svg
                   width="20"

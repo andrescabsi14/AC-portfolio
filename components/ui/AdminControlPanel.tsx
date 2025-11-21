@@ -10,8 +10,27 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 
+const CONFIG_SECTION_CLASS =
+  'flex-shrink-0 w-80 h-full border border-white/10 rounded-lg p-4 bg-white/5 flex flex-col max-h-[80vh] min-h-0';
+const CONFIG_SECTION_BODY_CLASS =
+  'space-y-3 text-white text-xs overflow-y-auto pr-2 flex-1 min-h-0 max-h-full';
+
 export const AdminControlPanel = ({ isExpanded }: { isExpanded: boolean }) => {
-  const { config, updateConfig, updateLightDir, updateProjectMarkerColor, updateMomentMarkerColor, addLocation, removeLocation, updateLocation, resetToDefaults, saveToLocalStorage, loadFromLocalStorage } = useGlobeConfig();
+  const {
+    config,
+    updateConfig,
+    updateLightDir,
+    updateProjectMarkerColor,
+    updateMomentMarkerColor,
+    updateProjectMarkerCylinderColor,
+    updateMomentMarkerCylinderColor,
+    addLocation,
+    removeLocation,
+    updateLocation,
+    resetToDefaults,
+    saveToLocalStorage,
+    loadFromLocalStorage,
+  } = useGlobeConfig();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [newLocationName, setNewLocationName] = useState('');
   const [newLocationLat, setNewLocationLat] = useState('0');
@@ -39,7 +58,7 @@ export const AdminControlPanel = ({ isExpanded }: { isExpanded: boolean }) => {
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
       <DrawerTrigger asChild>
-        <button className="fixed bottom-6 right-6 z-40 bg-black/80 backdrop-blur border border-white/20 rounded px-4 py-2 text-white text-sm font-semibold hover:bg-black/90 transition-colors">
+        <button className="fixed cursor-pointer bottom-6 right-6 z-40 bg-black/80 backdrop-blur border border-white/20 rounded px-4 py-2 text-white text-sm font-semibold hover:bg-black/90 transition-colors">
           Admin Controls
         </button>
       </DrawerTrigger>
@@ -49,7 +68,7 @@ export const AdminControlPanel = ({ isExpanded }: { isExpanded: boolean }) => {
         </DrawerHeader>
 
         {/* Horizontal Scrolling Container */}
-        <div className="flex-1 overflow-x-auto overflow-y-hidden min-h-0 h-[400px]">
+        <div className="flex-1 overflow-x-auto overflow-y-auto min-h-0 h-[400px]">
           <div className="flex gap-6 p-6 min-w-max">
             {/* Globe Section */}
             <ConfigSection title="Globe">
@@ -105,6 +124,47 @@ export const AdminControlPanel = ({ isExpanded }: { isExpanded: boolean }) => {
                 />
                 <span className="text-white/50 text-xs">{config.rotationSpeed.toFixed(5)}</span>
               </div>
+              <SubSection title="Position">
+                <div>
+                  <label className="block text-white/70 mb-1 text-xs">X</label>
+                  <input
+                    type="range"
+                    min="-2"
+                    max="2"
+                    step="0.0001"
+                    value={config.globePositionX}
+                    onChange={(e) => updateConfig({ globePositionX: parseFloat(e.target.value) })}
+                    className="w-full"
+                  />
+                  <span className="text-white/50 text-xs">{config.globePositionX.toFixed(3)}</span>
+                </div>
+                <div className="mt-2">
+                  <label className="block text-white/70 mb-1 text-xs">Y</label>
+                  <input
+                    type="range"
+                    min="-2"
+                    max="2"
+                    step="0.0001"
+                    value={config.globePositionY}
+                    onChange={(e) => updateConfig({ globePositionY: parseFloat(e.target.value) })}
+                    className="w-full"
+                  />
+                  <span className="text-white/50 text-xs">{config.globePositionY.toFixed(3)}</span>
+                </div>
+                <div className="mt-2">
+                  <label className="block text-white/70 mb-1 text-xs">Z</label>
+                  <input
+                    type="range"
+                    min="-2"
+                    max="2"
+                    step="0.0001"
+                    value={config.globePositionZ}
+                    onChange={(e) => updateConfig({ globePositionZ: parseFloat(e.target.value) })}
+                    className="w-full"
+                  />
+                  <span className="text-white/50 text-xs">{config.globePositionZ.toFixed(3)}</span>
+                </div>
+              </SubSection>
             </ConfigSection>
 
             {/* Clouds Section */}
@@ -467,29 +527,47 @@ export const AdminControlPanel = ({ isExpanded }: { isExpanded: boolean }) => {
 
             {/* Project Markers Section */}
             <ConfigSection title="Project Markers">
-              <div>
-                <label className="block text-white/70 mb-1 text-xs">Color</label>
-                <input
-                  type="color"
-                  value={config.projectMarkerColor}
-                  onChange={(e) => updateProjectMarkerColor(e.target.value)}
-                  className="w-full h-8 rounded cursor-pointer"
-                />
-              </div>
-            </ConfigSection>
+            <div>
+              <label className="block text-white/70 mb-1 text-xs">Color</label>
+              <input
+                type="color"
+                value={config.projectMarkerColor}
+                onChange={(e) => updateProjectMarkerColor(e.target.value)}
+                className="w-full h-8 rounded cursor-pointer"
+              />
+            </div>
+            <div>
+              <label className="block text-white/70 mb-1 text-xs">Base Color</label>
+              <input
+                type="color"
+                value={config.projectMarkerCylinderColor}
+                onChange={(e) => updateProjectMarkerCylinderColor(e.target.value)}
+                className="w-full h-8 rounded cursor-pointer"
+              />
+            </div>
+          </ConfigSection>
 
-            {/* Moment Markers Section */}
-            <ConfigSection title="Moment Markers">
-              <div>
-                <label className="block text-white/70 mb-1 text-xs">Color</label>
-                <input
-                  type="color"
-                  value={config.momentMarkerColor}
-                  onChange={(e) => updateMomentMarkerColor(e.target.value)}
-                  className="w-full h-8 rounded cursor-pointer"
-                />
-              </div>
-            </ConfigSection>
+          {/* Moment Markers Section */}
+          <ConfigSection title="Moment Markers">
+            <div>
+              <label className="block text-white/70 mb-1 text-xs">Color</label>
+              <input
+                type="color"
+                value={config.momentMarkerColor}
+                onChange={(e) => updateMomentMarkerColor(e.target.value)}
+                className="w-full h-8 rounded cursor-pointer"
+              />
+            </div>
+            <div>
+              <label className="block text-white/70 mb-1 text-xs">Base Color</label>
+              <input
+                type="color"
+                value={config.momentMarkerCylinderColor}
+                onChange={(e) => updateMomentMarkerCylinderColor(e.target.value)}
+                className="w-full h-8 rounded cursor-pointer"
+              />
+            </div>
+          </ConfigSection>
 
             {/* Locations Section */}
             <ConfigSection title="Manage Locations">
@@ -595,11 +673,9 @@ export const AdminControlPanel = ({ isExpanded }: { isExpanded: boolean }) => {
 // Helper Components
 function ConfigSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex-shrink-0 w-80 border border-white/10 rounded-lg p-4 bg-white/5 flex flex-col">
+    <div className={CONFIG_SECTION_CLASS}>
       <h3 className="text-white font-semibold mb-4 text-sm flex-shrink-0">{title}</h3>
-      <div className="space-y-3 text-white text-xs overflow-y-auto pr-2">
-        {children}
-      </div>
+      <div className={CONFIG_SECTION_BODY_CLASS}>{children}</div>
     </div>
   );
 }

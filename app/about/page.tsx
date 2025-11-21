@@ -23,7 +23,7 @@ export default function AboutPage() {
 
   return (
     <>
-      <Header />
+      <Header showAnimation={false} />
       <main className="relative bg-black overflow-x-hidden">
         <AboutUsIntroSection />
         <RecognitionSection />

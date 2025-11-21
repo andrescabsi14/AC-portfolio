@@ -57,13 +57,12 @@ export default function Header({ showAnimation = true }: HeaderProps) {
         clearTimeout(scrollTimeout.current);
       }
 
-      // Show header after scrolling stops (when scroll position stays the same for 1.5 seconds)
+      const SHOW_DELAY_MS = 400;
       scrollTimeout.current = setTimeout(() => {
-        // Only show header if scroll position hasn't changed (scrolling has stopped)
         if (window.scrollY === currentScrollY && currentScrollY > 300) {
           setIsVisible(true);
         }
-      }, 1500);
+      }, SHOW_DELAY_MS);
 
       const sections = ['world-experience', 'networking', 'recognition'];
       for (const section of sections) {
@@ -105,7 +104,7 @@ export default function Header({ showAnimation = true }: HeaderProps) {
       transition={{
         duration: 0.8,
         ease: 'easeOut',
-        delay: showAnimation ? 4.3 : 0,
+        delay: showAnimation ? 2 : 0,
       }}
       className="fixed inset-x-0 top-0 z-50 bg-secondary/80 backdrop-blur-sm"
     >
@@ -114,7 +113,7 @@ export default function Header({ showAnimation = true }: HeaderProps) {
         <motion.div
           initial={showAnimation ? { opacity: 0 } : { opacity: 1 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, delay: showAnimation ? 4.3 : 0 }}
+          transition={{ duration: 0.3, delay: showAnimation ? 2 : 0 }}
         >
           <Link
             href="/"

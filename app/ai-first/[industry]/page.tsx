@@ -29,7 +29,7 @@ export default function IndustryPage() {
   if (!industry) {
     return (
       <>
-        <Header />
+        <Header showAnimation={false} />
         <main className="relative bg-black min-h-screen flex items-center justify-center">
           <div className="text-center px-6">
             <h1 className="text-4xl font-bold text-white mb-4">Industry Not Found</h1>
@@ -51,7 +51,7 @@ export default function IndustryPage() {
 
   return (
     <>
-      <Header />
+      <Header showAnimation={false} />
       <main className="relative bg-black overflow-x-hidden">
         <IndustryHero industry={industry} />
         <IndustryProblem industry={industry} />

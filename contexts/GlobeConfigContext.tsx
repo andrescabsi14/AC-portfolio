@@ -28,12 +28,20 @@ export interface GlobeConfig {
   projectMarkerEmissive: string;
   projectMarkerMetalness: number;
   projectMarkerRoughness: number;
+  projectMarkerHoverColor: string;
+  projectMarkerHoverEmissive: string;
+  projectMarkerCylinderColor: string;
+  projectMarkerCylinderEmissive: string;
 
   // Moment Markers
   momentMarkerColor: string;
   momentMarkerEmissive: string;
   momentMarkerMetalness: number;
   momentMarkerRoughness: number;
+  momentMarkerHoverColor: string;
+  momentMarkerHoverEmissive: string;
+  momentMarkerCylinderColor: string;
+  momentMarkerCylinderEmissive: string;
 
   // Environment
   cloudOpacity: number;
@@ -46,6 +54,9 @@ export interface GlobeConfig {
   globeSegments: number;
   globeScale: number;
   globeBlur: number;
+  globePositionX: number;
+  globePositionY: number;
+  globePositionZ: number;
 
   // Geometry - Clouds
   cloudScale: number;
@@ -108,17 +119,25 @@ const DEFAULT_CONFIG: GlobeConfig = {
   glowColor: '#0857f7',
   glowIntensity: 0.9,
 
-  projectMarkerColor: '#00ff41',
-  projectMarkerEmissive: '#00ff41',
+  projectMarkerColor: '#cd0101ff',
+  projectMarkerEmissive: '#cd0101ff',
   projectMarkerMetalness: 0.7,
   projectMarkerRoughness: 0.2,
+  projectMarkerHoverColor: '#760000ff',
+  projectMarkerHoverEmissive: '#760000ff',
+  projectMarkerCylinderColor: '#011216ff',
+  projectMarkerCylinderEmissive: '#04272fff',
 
-  momentMarkerColor: '#10c6ee',
-  momentMarkerEmissive: '#1070ee',
+  momentMarkerColor: '#03303dff',
+  momentMarkerEmissive: '#03303dff',
   momentMarkerMetalness: 0.7,
   momentMarkerRoughness: 0.2,
+  momentMarkerHoverColor: '#006076ff',
+  momentMarkerHoverEmissive: '#006076ff',
+  momentMarkerCylinderColor: '#04272fff',
+  momentMarkerCylinderEmissive: '#011216ff',
 
-  cloudOpacity: 0.30,
+  cloudOpacity: 0.10,
   starVisibility: 1,
   rotationSpeed: 0.010,
   ambientLightIntensity: 0.5,
@@ -127,6 +146,9 @@ const DEFAULT_CONFIG: GlobeConfig = {
   globeSegments: 128,
   globeScale: 1,
   globeBlur: 0.038,
+  globePositionX: 0,
+  globePositionY: 0,
+  globePositionZ: 0,
 
   cloudScale: 1,
 
@@ -134,9 +156,9 @@ const DEFAULT_CONFIG: GlobeConfig = {
 
   glowScale: 1.00,
 
-  projectMarkerSize: 0.035,
+  projectMarkerSize: 0.014,
   projectMarkerSegments: 16,
-  momentMarkerSize: 0.025,
+  momentMarkerSize: 0.014,
   momentMarkerSegments: 16,
 
   currentLocationColor: '#a21111ff',
@@ -160,13 +182,18 @@ const DEFAULT_CONFIG: GlobeConfig = {
   glowPositionZ: 0,
 
   markerDistanceFromGlobe: 1.07,
-  markerLineHeight: 0.21,
-  markerCylinderBaseRadius: 0.005,
-  projectMarkerTipRadius: 0.035,
-  momentMarkerTipRadius: 0.025,
+  markerLineHeight: 0.1,
+  markerCylinderBaseRadius: 0.001,
+  projectMarkerTipRadius: 0.01,
+  momentMarkerTipRadius: 0.01,
 
   locations: [],
 };
+
+const mergeWithDefaultConfig = (partial: Partial<GlobeConfig>): GlobeConfig => ({
+  ...DEFAULT_CONFIG,
+  ...partial,
+});
 
 interface GlobeConfigContextType {
   config: GlobeConfig;
@@ -174,6 +201,10 @@ interface GlobeConfigContextType {
   updateLightDir: (dir: { x?: number; y?: number; z?: number }) => void;
   updateProjectMarkerColor: (color: string) => void;
   updateMomentMarkerColor: (color: string) => void;
+  updateProjectMarkerHoverColor: (color: string) => void;
+  updateMomentMarkerHoverColor: (color: string) => void;
+  updateProjectMarkerCylinderColor: (color: string) => void;
+  updateMomentMarkerCylinderColor: (color: string) => void;
   addLocation: (location: LocationMarker) => void;
   removeLocation: (id: string) => void;
   updateLocation: (id: string, location: Partial<LocationMarker>) => void;
@@ -190,7 +221,7 @@ export const GlobeConfigProvider = ({ children }: { children: ReactNode }) => {
       const saved = localStorage.getItem('globeConfig');
       if (saved) {
         try {
-          return JSON.parse(saved);
+          return mergeWithDefaultConfig(JSON.parse(saved));
         } catch {
           return DEFAULT_CONFIG;
         }
@@ -223,6 +254,38 @@ export const GlobeConfigProvider = ({ children }: { children: ReactNode }) => {
       ...prev,
       momentMarkerColor: color,
       momentMarkerEmissive: color,
+    }));
+  };
+
+  const updateProjectMarkerHoverColor = (color: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      projectMarkerHoverColor: color,
+      projectMarkerHoverEmissive: color,
+    }));
+  };
+
+  const updateMomentMarkerHoverColor = (color: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      momentMarkerHoverColor: color,
+      momentMarkerHoverEmissive: color,
+    }));
+  };
+
+  const updateProjectMarkerCylinderColor = (color: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      projectMarkerCylinderColor: color,
+      projectMarkerCylinderEmissive: color,
+    }));
+  };
+
+  const updateMomentMarkerCylinderColor = (color: string) => {
+    setConfig((prev) => ({
+      ...prev,
+      momentMarkerCylinderColor: color,
+      momentMarkerCylinderEmissive: color,
     }));
   };
 
@@ -264,7 +327,7 @@ export const GlobeConfigProvider = ({ children }: { children: ReactNode }) => {
       const saved = localStorage.getItem('globeConfig');
       if (saved) {
         try {
-          setConfig(JSON.parse(saved));
+          setConfig(mergeWithDefaultConfig(JSON.parse(saved)));
         } catch {
           console.error('Failed to load config from localStorage');
         }
@@ -286,6 +349,10 @@ export const GlobeConfigProvider = ({ children }: { children: ReactNode }) => {
         resetToDefaults,
         saveToLocalStorage,
         loadFromLocalStorage,
+        updateProjectMarkerHoverColor,
+        updateMomentMarkerHoverColor,
+        updateProjectMarkerCylinderColor,
+        updateMomentMarkerCylinderColor,
       }}
     >
       {children}
