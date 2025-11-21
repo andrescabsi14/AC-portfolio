@@ -29,14 +29,14 @@ export default function ProjectLightbox({ project, onClose, isExpanding = false 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.3 }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 md:p-8"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-8"
         >
           <motion.div
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
+            exit={{ scale: 0.95, opacity: 0 }}
             transition={{
               type: 'spring',
               damping: 30,
@@ -44,51 +44,45 @@ export default function ProjectLightbox({ project, onClose, isExpanding = false 
               delay: isExpanding ? 0.3 : 0
             }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-gradient-to-br from-zinc-900/95 via-zinc-800/95 to-black/95 backdrop-blur-2xl border-2 border-cyan-500/20 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative shadow-2xl shadow-cyan-500/20"
-            style={{
-              boxShadow: '0 0 60px rgba(34, 211, 238, 0.15), inset 0 0 40px rgba(34, 211, 238, 0.05)'
-            }}
+            className="bg-black border border-white/10 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative"
           >
-            {/* Decorative gradient orbs */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
             {/* Close button */}
             <motion.button
               onClick={onClose}
-              whileHover={{ scale: 1.1, rotate: 90 }}
-              whileTap={{ scale: 0.9 }}
-              className="absolute top-6 right-6 w-12 h-12 rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 hover:border-cyan-400/50 flex items-center justify-center transition-all z-10 shadow-lg hover:shadow-cyan-500/25"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className="absolute top-8 right-8 w-10 h-10 rounded-full border border-white/20 hover:border-white/40 flex items-center justify-center transition-colors z-10"
             >
-              <span className="text-3xl text-white font-light">×</span>
+              <span className="text-2xl text-white/60 hover:text-white/80">×</span>
             </motion.button>
 
             {/* Content */}
             <div className="p-8 md:p-12 relative z-10">
               {/* Header */}
               <div className="mb-10">
-                <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center gap-4 mb-8">
                   <motion.span
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="px-4 py-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-full text-cyan-400 font-bold text-lg"
+                    transition={{ delay: 0.1 }}
+                    className="px-3 py-1 border border-white/20 rounded-full text-white/60 text-sm font-medium"
                   >
                     {project.year}
                   </motion.span>
                   <motion.span
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                    className="text-gray-500 text-xl"
+                    transition={{ delay: 0.15 }}
+                    className="text-white/30"
                   >
                     •
                   </motion.span>
                   <motion.span
-                    initial={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="text-gray-300 text-lg"
+                    transition={{ delay: 0.2 }}
+                    className="text-white/70 text-sm"
                   >
                     📍 {project.location.city}, {project.location.country}
                   </motion.span>
@@ -96,16 +90,16 @@ export default function ProjectLightbox({ project, onClose, isExpanding = false 
                 <motion.h2
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-cyan-100 to-blue-100 bg-clip-text text-transparent mb-6"
+                  transition={{ delay: 0.3 }}
+                  className="text-5xl md:text-6xl font-light text-white mb-4"
                 >
                   {project.title}
                 </motion.h2>
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  className="text-xl md:text-2xl text-gray-300 leading-relaxed"
+                  transition={{ delay: 0.4 }}
+                  className="text-lg md:text-xl text-white/70 leading-relaxed"
                 >
                   {project.description}
                 </motion.p>
@@ -115,17 +109,17 @@ export default function ProjectLightbox({ project, onClose, isExpanding = false 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
-                className="flex flex-wrap gap-3 mb-10"
+                transition={{ delay: 0.5 }}
+                className="flex flex-wrap gap-3 mb-12"
               >
                 {project.tags.map((tag, index) => (
                   <motion.span
                     key={tag}
-                    initial={{ opacity: 0, scale: 0 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.8 + index * 0.1 }}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className="px-5 py-2.5 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-400/40 text-cyan-300 rounded-full text-sm font-semibold shadow-lg shadow-cyan-500/10 hover:shadow-cyan-500/25 transition-all"
+                    transition={{ delay: 0.6 + index * 0.05 }}
+                    whileHover={{ scale: 1.05 }}
+                    className="px-4 py-2 border border-white/20 hover:border-white/40 text-white/70 hover:text-white/90 rounded-lg text-xs font-medium transition-colors"
                   >
                     {tag}
                   </motion.span>
@@ -136,10 +130,10 @@ export default function ProjectLightbox({ project, onClose, isExpanding = false 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9 }}
-                className="mb-10 p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10"
+                transition={{ delay: 0.7 }}
+                className="mb-12 p-8 bg-white/5 rounded-lg border border-white/10"
               >
-                <p className="text-lg text-gray-200 leading-relaxed">{project.details}</p>
+                <p className="text-base text-white/70 leading-relaxed">{project.details}</p>
               </motion.div>
 
               {/* Achievements */}
@@ -147,23 +141,21 @@ export default function ProjectLightbox({ project, onClose, isExpanding = false 
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.0 }}
-                  className="mb-10"
+                  transition={{ delay: 0.8 }}
+                  className="mb-12"
                 >
-                  <h3 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-6">
-                    ✨ Achievements
-                  </h3>
-                  <ul className="space-y-4">
+                  <h3 className="text-2xl font-light text-white mb-6">✨ Achievements</h3>
+                  <ul className="space-y-3">
                     {project.achievements.map((achievement, index) => (
                       <motion.li
                         key={index}
-                        initial={{ opacity: 0, x: -20 }}
+                        initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 1.1 + index * 0.1 }}
-                        className="flex items-start gap-4 text-gray-200 p-4 rounded-xl bg-gradient-to-r from-cyan-500/5 to-blue-500/5 border border-cyan-500/10 hover:border-cyan-500/30 transition-all group"
+                        transition={{ delay: 0.9 + index * 0.05 }}
+                        className="flex items-start gap-3 text-white/70 pl-2 group"
                       >
-                        <span className="text-cyan-400 text-2xl mt-0.5 group-hover:scale-125 transition-transform">▸</span>
-                        <span className="text-lg">{achievement}</span>
+                        <span className="text-white/40 mt-1 group-hover:text-white/70 transition-colors">▸</span>
+                        <span className="text-sm">{achievement}</span>
                       </motion.li>
                     ))}
                   </ul>
@@ -175,20 +167,18 @@ export default function ProjectLightbox({ project, onClose, isExpanding = false 
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.2 }}
+                  transition={{ delay: 1.0 }}
                 >
-                  <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-6">
-                    🛠️ Technologies
-                  </h3>
-                  <div className="flex flex-wrap gap-3">
+                  <h3 className="text-2xl font-light text-white mb-6">🛠️ Technologies</h3>
+                  <div className="flex flex-wrap gap-2">
                     {project.technologies.map((tech, index) => (
                       <motion.span
                         key={tech}
-                        initial={{ opacity: 0, scale: 0 }}
+                        initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 1.3 + index * 0.05 }}
-                        whileHover={{ scale: 1.1, y: -3 }}
-                        className="px-5 py-3 bg-gradient-to-br from-purple-900/30 via-pink-900/30 to-purple-900/30 border border-purple-400/40 text-purple-100 rounded-xl text-sm font-semibold shadow-lg shadow-purple-500/10 hover:shadow-purple-500/30 transition-all"
+                        transition={{ delay: 1.1 + index * 0.04 }}
+                        whileHover={{ scale: 1.05 }}
+                        className="px-4 py-2 border border-white/20 hover:border-white/40 text-white/70 hover:text-white/90 rounded-lg text-xs font-medium transition-colors"
                       >
                         {tech}
                       </motion.span>
