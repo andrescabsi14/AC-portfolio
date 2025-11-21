@@ -965,7 +965,7 @@ export default function WorldExperienceSection() {
                   {/* Markers positioned at geographic locations on the globe - only render after Earth is fully loaded */}
                   {isExpanded && globeLoadedOnce && (
                     <MarkersGroup>
-                      <group scale={[1.1, 1.1, 1.1]}>
+                      <group scale={[1.1, 1.1, -1.1]}>
                         <group>
                           {projectMarkers.map((marker) => (
                           <group key={marker.id}>
