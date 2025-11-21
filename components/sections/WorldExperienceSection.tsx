@@ -779,20 +779,10 @@ const MarkersGroup = ({ children }: { children: React.ReactNode }) => {
   const markersRef = useRef<THREE.Group>(null);
   const globeMeshRef = useGlobeMesh();
 
-  // Set initial rotation to match globe's initial orientation
-  useEffect(() => {
-    if (markersRef.current) {
-      markersRef.current.rotation.x = THREE.MathUtils.degToRad(1.3);
-      markersRef.current.rotation.z = THREE.MathUtils.degToRad(180);
-    }
-  }, []);
-
   useFrame(() => {
     if (markersRef.current && globeMeshRef.current) {
       // Sync markers rotation with globe rotation
-      markersRef.current.rotation.x = globeMeshRef.current.rotation.x;
-      markersRef.current.rotation.y = globeMeshRef.current.rotation.y;
-      markersRef.current.rotation.z = globeMeshRef.current.rotation.z;
+      markersRef.current.rotation.copy(globeMeshRef.current.rotation);
     }
   });
 
