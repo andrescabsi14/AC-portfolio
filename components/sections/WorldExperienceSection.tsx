@@ -114,7 +114,7 @@ const latLngToCartesian = (lat: number, lng: number, radius = 1.02): THREE.Vecto
   return new THREE.Vector3(
     radius * Math.sin(phi) * Math.cos(theta),
     radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.sin(theta)
+    -radius * Math.sin(phi) * Math.sin(theta)  // Negate z to match Earth's negative z-scale
   );
 };
 
@@ -965,7 +965,7 @@ export default function WorldExperienceSection() {
                   {/* Markers positioned at geographic locations on the globe - only render after Earth is fully loaded */}
                   {isExpanded && globeLoadedOnce && (
                     <MarkersGroup>
-                      <group scale={[1.1, 1.1, -1.1]}>
+                      <group scale={[1.1, 1.1, 1.1]}>
                         <group>
                           {projectMarkers.map((marker) => (
                           <group key={marker.id}>
