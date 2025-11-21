@@ -109,7 +109,7 @@ export interface GlobeConfig {
 }
 
 const DEFAULT_CONFIG: GlobeConfig = {
-  lightDir: { x: 0.6, y: 0.4, z: 0 },
+  lightDir: { x: 0.6, y: 0, z: -0.2 },
   lightIntensity: 0.9,
   lightColor: '#ffd814',
 
@@ -181,7 +181,7 @@ const DEFAULT_CONFIG: GlobeConfig = {
   glowPositionY: 0,
   glowPositionZ: 0,
 
-  markerDistanceFromGlobe: 1.07,
+  markerDistanceFromGlobe: 1,
   markerLineHeight: 0.1,
   markerCylinderBaseRadius: 0.001,
   projectMarkerTipRadius: 0.01,

@@ -35,11 +35,17 @@ const CLOUDS_TEXTURE_URL = '/earthclouds.jpg';
 const HIGH_DAY_TEXTURE_URL = '/earthhighday.jpg';
 const HIGH_NIGHT_TEXTURE_URL = '/earthhighnight.jpg';
 
-const CURRENT_LOCATION = {
+const INITIAL_GLOBE_LOCATION = {
   lat: 40.7128,
   lng: -74.0060,
+};
+
+const CURRENT_LOCATION = {
+  ...INITIAL_GLOBE_LOCATION,
   label: 'Current Location: New York',
 };
+
+const AXIS_TILT_DEGREES = 23.5;
 
 const normalizeHexColor = (value: string) => {
   if (!value || !value.startsWith('#')) {
@@ -435,7 +441,7 @@ const CloudLayer = ({
         varying vec2 vUv;
 
         void main() {
-          vec2 correctedUv = vec2(vUv.x, 1.0 - vUv.y);
+          vec2 correctedUv = vec2(1.0 - vUv.x, 1.0 - vUv.y);
           vec4 texColor = vec4(0.0);
 
           // Apply blur effect - sample texture at multiple offsets
@@ -643,7 +649,7 @@ const Earth = ({
 
         // Determine blur amount for texture sampling
         float blurAmount = uBlur > 0.0 ? uBlur * 0.005 : 0.0;
-        vec2 correctedUv = vec2(vUv.x, 1.0 - vUv.y);
+        vec2 correctedUv = vec2(1.0 - vUv.x, 1.0 - vUv.y);
 
         // Sample low-res textures with optional blur
         vec3 lowDayColor = blurAmount > 0.0 ? blurTexture(uDayMap, correctedUv, blurAmount) : texture2D(uDayMap, correctedUv).rgb;
@@ -760,8 +766,10 @@ const Earth = ({
   };
 
   const tiltQuaternion = useMemo(() => {
-    const axis = new THREE.Vector3(0, 0, 1);
-    return new THREE.Quaternion().setFromAxisAngle(axis, THREE.MathUtils.degToRad(23.5));
+    return new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 0, 1),
+      THREE.MathUtils.degToRad(AXIS_TILT_DEGREES)
+    );
   }, []);
 
   const phaseMap = useMemo(() => ({ night: 0, dawn: 1, day: 2, dusk: 3 } as Record<string, number>), []);
@@ -784,10 +792,18 @@ const Earth = ({
 
       // Calculate target rotation to center NYC
       // NYC position on globe
-      const nycCartesian = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1);
+      const initialLocationCartesian = latLngToCartesian(
+        INITIAL_GLOBE_LOCATION.lat,
+        INITIAL_GLOBE_LOCATION.lng,
+        1
+      );
 
       // Create quaternion that rotates NYC point to face camera (positive Z direction)
-      const targetDir = new THREE.Vector3(nycCartesian.x, nycCartesian.y, nycCartesian.z).normalize();
+      const targetDir = new THREE.Vector3(
+        initialLocationCartesian.x,
+        initialLocationCartesian.y,
+        initialLocationCartesian.z
+      ).normalize();
       const cameraDir = new THREE.Vector3(0, 0, 1); // Camera looks at positive Z
 
       expandAnimationRef.current.targetQuaternion.setFromUnitVectors(targetDir, cameraDir);
@@ -1341,6 +1357,7 @@ const MarkerSphere = ({
       position={position}
       onClick={(event) => {
         event.stopPropagation();
+        onClick?.();
       }}
       onPointerOver={() => {
         setIsHovered(true);
