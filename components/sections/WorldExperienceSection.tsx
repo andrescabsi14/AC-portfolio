@@ -550,10 +550,11 @@ const Earth = ({
 };
 
 const CurrentLocationPulse = () => {
-  const position = useMemo(() => {
-    const vec = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1.05);
-    return [vec.x, vec.y, vec.z] as [number, number, number];
+  const transform = useMemo(() => {
+    return getMarkerTransform(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng);
   }, []);
+
+  const position = transform.tipPosition;
 
   const coreRef = useRef<THREE.Mesh>(null);
   const pulse1Ref = useRef<THREE.Mesh>(null);
