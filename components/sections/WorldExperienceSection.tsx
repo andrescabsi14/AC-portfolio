@@ -551,7 +551,7 @@ const Earth = ({
 
 const CurrentLocationPulse = () => {
   const position = useMemo(() => {
-    const vec = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1.11);
+    const vec = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1.05);
     return [vec.x, vec.y, vec.z] as [number, number, number];
   }, []);
 
@@ -778,6 +778,14 @@ const StarsParallax = () => {
 const MarkersGroup = ({ children }: { children: React.ReactNode }) => {
   const markersRef = useRef<THREE.Group>(null);
   const globeMeshRef = useGlobeMesh();
+
+  // Set initial rotation to match globe's initial orientation
+  useEffect(() => {
+    if (markersRef.current) {
+      markersRef.current.rotation.x = THREE.MathUtils.degToRad(1.3);
+      markersRef.current.rotation.z = THREE.MathUtils.degToRad(180);
+    }
+  }, []);
 
   useFrame(() => {
     if (markersRef.current && globeMeshRef.current) {
