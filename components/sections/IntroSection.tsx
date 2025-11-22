@@ -141,7 +141,7 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
               <motion.div
                 className="h-1 bg-gradient-to-r from-white via-white to-gray-400 my-4"
                 initial={hasAnimated ? false : { width: 0 }}
-                animate={hasAnimated ? { opacity: [0,1,1] } : { width: '120px' }}
+                animate={hasAnimated ? { opacity: [0, 1, 1] } : { width: '120px' }}
                 transition={{ duration: 0.8, delay: 1.0, ease: 'easeInOut' }}
               />
 
@@ -170,11 +170,13 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
           className="text-center max-w-5xl mx-auto"
           initial={hasAnimated ? false : { opacity: 0 }}
           animate={hasAnimated ? false : { opacity: 1, y: [0, 40, 40], }}
-          transition={{ duration: 0.4, delay: 5, ease: 'easeOut', y: {
-                    duration: 2.0,
-                    delay: 5,
-                    ease: 'easeOut'
-                  } }}
+          transition={{
+            duration: 0.4, delay: 5, ease: 'easeOut', y: {
+              duration: 2.0,
+              delay: 5,
+              ease: 'easeOut'
+            }
+          }}
         >
           <motion.p
             initial={hasAnimated ? false : { opacity: 0, y: 30 }}
@@ -182,7 +184,7 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
             transition={{ duration: 1.2, delay: 5, ease: [0.22, 1, 0.36, 1] }}
             className="text-2xl md:text-3xl lg:text-4xl font-light tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-gray-500 mb-6"
           >
-            AI First
+            World-Class AI Engineering & Strategy
           </motion.p>
           <motion.p
             initial={hasAnimated ? false : { opacity: 0, y: 30 }}
@@ -190,7 +192,7 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
             transition={{ duration: 1.2, delay: 5.5, ease: [0.22, 1, 0.36, 1] }}
             className="text-lg md:text-xl lg:text-2xl font-light text-gray-400 max-w-3xl mx-auto"
           >
-            Transform your business into an AI-first company. Stay ahead of the competition.
+            Delivering expert AI solutions for global enterprises.
           </motion.p>
         </motion.div>
       </div>

@@ -3,10 +3,12 @@
 import { useEffect } from 'react';
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
-import AboutUsIntroSection from '@/components/sections/AboutUsIntroSection';
-import RecognitionSection from '@/components/sections/RecognitionSection';
-import NetworkingSection from '@/components/sections/NetworkingSection';
+import StrategicHeroSection from '@/components/sections/StrategicHeroSection';
+import CredentialsSection from '@/components/sections/CredentialsSection';
+import ServicesSection from '@/components/sections/ServicesSection';
 import AIReadyCTA from '@/components/sections/AIReadyCTA';
+
+import GlobalStatus from '@/components/ui/GlobalStatus';
 
 export default function AboutPage() {
   // Add smooth snap scrolling
@@ -25,15 +27,17 @@ export default function AboutPage() {
     <>
       <Header showAnimation={false} />
       <main className="relative bg-black overflow-x-hidden">
-        <AboutUsIntroSection />
-        <RecognitionSection />
-        <NetworkingSection />
-      
-      <section className="bg-black px-6 py-12 md:py-16">
-        <div className="mx-auto max-w-6xl">
-          <AIReadyCTA />
-        </div>
-      </section>
+        <StrategicHeroSection />
+        <CredentialsSection />
+        <ServicesSection />
+
+        <section className="bg-black px-6 py-12 md:py-16">
+          <div className="mx-auto max-w-6xl">
+            <AIReadyCTA />
+          </div>
+        </section>
+
+        <GlobalStatus />
       </main>
       <Footer />
     </>

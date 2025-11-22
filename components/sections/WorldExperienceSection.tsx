@@ -24,98 +24,108 @@ interface GeoJSONData {
 }
 
 interface GlobeMoment {
+  id: string;
   title: string;
   subtitle: string;
   description: string;
   image: string;
   lat: number;
   lng: number;
+  color: string;
+  type: 'milestone' | 'event';
 }
 
 // Globe moments with coordinates
 const GLOBE_MOMENT_LOCATIONS: GlobeMoment[] = [
   {
-    title: 'Bogotá',
-    subtitle: 'The origin.',
-    description:
-      'Where the journey began — growing up in Bogotá, learning to build without permission and think beyond the neighborhood.',
-    image: '/images/globe/bogota-origin.jpg',
-    lat: 4.7110,
-    lng: -74.0055,
-  },
-  {
-    title: 'Dallas',
-    subtitle: "The mayor's office.",
-    description:
-      "A first taste of U.S. civic leadership — conversations inside the mayor's office about cities, innovation, and opportunity.",
-    image: '/images/globe/dallas-mayor.jpg',
-    lat: 32.7767,
-    lng: -96.7970,
-  },
-  {
-    title: 'Detroit',
-    subtitle: 'Congressmen, city leaders, and the awakening of a global perspective.',
-    description:
-      'In Detroit, meetings with congressmen and city leaders expanded a local story into a global mission for impact.',
-    image: '/images/globe/detroit-leaders.jpg',
-    lat: 42.3314,
-    lng: -83.0458,
-  },
-  {
-    title: 'Washington D.C.',
-    subtitle: 'The U.S. Department of State, seventh floor.',
-    description:
-      'On the seventh floor of the State Department, policy, diplomacy, and entrepreneurship collided in a single hallway.',
-    image: '/images/globe/washington-state-dept.jpg',
-    lat: 38.8951,
+    id: 'ylai',
+    title: 'Washington, D.C.',
+    subtitle: 'YLAI Fellowship',
+    description: 'Selected as one of 250 exceptional young leaders from Latin America and the Caribbean. Recognized by President Barack Obama at the U.S. Department of State.',
+    image: '/photos/certificate/PresidentObamaCertificate.jpg',
+    lat: 38.9072,
     lng: -77.0369,
+    color: '#ef4444',
+    type: 'milestone'
   },
   {
-    title: 'Copenhagen & Aarhus',
-    subtitle:
-      'Representing the Americas as a DTU Young Influencer at the C40 World Mayors Summit.',
-    description:
-      'Representing the Americas among mayors, climate leaders, and innovators, shaping conversations about cities and the future.',
-    image: '/images/globe/copenhagen-aarhus-c40.jpg',
+    id: 'dtu',
+    title: 'Copenhagen, Denmark',
+    subtitle: 'DTU Young Influencer',
+    description: 'Acknowledged as a leading voice in sustainable innovation and technology at the C40 World Mayors Summit.',
+    image: '/photos/certificate/TechCamp-Bolivia.jpg',
     lat: 55.6761,
     lng: 12.5683,
+    color: '#ef4444',
+    type: 'milestone'
   },
   {
-    title: 'Lima',
-    subtitle: 'The APEC Summit.',
-    description:
-      'At APEC in Lima, the focus shifted from local startups to the geopolitics of trade, technology, and shared prosperity.',
-    image: '/images/globe/lima-apec.jpg',
-    lat: -12.0464,
-    lng: -77.0428,
+    id: 'techcamp',
+    title: 'La Paz, Bolivia',
+    subtitle: 'TechCamp Innovation',
+    description: 'Leading digital innovation workshops and fostering cross-border collaboration in technology.',
+    image: '/photos/certificate/TechCamp-Bolivia.jpg',
+    lat: -16.5000,
+    lng: -68.1193,
+    color: '#ef4444',
+    type: 'milestone'
   },
   {
-    title: 'Spain, Bolivia, Memphis',
-    subtitle: 'Entrepreneurship, culture, and the belief that ideas move faster than borders.',
-    description:
-      'Workshops, talks, and collaborations across three continents proving that good ideas can outrun passports and borders.',
-    image: '/images/globe/spain-bolivia-memphis.jpg',
-    lat: 40.4637,
-    lng: -3.7492,
+    id: 'maastricht',
+    title: 'Maastricht, Netherlands',
+    subtitle: 'AI Research & Development',
+    description: 'Advanced research in Artificial Intelligence and agentic workflows.',
+    image: '/images/globe/copenhagen-aarhus-c40.jpg', // Placeholder
+    lat: 50.8514,
+    lng: 5.6910,
+    color: '#ef4444',
+    type: 'milestone'
   },
   {
-    title: 'Santa Clara & Silicon Valley',
-    subtitle: 'Invited to share approaches to frontier technology.',
-    description:
-      'In the heart of Silicon Valley, sharing experiments at the edge of AI, Web3, and the next wave of tools for builders.',
-    image: '/images/globe/silicon-valley-frontier-tech.jpg',
-    lat: 37.3541,
-    lng: -121.9552,
+    id: 'miami',
+    title: 'Miami, USA',
+    subtitle: 'Blockchain & AI Hub',
+    description: 'Architecting decentralized solutions and enterprise AI systems.',
+    image: '/images/globe/new-york-hudson-yards.jpg', // Placeholder
+    lat: 25.7617,
+    lng: -80.1918,
+    color: '#ef4444',
+    type: 'milestone'
+  },
+  // High-Level Events
+  {
+    id: 'event-europe',
+    title: 'European Summit',
+    subtitle: 'Strategic Innovation',
+    description: 'Collaborating with European tech leaders on future-ready infrastructure.',
+    image: '/photos/mlb/IMG_5006.jpeg',
+    lat: 48.8566, // Paris
+    lng: 2.3522,
+    color: '#3b82f6', // Blue for events
+    type: 'event'
   },
   {
-    title: 'New York',
-    subtitle: 'The city first seen in 2014 from the still-unfinished Hudson Yards.',
-    description:
-      'Looking over an unfinished Hudson Yards in 2014 and deciding that one day, the work would belong in this skyline.',
-    image: '/images/globe/new-york-hudson-yards.jpg',
-    lat: 40.7128,
-    lng: -74.0060,
+    id: 'event-asia',
+    title: 'Asian Tech Forum',
+    subtitle: 'Global Expansion',
+    description: 'Bridging markets and technologies across the Pacific.',
+    image: '/photos/mlb/IMG_5005.jpeg',
+    lat: 35.6762, // Tokyo
+    lng: 139.6503,
+    color: '#3b82f6',
+    type: 'event'
   },
+  {
+    id: 'event-africa',
+    title: 'African Innovation',
+    subtitle: 'Emerging Markets',
+    description: 'Empowering the next generation of digital builders.',
+    image: '/photos/mlb/IMG_4998.jpeg',
+    lat: -1.2921, // Nairobi
+    lng: 36.8219,
+    color: '#3b82f6',
+    type: 'event'
+  }
 ];
 
 function WorldExperienceSectionContent() {

@@ -13,10 +13,10 @@ const navItems: {
   href?: string;
   hiddenOnMobile?: boolean;
 }[] = [
-  { id: 'about', label: 'About', href: '/about' },
-  { id: 'world-experience', label: 'Experience' },
-  { id: 'ai-first', label: 'AI First', href: '/ai-first' },
-];
+    { id: 'about', label: 'About', href: '/about' },
+    { id: 'world-experience', label: 'Experience' },
+    { id: 'ai-first', label: 'AI First', href: '/ai-first' },
+  ];
 
 interface HeaderProps {
   showAnimation?: boolean;
@@ -121,29 +121,29 @@ export default function Header({ showAnimation = true }: HeaderProps) {
             onMouseEnter={() => setIsNameHovered(true)}
             onMouseLeave={() => setIsNameHovered(false)}
           >
-          {/* Andrés */}
-          <div className="overflow-hidden h-6">
-            <motion.span
-              className="text-sm font-medium tracking-widest uppercase leading-none inline-block"
-              style={{ letterSpacing: '0.2em' }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-            >
-              <span className="text-white">A</span><motion.span initial={{opacity: 0}} animate={{opacity: isNameHovered ? 1: 0}} className="text-gray-300">ndrés</motion.span>
-            </motion.span>
-          </div>
+            {/* Andrés */}
+            <div className="overflow-hidden h-6">
+              <motion.span
+                className="text-sm font-medium tracking-widest uppercase leading-none inline-block"
+                style={{ letterSpacing: '0.2em' }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+              >
+                <span className="text-white">A</span><motion.span initial={{ opacity: 0 }} animate={{ opacity: isNameHovered ? 1 : 0 }} className="text-gray-300">ndrés</motion.span>
+              </motion.span>
+            </div>
 
-          <motion.span initial={{width: 20, x: -5}} animate={{width: isNameHovered ? '110%' : 20, x: isNameHovered ? -4 : -5}} transition={{duration: 0.3, ease: 'easeInOut', delay: 0}} className="w-full h-px bg-white my-0.5" />
+            <motion.span initial={{ width: 20, x: -5 }} animate={{ width: isNameHovered ? '110%' : 20, x: isNameHovered ? -4 : -5 }} transition={{ duration: 0.3, ease: 'easeInOut', delay: 0 }} className="w-full h-px bg-white my-0.5" />
 
-          {/* Cabrera */}
-          <div className="overflow-hidden h-6">
-            <motion.span
-              className="text-sm font-medium tracking-widest uppercase leading-none inline-block"
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-            >
-              <span className="text-white">C</span><motion.span initial={{opacity: 0}} animate={{opacity: isNameHovered ? 1: 0}} transition={{duration: 0.3, ease: 'easeInOut', delay: 0}} className="text-gray-300">abrera</motion.span>
-            </motion.span>
-          </div>
-        </Link>
+            {/* Cabrera */}
+            <div className="overflow-hidden h-6">
+              <motion.span
+                className="text-sm font-medium tracking-widest uppercase leading-none inline-block"
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+              >
+                <span className="text-white">C</span><motion.span initial={{ opacity: 0 }} animate={{ opacity: isNameHovered ? 1 : 0 }} transition={{ duration: 0.3, ease: 'easeInOut', delay: 0 }} className="text-gray-300">abrera</motion.span>
+              </motion.span>
+            </div>
+          </Link>
         </motion.div>
 
         {/* Navigation */}
@@ -156,7 +156,7 @@ export default function Header({ showAnimation = true }: HeaderProps) {
               onMouseLeave={() => setHoveredNavItem(null)}
             >
               <Link
-                href={item.href || `#${item.id}`}
+                href={item.href || (pathname === '/' ? `#${item.id}` : `/#${item.id}`)}
                 className={cn(
                   'text-xs font-medium tracking-widest uppercase transition-all duration-300',
                   activeSection === item.id

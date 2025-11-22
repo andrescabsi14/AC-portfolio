@@ -96,15 +96,17 @@ export default function AIReadyPage() {
         {/* Hero Section */}
         <section className="relative mx-auto max-w-6xl px-6 py-32 text-center">
           <div className="space-y-6">
-            <p className="text-xs uppercase tracking-[0.6em] text-white/50">
-              Become AI-Ready
+            <p className="text-xs uppercase tracking-[0.6em] text-blue-400">
+              AI Intelligence & Training
             </p>
-            <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">
-              Transform Your Business with AI
+            <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl leading-tight">
+              Strategic AI <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-400 to-gray-600">
+                Capabilities
+              </span>
             </h1>
-            <p className="mx-auto max-w-3xl text-lg text-white/70">
-              Practical guides to solve common business challenges with AI in measurable timeframes.
-              Expand your vision and discover what's possible when you partner with technology that understands your goals.
+            <p className="mx-auto max-w-3xl text-lg text-white/70 leading-relaxed">
+              Executive-grade intelligence reports and training modules designed to accelerate your organization's AI maturity.
             </p>
           </div>
         </section>
@@ -152,25 +154,28 @@ export default function AIReadyPage() {
             {articleCategories.map((category) => (
               <div
                 key={category.title}
-                className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur transition hover:border-white/20 hover:bg-white/[0.05]"
+                className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.02] p-8 backdrop-blur transition hover:border-white/20 hover:bg-white/[0.04]"
               >
-                <div className="space-y-1">
+                <div className="space-y-2 mb-6">
                   <h4 className="text-sm font-semibold uppercase tracking-[0.2em] text-white">
                     {category.title}
                   </h4>
-                  <p className="text-xs text-white/60">{category.description}</p>
+                  <p className="text-xs text-white/50 font-light">{category.description}</p>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {category.articles.map((article) => (
                     <Link
                       key={article.href}
                       href={article.href}
-                      className="group block space-y-1 rounded-lg border border-white/5 bg-white/[0.02] p-3 transition hover:border-white/20 hover:bg-white/[0.05]"
+                      className="group block space-y-2 rounded-lg border border-white/5 bg-black/40 p-4 transition hover:border-blue-500/30 hover:bg-blue-500/5"
                     >
-                      <p className="text-xs font-medium text-white/90 group-hover:text-white">
-                        {article.title}
-                      </p>
-                      <p className="text-[10px] leading-relaxed text-white/50 group-hover:text-white/70">
+                      <div className="flex items-start justify-between">
+                        <p className="text-sm font-medium text-white/90 group-hover:text-blue-400 transition-colors">
+                          {article.title}
+                        </p>
+                        <span className="text-xs text-white/30 group-hover:text-blue-400/50">→</span>
+                      </div>
+                      <p className="text-[11px] leading-relaxed text-white/40 group-hover:text-white/60 font-light">
                         {article.problem}
                       </p>
                     </Link>

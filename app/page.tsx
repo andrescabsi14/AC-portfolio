@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
 import IntroSection from '@/components/sections/IntroSection';
+import TrustedBySection from '@/components/sections/TrustedBySection';
 import AIChatSectionNew from '@/components/sections/AIChatSectionNew';
 import WorldExperienceSection from '@/components/sections/WorldExperienceSection';
 import ServicesOverviewSection from '@/components/sections/ServicesOverviewSection';
@@ -22,26 +23,27 @@ export default function Home() {
       {/* Intro Section with Name Animation */}
       <IntroSection onAnimationComplete={() => setIntroAnimationComplete(true)} />
 
-       
+      {/* Trusted By Section */}
+      <TrustedBySection />
 
-        {/* World Experience Section */}
-        <WorldExperienceSection />
+      {/* World Experience Section */}
+      <WorldExperienceSection />
 
-        {/* Services Overview Section */}
-        <ServicesOverviewSection />
+      {/* Services Overview Section */}
+      <ServicesOverviewSection />
 
-        {/* Problems & Solutions Section */}
-        <ProblemsSection />
+      {/* Problems & Solutions Section */}
+      <ProblemsSection />
 
-        {/* Personal Guarantee Section */}
-        <PersonalGuaranteeSection />
+      {/* Personal Guarantee Section */}
+      <PersonalGuaranteeSection />
 
-        {/* CTA Section */}
-        <CTASection />
+      {/* CTA Section */}
+      <CTASection />
 
-        {/* AI Chat Section */}
-        <AIChatSectionNew />
-        <Footer />
-      </main>
+      {/* AI Chat Section */}
+      <AIChatSectionNew />
+      <Footer />
+    </main>
   );
 }
