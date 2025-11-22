@@ -10,6 +10,8 @@ import ProjectLightbox from '@/components/ui/ProjectLightbox';
 import { Button } from '@/components/ui/button';
 import { AdminControlPanel } from '@/components/ui/AdminControlPanel';
 import { GlobeConfigProvider, useGlobeConfig } from '@/contexts/GlobeConfigContext';
+import { getSunDirectionVector } from '@/lib/solar';
+import { INITIAL_GLOBE_LOCATION, AXIS_TILT_DEGREES } from '@/lib/globeConstants';
 
 // Admin mode toggle - set to true to enable admin controls
 const ADMIN = true;
@@ -36,8 +38,7 @@ const HIGH_DAY_TEXTURE_URL = '/earthhighday.jpg';
 const HIGH_NIGHT_TEXTURE_URL = '/earthhighnight.jpg';
 
 const CURRENT_LOCATION = {
-  lat: 40.7128,
-  lng: -74.0060,
+  ...INITIAL_GLOBE_LOCATION,
   label: 'Current Location: New York',
 };
 
@@ -152,7 +153,7 @@ const calculateSunPosition = (lat: number, lng: number, date: Date) => {
   const M = (357.5291 + 0.98560028 * J) % 360;
   const C = (1.9146 - 0.004817 * Math.cos(M * Math.PI / 180) - 0.000135 * Math.cos(2 * M * Math.PI / 180)) * Math.sin(M * Math.PI / 180);
   const lambda = (280.4665 + 36000.76983 * (julianDay / 36525) + C) % 360;
-  const SunDec = Math.asin(Math.sin(23.4397 * Math.PI / 180) * Math.sin(lambda * Math.PI / 180));
+  const SunDec = Math.asin(Math.sin(AXIS_TILT_DEGREES * Math.PI / 180) * Math.sin(lambda * Math.PI / 180));
 
   const latRad = lat * Math.PI / 180;
   const cosH = -Math.tan(latRad) * Math.tan(SunDec);
@@ -255,6 +256,8 @@ const Atmosphere = ({
   const g = ((rgb >> 8) & 255) / 255;
   const b = (rgb & 255) / 255;
 
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
+
   const material = useMemo(
     () =>
       new THREE.ShaderMaterial({
@@ -291,6 +294,8 @@ const Atmosphere = ({
     [r, g, b, intensity, terminatorSoftness]
   );
 
+  materialRef.current = material;
+
   useEffect(() => {
     return () => {
       material.dispose();
@@ -316,7 +321,7 @@ const Atmosphere = ({
   return (
     <mesh ref={ref} position={[positionX, positionY, positionZ]} scale={scale}>
       <sphereGeometry args={[1, 64, 64]} />
-      <primitive object={material} attach="material" />
+      <primitive object={material} attach="material" ref={materialRef} />
     </mesh>
   );
 };
@@ -335,6 +340,8 @@ const OuterGlow = ({
   positionX?: number;
   positionY?: number;
   positionZ?: number;
+  textureUOffset?: number;
+  textureVOffset?: number;
 }) => {
   // Parse color to RGB
   const rgb = parseInt(color.replace('#', ''), 16);
@@ -391,7 +398,9 @@ const CloudLayer = ({
   positionY = 0,
   positionZ = 0,
   blur = 0,
-  rotationSpeed = 0.02
+  rotationSpeed = 0.02,
+  textureUOffset = 0,
+  textureVOffset = 0,
 }: {
   opacity?: number;
   scale?: number;
@@ -400,6 +409,8 @@ const CloudLayer = ({
   positionZ?: number;
   blur?: number;
   rotationSpeed?: number;
+  textureUOffset?: number;
+  textureVOffset?: number;
 }) => {
   const cloudsTexture = useLoader(THREE.TextureLoader, CLOUDS_TEXTURE_URL);
   cloudsTexture.flipY = false;
@@ -420,6 +431,8 @@ const CloudLayer = ({
         uTexture: { value: cloudsTexture },
         uOpacity: { value: opacity },
         uBlur: { value: blur },
+        uTextureUOffset: { value: textureUOffset },
+        uTextureVOffset: { value: textureVOffset },
       },
       vertexShader: `
         varying vec2 vUv;
@@ -432,10 +445,20 @@ const CloudLayer = ({
         uniform sampler2D uTexture;
         uniform float uOpacity;
         uniform float uBlur;
+        uniform float uTextureUOffset;
+        uniform float uTextureVOffset;
         varying vec2 vUv;
 
+        float wrapUv(float value) {
+          float w = mod(value, 1.0);
+          return w < 0.0 ? w + 1.0 : w;
+        }
+
         void main() {
-          vec2 correctedUv = vec2(vUv.x, 1.0 - vUv.y);
+          vec2 correctedUv = vec2(
+            wrapUv(1.0 - vUv.x + uTextureUOffset),
+            wrapUv(1.0 - vUv.y + uTextureVOffset)
+          );
           vec4 texColor = vec4(0.0);
 
           // Apply blur effect - sample texture at multiple offsets
@@ -516,6 +539,8 @@ const Earth = ({
   positionX = 0,
   positionY = 0,
   positionZ = 0,
+  textureUOffset = 0,
+  textureVOffset = 0,
 }: {
   onLoaded: () => void;
   scale?: number;
@@ -558,6 +583,7 @@ const Earth = ({
     lastX: 0,
     lastY: 0,
   });
+  const sunDirectionRef = useRef(new THREE.Vector3());
   const initialRotationSet = useRef(false);
 
   const shaderMaterial = useMemo(() => {
@@ -577,6 +603,8 @@ const Earth = ({
         uTextureBlend: { value: 0 }, // 0 = low-res, 1 = high-res
         uIsExpanded: { value: isExpanded ? 1.0 : 0.0 }, // 1.0 = expanded, 0.0 = not expanded
         uBlur: { value: blur }, // 0 = no blur, >0 = blur effect
+        uTextureUOffset: { value: textureUOffset },
+        uTextureVOffset: { value: textureVOffset },
       },
       vertexShader: `
         varying vec3 vNormal;
@@ -609,6 +637,13 @@ const Earth = ({
         uniform float uTextureBlend;
         uniform float uIsExpanded;
         uniform float uBlur;
+        uniform float uTextureUOffset;
+        uniform float uTextureVOffset;
+
+        float wrapUv(float value) {
+          float w = mod(value, 1.0);
+          return w < 0.0 ? w + 1.0 : w;
+        }
 
         // Texture blur function - applies 9-tap box blur
         vec3 blurTexture(sampler2D tex, vec2 uv, float blurAmount) {
@@ -639,11 +674,15 @@ const Earth = ({
           // Smooth transition zone (terminator line) - wider for more realistic gradient
           float transitionStart = -uTerminatorSoftness;
           float transitionEnd = uTerminatorSoftness;
-          float dayFactor = smoothstep(transitionStart, transitionEnd, intensity);
+          float rawDayFactor = smoothstep(transitionStart, transitionEnd, intensity);
+          float dayFactor = 1.0 - rawDayFactor;
 
         // Determine blur amount for texture sampling
         float blurAmount = uBlur > 0.0 ? uBlur * 0.005 : 0.0;
-        vec2 correctedUv = vec2(vUv.x, 1.0 - vUv.y);
+        vec2 correctedUv = vec2(
+          wrapUv(1.0 - vUv.x + uTextureUOffset),
+          wrapUv(1.0 - vUv.y + uTextureVOffset)
+        );
 
         // Sample low-res textures with optional blur
         vec3 lowDayColor = blurAmount > 0.0 ? blurTexture(uDayMap, correctedUv, blurAmount) : texture2D(uDayMap, correctedUv).rgb;
@@ -759,11 +798,6 @@ const Earth = ({
     pointerStateRef.current.isDragging = false;
   };
 
-  const tiltQuaternion = useMemo(() => {
-    const axis = new THREE.Vector3(0, 0, 1);
-    return new THREE.Quaternion().setFromAxisAngle(axis, THREE.MathUtils.degToRad(23.5));
-  }, []);
-
   const phaseMap = useMemo(() => ({ night: 0, dawn: 1, day: 2, dusk: 3 } as Record<string, number>), []);
   const frameCountRef = useRef(0);
   const expandAnimationRef = useRef({
@@ -784,10 +818,18 @@ const Earth = ({
 
       // Calculate target rotation to center NYC
       // NYC position on globe
-      const nycCartesian = latLngToCartesian(CURRENT_LOCATION.lat, CURRENT_LOCATION.lng, 1);
+      const initialLocationCartesian = latLngToCartesian(
+        INITIAL_GLOBE_LOCATION.lat,
+        INITIAL_GLOBE_LOCATION.lng,
+        1
+      );
 
       // Create quaternion that rotates NYC point to face camera (positive Z direction)
-      const targetDir = new THREE.Vector3(nycCartesian.x, nycCartesian.y, nycCartesian.z).normalize();
+      const targetDir = new THREE.Vector3(
+        initialLocationCartesian.x,
+        initialLocationCartesian.y,
+        initialLocationCartesian.z
+      ).normalize();
       const cameraDir = new THREE.Vector3(0, 0, 1); // Camera looks at positive Z
 
       expandAnimationRef.current.targetQuaternion.setFromUnitVectors(targetDir, cameraDir);
@@ -835,18 +877,18 @@ const Earth = ({
       // Throttle sun calculation to every 30 frames (~500ms at 60fps)
       frameCountRef.current++;
       if (frameCountRef.current % 30 === 0) {
-        const now = new Date();
-        const localHours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
-        const dynamicTimeOfDay = (localHours % 24) / 24;
-
-        const sunAngle = dynamicTimeOfDay * Math.PI * 2;
-        const sunDirection = new THREE.Vector3(
-          Math.cos(sunAngle),
-          0.2,
-          Math.sin(sunAngle)
+        const calculatedSunDirection = getSunDirectionVector(
+          new Date(),
+          CURRENT_LOCATION.lat,
+          CURRENT_LOCATION.lng,
+          AXIS_TILT_DEGREES
         );
-        sunDirection.applyQuaternion(tiltQuaternion).normalize();
-        materialRef.current.uniforms.uLightDir.value.copy(sunDirection);
+        sunDirectionRef.current.set(
+          calculatedSunDirection.x,
+          calculatedSunDirection.y,
+          calculatedSunDirection.z
+        );
+        materialRef.current.uniforms.uLightDir.value.copy(sunDirectionRef.current);
       }
 
       materialRef.current.uniforms.uTimeOfDay.value = timeOfDay;
@@ -871,6 +913,13 @@ const Earth = ({
     };
   }, [shaderMaterial]);
 
+  useEffect(() => {
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTextureUOffset.value = textureUOffset;
+      materialRef.current.uniforms.uTextureVOffset.value = textureVOffset;
+    }
+  }, [textureUOffset, textureVOffset]);
+
   return (
     <mesh
       ref={meshRef}
@@ -885,7 +934,7 @@ const Earth = ({
       onPointerCancel={handlePointerUp}
     >
       <sphereGeometry args={[1, isExpanded ? segments : 32, isExpanded ? segments : 32]} />
-      <primitive object={shaderMaterial} attach="material" />
+      <primitive object={shaderMaterial} attach="material" ref={materialRef} />
     </mesh>
   );
 };
@@ -1341,6 +1390,7 @@ const MarkerSphere = ({
       position={position}
       onClick={(event) => {
         event.stopPropagation();
+        onClick?.();
       }}
       onPointerOver={() => {
         setIsHovered(true);
@@ -1562,6 +1612,8 @@ function WorldExperienceSectionContent() {
                     positionX={dynamicGlobePositionX}
                     positionY={dynamicGlobePositionY}
                     positionZ={dynamicGlobePositionZ}
+                    textureUOffset={config.textureUOffset}
+                    textureVOffset={config.textureVOffset}
                   />
                   <CloudLayer
                     opacity={config.cloudOpacity}
@@ -1571,6 +1623,8 @@ function WorldExperienceSectionContent() {
                     positionZ={config.cloudPositionZ}
                     blur={config.cloudBlur}
                     rotationSpeed={config.rotationSpeed}
+                    textureUOffset={config.textureUOffset}
+                    textureVOffset={config.textureVOffset}
                   />
                   {isExpanded && (
                   <Atmosphere

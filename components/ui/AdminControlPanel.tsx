@@ -255,6 +255,38 @@ export const AdminControlPanel = ({ isExpanded }: { isExpanded: boolean }) => {
               </SubSection>
             </ConfigSection>
 
+            {/* Textures Section */}
+            <ConfigSection title="Textures">
+              <SubSection title="UV Offsets">
+                <div>
+                  <label className="block text-white/70 mb-1 text-xs">U Offset</label>
+                  <input
+                    type="range"
+                    min="-1"
+                    max="1"
+                    step="0.01"
+                    value={config.textureUOffset}
+                    onChange={(e) => updateConfig({ textureUOffset: parseFloat(e.target.value) })}
+                    className="w-full"
+                  />
+                  <span className="text-white/50 text-xs">{config.textureUOffset.toFixed(2)}</span>
+                </div>
+                <div>
+                  <label className="block text-white/70 mb-1 text-xs">V Offset</label>
+                  <input
+                    type="range"
+                    min="-1"
+                    max="1"
+                    step="0.01"
+                    value={config.textureVOffset}
+                    onChange={(e) => updateConfig({ textureVOffset: parseFloat(e.target.value) })}
+                    className="w-full"
+                  />
+                  <span className="text-white/50 text-xs">{config.textureVOffset.toFixed(2)}</span>
+                </div>
+              </SubSection>
+            </ConfigSection>
+
             {/* Lighting Section */}
             <ConfigSection title="Lighting">
               <div>

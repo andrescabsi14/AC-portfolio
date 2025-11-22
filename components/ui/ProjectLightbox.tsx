@@ -49,12 +49,16 @@ export default function ProjectLightbox({ project, onClose, isExpanding = false 
 
             {/* Close button */}
             <motion.button
-              onClick={onClose}
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onClose();
+              }}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className="absolute top-8 right-8 w-10 h-10 rounded-full border border-white/20 hover:border-white/40 flex items-center justify-center transition-colors z-10"
+              className="absolute top-8 right-8 w-10 h-10 rounded-full border border-white/20 hover:border-white/40 flex items-center justify-center transition-colors z-[999]"
             >
-              <span className="text-2xl text-white/60 hover:text-white/80">×</span>
+              <span className="text-2xl text-white/60 hover:text-white/80 cursor-pointer" style={{ height: '35px'}}>×</span>
             </motion.button>
 
             {/* Content */}
