@@ -13,7 +13,7 @@ const navItems: {
   href?: string;
   hiddenOnMobile?: boolean;
 }[] = [
-  { id: 'about', label: 'About' },
+  { id: 'about', label: 'About', href: '/about' },
   { id: 'world-experience', label: 'Experience' },
   { id: 'ai-first', label: 'AI First', href: '/ai-first' },
 ];
