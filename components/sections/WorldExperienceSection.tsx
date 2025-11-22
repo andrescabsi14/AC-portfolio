@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import MomentLightbox from '@/components/ui/MomentLightbox';
+import * as THREE from 'three';
 
 // Dynamically import Globe to avoid SSR issues
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false });
@@ -121,6 +122,7 @@ function WorldExperienceSectionContent() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [placesData, setPlacesData] = useState<GeoJSONData | null>(null);
   const [selectedMoment, setSelectedMoment] = useState<GlobeMoment | null>(null);
+  const [globeMaterial, setGlobeMaterial] = useState<THREE.Material | null>(null);
   const scrollPositionRef = useRef(0);
   const globeEl = useRef<any>(null);
 
@@ -131,12 +133,84 @@ function WorldExperienceSectionContent() {
       .then((data) => setPlacesData(data));
   }, []);
 
+  // Load textures and create shader material
+  useEffect(() => {
+    const loader = new THREE.TextureLoader();
+    Promise.all([
+      loader.loadAsync('/earthhighday.jpg'),
+      loader.loadAsync('/earthhighnight.jpg'),
+      loader.loadAsync('/earthcloudshigh.jpg')
+    ]).then(([dayTexture, nightTexture, cloudsTexture]) => {
+      // Earth Material
+      const shaderMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          dayTexture: { value: dayTexture },
+          nightTexture: { value: nightTexture },
+          sunDirection: { value: new THREE.Vector3(1, 0.5, 1).normalize() }
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          varying vec3 vNormal;
+          varying vec3 vSunDir;
+          uniform vec3 sunDirection;
+          void main() {
+            vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+            vSunDir = normalize((viewMatrix * vec4(sunDirection, 0.0)).xyz);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform sampler2D dayTexture;
+          uniform sampler2D nightTexture;
+          varying vec2 vUv;
+          varying vec3 vNormal;
+          varying vec3 vSunDir;
+          void main() {
+            vec3 dayColor = texture2D(dayTexture, vUv).rgb;
+            vec3 nightColor = texture2D(nightTexture, vUv).rgb;
+            float cosineAngleSunToNormal = dot(vNormal, vSunDir);
+            float mixAmount = smoothstep(-0.2, 0.2, cosineAngleSunToNormal);
+            vec3 color = mix(nightColor, dayColor, mixAmount);
+            gl_FragColor = vec4(color, 1.0);
+          }
+        `
+      });
+      setGlobeMaterial(shaderMaterial);
+
+      // Cloud Mesh
+      if (globeEl.current) {
+        const cloudGeometry = new THREE.SphereGeometry(globeEl.current.getGlobeRadius() * 1.005, 75, 75);
+        const cloudMaterial = new THREE.MeshPhongMaterial({
+          map: cloudsTexture,
+          transparent: true,
+          opacity: 0.8,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide
+        });
+        const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
+        globeEl.current.scene().add(cloudMesh);
+
+        // Animate clouds
+        const animateClouds = () => {
+          cloudMesh.rotation.y += 0.0005;
+          requestAnimationFrame(animateClouds);
+        };
+        animateClouds();
+      }
+    });
+  }, []);
+
   const openGlobe = useCallback(() => {
     scrollPositionRef.current = window.scrollY;
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
     document.body.style.top = `-${scrollPositionRef.current}px`;
     setIsExpanded(true);
+
+    if (globeEl.current) {
+      globeEl.current.pointOfView({ altitude: 2.5 }, 1000);
+    }
   }, []);
 
   const closeGlobe = useCallback(() => {
@@ -147,6 +221,10 @@ function WorldExperienceSectionContent() {
     setTimeout(() => {
       window.scrollTo(0, scrollPositionRef.current);
     }, 0);
+
+    if (globeEl.current) {
+      globeEl.current.pointOfView({ altitude: 0.1 }, 1000);
+    }
   }, []);
 
   useEffect(() => {
@@ -169,61 +247,105 @@ function WorldExperienceSectionContent() {
     return () => window.removeEventListener('keydown', handleEscapeKey);
   }, [isExpanded, closeGlobe]);
 
+  // Handle rotation and zoom based on expanded state
+  useEffect(() => {
+    if (globeEl.current) {
+      const controls = globeEl.current.controls();
+      if (controls) {
+        controls.autoRotate = isExpanded;
+        controls.autoRotateSpeed = 0.1;
+        controls.enableZoom = isExpanded;
+        controls.minDistance = isExpanded ? 200 : globeEl.current.getGlobeRadius() * 1.5; // Lock zoom distance if needed
+        controls.maxDistance = isExpanded ? 500 : globeEl.current.getGlobeRadius() * 1.5;
+        controls.update();
+      }
+    }
+  }, [isExpanded]);
+
   return (
     <>
       <section
         id="world-experience"
-        className={`${isExpanded ? 'fixed inset-0 z-50' : 'relative w-full h-screen'} overflow-hidden bg-black snap-start`}
+        className={`${isExpanded ? 'fixed inset-0 z-50' : 'relative w-full h-screen'} overflow-hidden bg-black snap-start bg-[url('https://unpkg.com/three-globe/example/img/night-sky.png')] bg-cover bg-center transition-all duration-1000`}
       >
-        <div className="absolute inset-0 z-0">
-          {placesData && (
-            <Globe
-              ref={globeEl}
-              globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-              backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
-              labelsData={placesData.features}
-              labelLat={(d: any) => d.properties.latitude}
-              labelLng={(d: any) => d.properties.longitude}
-              labelText={(d: any) => d.properties.name}
-              labelSize={(d: any) => Math.sqrt(d.properties.pop_max) * 4e-4}
-              labelDotRadius={(d: any) => Math.sqrt(d.properties.pop_max) * 4e-4}
-              labelColor={() => 'rgba(255, 165, 0, 0.75)'}
-              labelResolution={2}
-              // Custom markers for globe moments
-              pointsData={GLOBE_MOMENT_LOCATIONS}
-              pointLat="lat"
-              pointLng="lng"
-              pointColor={() => '#ff6b6b'}
-              pointAltitude={0.01}
-              pointRadius={0.5}
-              pointLabel={(d: any) => `
-                <div style="
-                  background: rgba(0, 0, 0, 0.9);
-                  padding: 12px 16px;
-                  border-radius: 8px;
-                  border: 1px solid rgba(255, 255, 255, 0.2);
-                  max-width: 250px;
-                ">
-                  <div style="
-                    font-size: 16px;
-                    font-weight: 500;
-                    color: white;
-                    margin-bottom: 4px;
-                  ">${d.title}</div>
-                  <div style="
-                    font-size: 12px;
-                    color: rgba(255, 255, 255, 0.7);
-                    font-style: italic;
-                  ">${d.subtitle}</div>
-                </div>
-              `}
-              onPointClick={(point: any) => {
-                setSelectedMoment(point as GlobeMoment);
-              }}
-              width={typeof window !== 'undefined' ? window.innerWidth : 1920}
-              height={typeof window !== 'undefined' ? window.innerHeight : 1080}
-            />
+        <div
+          className={`absolute inset-0 z-0 transition-all duration-1000 ${!isExpanded ? 'scale-150 blur-sm brightness-50 sepia-[.3]' : 'translate-y-[10%]'}`}
+        >
+          {/* Royal Blue Overlay */}
+          {!isExpanded && (
+            <div className="absolute inset-0 z-10 bg-blue-900/20 mix-blend-overlay pointer-events-none" />
           )}
+
+          <div className="absolute inset-0 z-0">
+            {placesData && globeMaterial && (
+              <Globe
+                ref={globeEl}
+                globeMaterial={globeMaterial}
+                backgroundColor="rgba(0,0,0,0)"
+                // Custom markers for globe moments
+                objectsData={isExpanded ? GLOBE_MOMENT_LOCATIONS : []}
+                objectLat="lat"
+                objectLng="lng"
+                objectAltitude={0.005}
+                objectThreeObject={() => {
+                  // Create a pin marker
+                  const pinGroup = new THREE.Group();
+
+                  // Pin Head (Sphere)
+                  const headGeometry = new THREE.SphereGeometry(1.5, 16, 16);
+                  const headMaterial = new THREE.MeshLambertMaterial({ color: 0xFF0000 });
+                  const head = new THREE.Mesh(headGeometry, headMaterial);
+                  head.position.y = 4;
+                  pinGroup.add(head);
+
+                  // Pin Body (Cylinder/Cone)
+                  const bodyGeometry = new THREE.CylinderGeometry(0.2, 0, 4, 8);
+                  const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0xFFFFFF });
+                  const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+                  body.position.y = 2;
+                  pinGroup.add(body);
+
+                  return pinGroup;
+                }}
+                objectLabel={(d: any) => `
+                  <div style="
+                    background: rgba(0, 0, 0, 0.9);
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    max-width: 250px;
+                    font-family: sans-serif;
+                  ">
+                    <div style="
+                      font-size: 16px;
+                      font-weight: 500;
+                      color: white;
+                      margin-bottom: 4px;
+                    ">${d.title}</div>
+                    <div style="
+                      font-size: 12px;
+                      color: rgba(255, 255, 255, 0.7);
+                      font-style: italic;
+                    ">${d.subtitle}</div>
+                  </div>
+                `}
+                onObjectClick={(obj: any) => {
+                  setSelectedMoment(obj as GlobeMoment);
+                }}
+                onGlobeReady={() => {
+                  if (globeEl.current) {
+                    globeEl.current.controls().autoRotateSpeed = 0.1;
+                    // Set initial view to America (approx lat 20, lng -90)
+                    // Zoomed in more (altitude 0.05 instead of 0.1)
+                    globeEl.current.pointOfView({ lat: 20, lng: -90, altitude: 0.05 });
+                  }
+                }}
+                width={typeof window !== 'undefined' ? window.innerWidth : 1920}
+                height={typeof window !== 'undefined' ? window.innerHeight : 1080}
+              />
+            )}
+          </div>
+
         </div>
 
         <motion.div
@@ -297,9 +419,10 @@ function WorldExperienceSectionContent() {
             </motion.button>
           )}
         </AnimatePresence>
-      </section>
+      </section >
 
-      {isExpanded && <div className="fixed inset-0 z-40" onClick={closeGlobe} />}
+      {isExpanded && <div className="fixed inset-0 z-40" onClick={closeGlobe} />
+      }
 
       {/* Moment Lightbox */}
       <MomentLightbox moment={selectedMoment} onClose={() => setSelectedMoment(null)} />
