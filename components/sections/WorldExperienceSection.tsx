@@ -557,6 +557,11 @@ const Earth = ({
   positionX?: number;
   positionY?: number;
   positionZ?: number;
+  textureUOffset?: number;
+  textureVOffset?: number;
+  rotationX?: number;
+  rotationY?: number;
+  rotationZ?: number;
 }) => {
   const blendFactorRef = useRef(0);
 
@@ -1309,8 +1314,8 @@ const MarkerSphere = ({
   position,
   color,
   emissiveColor,
-  hoverColor = '#19bdefff',
-  hoverEmissiveColor = '#19bdefff',
+  hoverColor = '#19bdee',
+  hoverEmissiveColor = '#19bdee',
   size = 0.005,
   onHover,
   onClick,
@@ -1327,6 +1332,8 @@ const MarkerSphere = ({
   metalness?: number;
   roughness?: number;
   segments?: number;
+  hoverColor?: string;
+  hoverEmissiveColor?: string;
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const [isHovered, setIsHovered] = useState(false);

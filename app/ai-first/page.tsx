@@ -132,17 +132,18 @@ export default function AIFirstPage() {
     if (index >= benefitColumns * (benefitRows - 1)) classes.push("border-b-0");
     return classes.join(" ");
   };
+  const framerEasing = [0.22, 1, 0.36, 1] as const;
   const benefitsContainerVariants = {
     hidden: { opacity: 0, y: 30 },
     show: {
       opacity: 1,
       y: 0,
-      transition: { staggerChildren: 0.12, delayChildren: 0.2 },
+      transition: { staggerChildren: 0.12, delayChildren: 0.2, ease: framerEasing },
     },
   };
   const benefitItemVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.98 },
-    show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: "easeOut" } },
+    show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4, ease: framerEasing } },
   };
   return (
     <>
