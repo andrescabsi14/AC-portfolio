@@ -1,6 +1,8 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode } from 'react';
+import { getSunDirectionVector } from '@/lib/solar';
+import { INITIAL_GLOBE_LOCATION, AXIS_TILT_DEGREES, GLOBE_POSITION, TEXTURE_U_OFFSET, TEXTURE_V_OFFSET } from '@/lib/globeConstants';
 
 export interface LocationMarker {
   id: string;
@@ -104,12 +106,29 @@ export interface GlobeConfig {
   projectMarkerTipRadius: number;
   momentMarkerTipRadius: number;
 
+  // Texture offsets
+  textureUOffset: number;
+  textureVOffset: number;
+
   // Locations
   locations: LocationMarker[];
 }
 
+const DEFAULT_SUN_DIRECTION = getSunDirectionVector(
+  new Date(),
+  INITIAL_GLOBE_LOCATION.lat,
+  INITIAL_GLOBE_LOCATION.lng,
+  AXIS_TILT_DEGREES
+);
+
+
+
 const DEFAULT_CONFIG: GlobeConfig = {
-  lightDir: { x: 0.6, y: 0, z: -0.2 },
+  lightDir: {
+    x: DEFAULT_SUN_DIRECTION.x,
+    y: DEFAULT_SUN_DIRECTION.y,
+    z: DEFAULT_SUN_DIRECTION.z,
+  },
   lightIntensity: 0.9,
   lightColor: '#ffd814',
 
@@ -147,7 +166,7 @@ const DEFAULT_CONFIG: GlobeConfig = {
   globeScale: 1,
   globeBlur: 0.038,
   globePositionX: 0,
-  globePositionY: 0,
+  globePositionY: GLOBE_POSITION.y,
   globePositionZ: 0,
 
   cloudScale: 1,
@@ -167,18 +186,18 @@ const DEFAULT_CONFIG: GlobeConfig = {
   currentLocationVisibility: 0.4,
 
   cloudPositionX: 0,
-  cloudPositionY: 0,
+  cloudPositionY: GLOBE_POSITION.y,
   cloudPositionZ: 0.05,
   cloudBlur: 0,
 
   atmospherePositionX: 0,
-  atmospherePositionY: 0,
+  atmospherePositionY: GLOBE_POSITION.y,
   atmospherePositionZ: 0,
   atmosphereBlur: 0,
   atmosphereGlow: 0,
 
   glowPositionX: 0,
-  glowPositionY: 0,
+  glowPositionY: GLOBE_POSITION.y,
   glowPositionZ: 0,
 
   markerDistanceFromGlobe: 1,
@@ -186,6 +205,8 @@ const DEFAULT_CONFIG: GlobeConfig = {
   markerCylinderBaseRadius: 0.001,
   projectMarkerTipRadius: 0.01,
   momentMarkerTipRadius: 0.01,
+  textureUOffset: TEXTURE_U_OFFSET,
+  textureVOffset: TEXTURE_V_OFFSET,
 
   locations: [],
 };
