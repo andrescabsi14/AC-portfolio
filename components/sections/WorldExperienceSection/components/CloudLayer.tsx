@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect, RefObject } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGlobeMesh } from '../context/GlobeContext';
-import { CLOUDS_TEXTURE_URL } from '../constants';
+import { CLOUDS_TEXTURE_URL, TEXTURE_U_OFFSET, TEXTURE_V_OFFSET } from '../constants';
 
 interface CloudLayerProps {
   opacity?: number;
@@ -42,6 +42,8 @@ export const CloudLayer = ({
         uTexture: { value: cloudsTexture },
         uOpacity: { value: opacity },
         uBlur: { value: blur },
+        uTextureUOffset: { value: TEXTURE_U_OFFSET },
+        uTextureVOffset: { value: TEXTURE_V_OFFSET },
       },
       vertexShader: `
         varying vec2 vUv;
@@ -54,10 +56,12 @@ export const CloudLayer = ({
         uniform sampler2D uTexture;
         uniform float uOpacity;
         uniform float uBlur;
+        uniform float uTextureUOffset;
+        uniform float uTextureVOffset;
         varying vec2 vUv;
 
         void main() {
-          vec2 correctedUv = vec2(vUv.x, 1.0 - vUv.y);
+          vec2 correctedUv = vec2(vUv.x + uTextureUOffset, 1.0 - vUv.y + uTextureVOffset);
           vec4 texColor = vec4(0.0);
 
           // Apply blur effect - sample texture at multiple offsets

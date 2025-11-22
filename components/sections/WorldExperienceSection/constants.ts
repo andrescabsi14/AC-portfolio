@@ -5,6 +5,10 @@ export const CLOUDS_TEXTURE_URL = '/earthclouds.jpg';
 export const HIGH_DAY_TEXTURE_URL = '/earthhighday.jpg';
 export const HIGH_NIGHT_TEXTURE_URL = '/earthhighnight.jpg';
 
+// Texture alignment offsets
+export const TEXTURE_U_OFFSET = -0.49;
+export const TEXTURE_V_OFFSET = -0.03;
+
 // Admin mode toggle
 export const ADMIN = true;
 

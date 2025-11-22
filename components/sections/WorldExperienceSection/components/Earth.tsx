@@ -2,7 +2,7 @@ import { RefObject, useRef, useMemo, useEffect } from 'react';
 import { useFrame, useLoader, ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { latLngToCartesian } from '../utils';
-import { CURRENT_LOCATION, DAY_TEXTURE_URL, NIGHT_TEXTURE_URL, CLOUDS_TEXTURE_URL, HIGH_DAY_TEXTURE_URL, HIGH_NIGHT_TEXTURE_URL } from '../constants';
+import { CURRENT_LOCATION, DAY_TEXTURE_URL, NIGHT_TEXTURE_URL, CLOUDS_TEXTURE_URL, HIGH_DAY_TEXTURE_URL, HIGH_NIGHT_TEXTURE_URL, TEXTURE_U_OFFSET, TEXTURE_V_OFFSET } from '../constants';
 
 interface EarthProps {
   onLoaded: () => void;
@@ -83,6 +83,8 @@ export const Earth = ({
         uTextureBlend: { value: 0 }, // 0 = low-res, 1 = high-res
         uIsExpanded: { value: isExpanded ? 1.0 : 0.0 }, // 1.0 = expanded, 0.0 = not expanded
         uBlur: { value: blur }, // 0 = no blur, >0 = blur effect
+        uTextureUOffset: { value: TEXTURE_U_OFFSET }, // U (horizontal) texture offset
+        uTextureVOffset: { value: TEXTURE_V_OFFSET }, // V (vertical) texture offset
       },
       vertexShader: `
         varying vec3 vNormal;
@@ -115,6 +117,8 @@ export const Earth = ({
         uniform float uTextureBlend;
         uniform float uIsExpanded;
         uniform float uBlur;
+        uniform float uTextureUOffset;
+        uniform float uTextureVOffset;
 
         // Texture blur function - applies 9-tap box blur
         vec3 blurTexture(sampler2D tex, vec2 uv, float blurAmount) {
@@ -149,7 +153,7 @@ export const Earth = ({
 
         // Determine blur amount for texture sampling
         float blurAmount = uBlur > 0.0 ? uBlur * 0.005 : 0.0;
-        vec2 correctedUv = vec2(vUv.x, 1.0 - vUv.y);
+        vec2 correctedUv = vec2(vUv.x + uTextureUOffset, 1.0 - vUv.y + uTextureVOffset);
 
         // Sample low-res textures with optional blur
         vec3 lowDayColor = blurAmount > 0.0 ? blurTexture(uDayMap, correctedUv, blurAmount) : texture2D(uDayMap, correctedUv).rgb;
