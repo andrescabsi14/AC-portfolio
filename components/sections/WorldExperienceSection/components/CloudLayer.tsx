@@ -61,7 +61,11 @@ export const CloudLayer = ({
         varying vec2 vUv;
 
         void main() {
-          vec2 correctedUv = vec2(vUv.x + uTextureUOffset, 1.0 - vUv.y + uTextureVOffset);
+          // Apply texture offsets with wrapping to keep UVs in 0-1 range
+          vec2 correctedUv = vec2(
+            fract(vUv.x + uTextureUOffset),
+            fract(1.0 - vUv.y + uTextureVOffset)
+          );
           vec4 texColor = vec4(0.0);
 
           // Apply blur effect - sample texture at multiple offsets

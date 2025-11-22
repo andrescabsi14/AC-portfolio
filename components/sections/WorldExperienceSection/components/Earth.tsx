@@ -153,7 +153,11 @@ export const Earth = ({
 
         // Determine blur amount for texture sampling
         float blurAmount = uBlur > 0.0 ? uBlur * 0.005 : 0.0;
-        vec2 correctedUv = vec2(vUv.x + uTextureUOffset, 1.0 - vUv.y + uTextureVOffset);
+        // Apply texture offsets with wrapping to keep UVs in 0-1 range
+        vec2 correctedUv = vec2(
+          fract(vUv.x + uTextureUOffset),
+          fract(1.0 - vUv.y + uTextureVOffset)
+        );
 
         // Sample low-res textures with optional blur
         vec3 lowDayColor = blurAmount > 0.0 ? blurTexture(uDayMap, correctedUv, blurAmount) : texture2D(uDayMap, correctedUv).rgb;
