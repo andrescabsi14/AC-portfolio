@@ -51,6 +51,27 @@ export const recruiterAgent = new Agent({
                 messageRange: 3,
                 scope: 'resource',
             },
+            workingMemory: {
+                enabled: true,
+                scope: 'resource',
+                template: `# Recruiter Conversation Context
+
+## Recruiter Information
+- **Name**:
+- **Company**:
+- **Preferred Language**:
+
+## Job Opportunity Details
+- **Position**:
+- **Key Requirements**:
+- **Compensation Range**:
+- **Alignment with Andrés's Goals**:
+
+## Conversation Progress
+- **Current Stage**: (Initial Contact / Analysis / Negotiation / Pending Approval / Resume Generation)
+- **Key Discussion Points**:
+- **Next Actions**:`,
+            },
         },
     }),
     scorers: {
