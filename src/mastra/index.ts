@@ -4,6 +4,7 @@ import { DefaultExporter } from '@mastra/core/ai-tracing';
 import { recruiterAgent } from './agents/recruiter';
 import { screeningWorkflow } from './workflows/screening';
 import { vectorStore } from './vector';
+import { answerRelevancyScorer, biasScorer, toxicityScorer } from './scorers';
 
 // Initialize PostgreSQL storage for memory and traces
 const pgStore = new PostgresStore({
@@ -21,6 +22,11 @@ export const mastra = new Mastra({
         default: vectorStore,
     },
     storage: pgStore,
+    scorers: {
+        answerRelevancyScorer,
+        biasScorer,
+        toxicityScorer,
+    },
     observability: {
         configs: {
             local: {
