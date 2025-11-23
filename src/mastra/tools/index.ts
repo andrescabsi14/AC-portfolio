@@ -131,7 +131,19 @@ export const readPreferences = createTool({
                 queryVector: vector,
                 topK: 3
             });
-            const preferences = results.map((r: any) => r.payload.text).join('\n\n');
+
+            // Safely extract text from results, handling different possible structures
+            const preferences = results
+                .map((r: any) => {
+                    // Handle different possible result structures
+                    if (r?.payload?.text) return r.payload.text;
+                    if (r?.metadata?.text) return r.metadata.text;
+                    if (r?.text) return r.text;
+                    if (r?.content) return r.content;
+                    return null;
+                })
+                .filter((text: string | null) => text !== null)
+                .join('\n\n');
 
             return {
                 preferences: preferences || "No specific information found in resume."

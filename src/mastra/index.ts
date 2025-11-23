@@ -20,4 +20,8 @@ export const mastra = new Mastra({
         default: vectorStore,
     },
     storage: pgStore,
+    telemetry: {
+        serviceName: 'ac-portfolio',
+        enabled: true,
+    },
 });
