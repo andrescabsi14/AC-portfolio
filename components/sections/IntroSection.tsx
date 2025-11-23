@@ -184,7 +184,7 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
             transition={{ duration: 1.2, delay: 5, ease: [0.22, 1, 0.36, 1] }}
             className="text-2xl md:text-3xl lg:text-4xl font-light tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-gray-500 mb-6"
           >
-            World-Class AI Engineering & Strategy
+            CEO of BX Infrastructure
           </motion.p>
           <motion.p
             initial={hasAnimated ? false : { opacity: 0, y: 30 }}
@@ -192,7 +192,11 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
             transition={{ duration: 1.2, delay: 5.5, ease: [0.22, 1, 0.36, 1] }}
             className="text-lg md:text-xl lg:text-2xl font-light text-gray-400 max-w-3xl mx-auto"
           >
-            Delivering expert AI solutions for global enterprises.
+            Architecting AI-First ecosystems for global leaders like Coca-Cola and Gillette.
+            <br />
+            <span className="text-sm md:text-base opacity-70 mt-4 block">
+              Available for Contract & Enterprise Engagements
+            </span>
           </motion.p>
         </motion.div>
       </div>

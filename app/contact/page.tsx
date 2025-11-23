@@ -1,32 +1,40 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
 import Header from "@/components/ui/Header";
 import Footer from "@/components/ui/Footer";
+import RecruiterChat from "@/components/contact/RecruiterChat";
+import StandardForm from "@/components/contact/StandardForm";
+
+type Step = 'initial' | 'work_type' | 'recruiter_check' | 'media_check' | 'recruiter_chat' | 'general_form' | 'media_form';
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    company: "",
-    message: "",
-  });
+  const [step, setStep] = useState<Step>('initial');
 
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would typically send the form data to your backend/email service
-    setSubmitted(true);
+  const handleInitialChoice = (isWork: boolean) => {
+    if (isWork) {
+      setStep('recruiter_check');
+    } else {
+      setStep('media_check');
+    }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleRecruiterCheck = (isRecruiter: boolean) => {
+    if (isRecruiter) {
+      setStep('recruiter_chat');
+    } else {
+      setStep('general_form');
+    }
+  };
+
+  const handleMediaCheck = (isMedia: boolean) => {
+    if (isMedia) {
+      setStep('media_form');
+    } else {
+      setStep('general_form');
+    }
   };
 
   return (
@@ -34,143 +42,149 @@ export default function ContactPage() {
       <Header showAnimation={false} />
       <main className="bg-black text-white min-h-screen pt-24">
         <section className="px-6 py-32">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              className="text-center mb-20"
+              className="text-center mb-12"
             >
               <h1 className="text-5xl md:text-7xl font-light mb-8 leading-tight tracking-tight">
                 Let's talk
               </h1>
-              <p className="text-xl text-white/50 font-light">
-                Schedule a consultation to discuss AI integration for your business.
-              </p>
+              {step !== 'recruiter_chat' && (
+                <p className="text-xl text-white/50 font-light">
+                  Help me direct your inquiry to the right place.
+                </p>
+              )}
             </motion.div>
 
-            {!submitted ? (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-              >
-                <form onSubmit={handleSubmit} className="space-y-8">
-                  <div className="space-y-3">
-                    <label htmlFor="name" className="block text-xs tracking-wider text-white/30 uppercase">
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      required
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="w-full px-0 py-3 bg-transparent border-0 border-b border-white/10 text-white font-light focus:outline-none focus:border-white/30 transition-colors"
-                      placeholder="John Doe"
-                    />
-                  </div>
+            <AnimatePresence mode="wait">
+              {step === 'initial' && (
+                <motion.div
+                  key="initial"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="flex flex-col md:flex-row gap-6 justify-center"
+                >
+                  <button
+                    onClick={() => handleInitialChoice(true)}
+                    className="p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all text-left group"
+                  >
+                    <h3 className="text-2xl font-light mb-2 group-hover:text-blue-400 transition-colors">Work & Projects</h3>
+                    <p className="text-white/50">I have a project or business opportunity.</p>
+                  </button>
+                  <button
+                    onClick={() => handleInitialChoice(false)}
+                    className="p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all text-left group"
+                  >
+                    <h3 className="text-2xl font-light mb-2 group-hover:text-purple-400 transition-colors">Other Inquiries</h3>
+                    <p className="text-white/50">Speaking, media, or general questions.</p>
+                  </button>
+                </motion.div>
+              )}
 
-                  <div className="space-y-3">
-                    <label htmlFor="email" className="block text-xs tracking-wider text-white/30 uppercase">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      required
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="w-full px-0 py-3 bg-transparent border-0 border-b border-white/10 text-white font-light focus:outline-none focus:border-white/30 transition-colors"
-                      placeholder="john@company.com"
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <label htmlFor="company" className="block text-xs tracking-wider text-white/30 uppercase">
-                      Company
-                    </label>
-                    <input
-                      type="text"
-                      id="company"
-                      name="company"
-                      value={formData.company}
-                      onChange={handleChange}
-                      className="w-full px-0 py-3 bg-transparent border-0 border-b border-white/10 text-white font-light focus:outline-none focus:border-white/30 transition-colors"
-                      placeholder="Your Company Inc."
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <label htmlFor="message" className="block text-xs tracking-wider text-white/30 uppercase">
-                      Message
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      required
-                      rows={6}
-                      value={formData.message}
-                      onChange={handleChange}
-                      className="w-full px-0 py-3 bg-transparent border-0 border-b border-white/10 text-white font-light focus:outline-none focus:border-white/30 transition-colors resize-none"
-                      placeholder="Tell us about your business needs..."
-                    />
-                  </div>
-
-                  <div className="pt-8">
+              {step === 'recruiter_check' && (
+                <motion.div
+                  key="recruiter_check"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="text-center space-y-8"
+                >
+                  <h3 className="text-2xl font-light">Are you a recruiter?</h3>
+                  <div className="flex gap-4 justify-center">
                     <button
-                      type="submit"
-                      className="text-sm tracking-widest uppercase text-white/70 hover:text-white transition-colors duration-300 border-b border-white/30 hover:border-white pb-1"
+                      onClick={() => handleRecruiterCheck(true)}
+                      className="px-8 py-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-colors"
                     >
-                      Send message →
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => handleRecruiterCheck(false)}
+                      className="px-8 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    >
+                      No
                     </button>
                   </div>
-                </form>
+                </motion.div>
+              )}
 
-                <div className="mt-20 pt-12 border-t border-white/10">
-                  <p className="text-xs tracking-wider text-white/30 uppercase mb-8">Or reach out directly</p>
-                  <div className="flex flex-col gap-4 text-white/50 font-light">
-                    <a
-                      href="mailto:hello@andrescabrera.com"
-                      className="hover:text-white transition-colors"
+              {step === 'media_check' && (
+                <motion.div
+                  key="media_check"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="text-center space-y-8"
+                >
+                  <h3 className="text-2xl font-light">Is this a media or speaking opportunity?</h3>
+                  <div className="flex gap-4 justify-center">
+                    <button
+                      onClick={() => handleMediaCheck(true)}
+                      className="px-8 py-3 rounded-full bg-purple-600 hover:bg-purple-500 text-white transition-colors"
                     >
-                      hello@andrescabrera.com
-                    </a>
-                    <a
-                      href="https://linkedin.com/in/andrescabrera"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-white transition-colors"
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => handleMediaCheck(false)}
+                      className="px-8 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
                     >
-                      LinkedIn
-                    </a>
+                      No
+                    </button>
                   </div>
-                </div>
-              </motion.div>
-            ) : (
+                </motion.div>
+              )}
+
+              {step === 'recruiter_chat' && (
+                <motion.div
+                  key="recruiter_chat"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                >
+                  <RecruiterChat />
+                </motion.div>
+              )}
+
+              {step === 'general_form' && (
+                <motion.div
+                  key="general_form"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="max-w-2xl mx-auto"
+                >
+                  <StandardForm type="general" />
+                </motion.div>
+              )}
+
+              {step === 'media_form' && (
+                <motion.div
+                  key="media_form"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="max-w-2xl mx-auto"
+                >
+                  <StandardForm type="media" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {step !== 'initial' && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className="text-center py-20"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-12 text-center"
               >
-                <div className="space-y-8">
-                  <div className="w-16 h-px bg-white/30 mx-auto"></div>
-                  <h2 className="text-3xl md:text-5xl font-light">Message sent</h2>
-                  <p className="text-xl text-white/50 font-light">
-                    I'll get back to you within 24 hours.
-                  </p>
-                  <div className="pt-8">
-                    <Link
-                      href="/"
-                      className="inline-block text-sm tracking-widest uppercase text-white/40 hover:text-white/70 transition-colors duration-300"
-                    >
-                      ← Back to home
-                    </Link>
-                  </div>
-                </div>
+                <button
+                  onClick={() => setStep('initial')}
+                  className="text-sm text-white/30 hover:text-white transition-colors uppercase tracking-widest"
+                >
+                  Start Over
+                </button>
               </motion.div>
             )}
           </div>

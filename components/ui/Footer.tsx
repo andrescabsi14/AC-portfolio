@@ -128,7 +128,7 @@ export default function Footer() {
 
         <div className="flex flex-col gap-6 border-t border-white/5 pt-6 text-xs text-white/60 md:flex-row md:items-center md:justify-between">
           <span>© {new Date().getFullYear()} Andrés Cabrera. All rights reserved.</span>
-          <span className="text-white/90">Shaped with intent from NYC to the world.</span>
+          <span className="text-white/90">NYC</span>
         </div>
       </div>
     </footer>

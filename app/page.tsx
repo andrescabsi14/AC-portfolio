@@ -39,7 +39,7 @@ export default function Home() {
       <PersonalGuaranteeSection />
 
       {/* CTA Section */}
-      <CTASection />
+      {/* <CTASection /> */}
 
       {/* AI Chat Section */}
       <AIChatSectionNew />
