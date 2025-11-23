@@ -145,7 +145,7 @@ export default function RecruiterChat() {
     return (
         <div className="w-full max-w-4xl mx-auto bg-black border border-white/10 rounded-xl overflow-hidden shadow-2xl h-[600px] flex flex-col font-mono text-sm">
             {/* Terminal Header */}
-            <div className="bg-white/5 border-b border-white/10 p-4 flex items-center gap-2">
+            <div className="bg-white/5 border-b border-white/10 p-4 flex items-center gap-2 flex-shrink-0">
                 <div className="w-3 h-3 rounded-full bg-red-500/50" />
                 <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
                 <div className="w-3 h-3 rounded-full bg-green-500/50" />
@@ -153,7 +153,10 @@ export default function RecruiterChat() {
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-scroll p-6 space-y-6 min-h-0" style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent'
+            }}>
                 {messages.map((msg, index) => {
                     const opacity = getSessionOpacity(msg.sessionId);
                     const isLastInSession = isLastMessageInSession(index);
@@ -225,7 +228,7 @@ export default function RecruiterChat() {
             </div>
 
             {/* Input Area */}
-            <div className="p-4 border-t border-white/10 bg-white/5">
+            <div className="p-4 border-t border-white/10 bg-white/5 flex-shrink-0">
                 <div className="flex gap-4">
                     <input
                         type="text"
