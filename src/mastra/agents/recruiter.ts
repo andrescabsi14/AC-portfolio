@@ -1,6 +1,7 @@
 import { Agent } from '@mastra/core';
 import { Memory } from '@mastra/memory';
 import { generateResume, notifySlack, readPreferences } from '../tools';
+import { vectorStore } from '../vector';
 
 import { answerRelevancyScorer, biasScorer } from '../scorers';
 
@@ -40,6 +41,7 @@ export const recruiterAgent = new Agent({
         provider: 'OPEN_AI',
     },
     memory: new Memory({
+        vector: vectorStore,
         options: {
             semanticRecall: {
                 enabled: true,
