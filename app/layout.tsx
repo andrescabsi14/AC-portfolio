@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
-import { Raleway } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 
-const raleway = Raleway({
-  subsets: ["latin"],
-  variable: "--font-raleway",
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
+// Using system fonts to avoid Google Fonts build issues
+// TODO: Add Raleway via CDN link in head or use local font files
+const fontVariable = "font-sans";
 
 export const metadata: Metadata = {
   title: "Portfolio - High Tech Founder & Software Engineer",
@@ -21,8 +17,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={raleway.variable}>
-      <body className="antialiased bg-black text-white overflow-x-hidden font-sans">
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="antialiased bg-black text-white overflow-x-hidden font-sans" style={{ fontFamily: "'Raleway', sans-serif" }}>
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

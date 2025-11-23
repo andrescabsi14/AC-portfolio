@@ -79,7 +79,6 @@ export const recruiterAgent = new Agent({
         embedder: openai.embedding('text-embedding-3-small'),
         options: {
             semanticRecall: {
-                enabled: true,
                 topK: 5,
                 messageRange: 3,
                 scope: 'resource',
