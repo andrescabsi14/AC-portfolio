@@ -1,5 +1,6 @@
 import { Agent } from '@mastra/core';
 import { Memory } from '@mastra/memory';
+import { openai } from '@ai-sdk/openai';
 import { generateResume, notifySlack, readPreferences } from '../tools';
 import { vectorStore } from '../vector';
 
@@ -42,6 +43,7 @@ export const recruiterAgent = new Agent({
     },
     memory: new Memory({
         vector: vectorStore,
+        embedder: openai.embedding('text-embedding-3-small'),
         options: {
             semanticRecall: {
                 enabled: true,
