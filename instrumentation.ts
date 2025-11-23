@@ -4,6 +4,6 @@ export async function register() {
     await import('./src/mastra/index');
 
     // Set the global flag to prevent legacy telemetry warnings
-    globalThis.___MASTRA_TELEMETRY___ = true;
+    (globalThis as any).___MASTRA_TELEMETRY___ = true;
   }
 }
