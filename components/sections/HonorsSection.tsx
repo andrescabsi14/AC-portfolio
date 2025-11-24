@@ -13,8 +13,9 @@ const honors = [
         role: "President of the United States",
         year: "2016",
         image: "/honors/honorylai.png",
-        imagePosition: "center-center" as const,
+        imagePosition: "center center" as const,
         textPosition: "center-center" as const,
+        imageSize: "100vw auto" as const,
     },
     {
         id: 2,
@@ -22,8 +23,9 @@ const honors = [
         organization: "Denmark Technical University - C40 World Mayors Summit",
         year: "2019",
         image: "/honors/dtu.jpg",
-        imagePosition: "center-center" as const,
+        imagePosition: "center 20vh" as const,
         textPosition: "center-center" as const,
+        imageSize: "auto 50%" as const,
     }
 ];
 
@@ -95,7 +97,7 @@ function HonorItem({ honor }: HonorItemProps) {
                 className="absolute inset-0 z-0"
             >
                 <motion.div
-                    style={{ y, opacity: imageOpacity, height: "140%", backgroundImage: `url(${honor.image})`, backgroundSize: "cover", backgroundPosition: honor.imagePosition || "center center" }}
+                    style={{ y, opacity: imageOpacity, height: "140%", backgroundImage: `url(${honor.image})`, backgroundSize: honor.imageSize || "auto 50%", backgroundRepeat: "no-repeat", backgroundPosition: honor.imagePosition || "center center" }}
                     className="relative w-full -top-[20%]"
                 >
                     <Image
