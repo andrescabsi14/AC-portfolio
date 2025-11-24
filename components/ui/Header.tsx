@@ -13,9 +13,9 @@ const navItems: {
   href?: string;
   hiddenOnMobile?: boolean;
 }[] = [
+    { id: 'ai-first', label: 'AI-First', href: '/ai-first' },
     { id: 'about', label: 'About', href: '/about' },
     { id: 'world-experience', label: 'Experience' },
-    { id: 'ai-first', label: 'AI First', href: '/ai-first' },
   ];
 
 interface HeaderProps {
@@ -182,7 +182,7 @@ export default function Header({ showAnimation = true }: HeaderProps) {
               variant="outline"
               className="ml-4 h-auto border border-secondary-foreground/30 px-6 py-2.5 text-xs font-medium tracking-widest uppercase text-secondary-foreground hover:bg-secondary-foreground/10"
             >
-              Get Started
+              Start Here
             </Button>
           </Link>
         </nav>

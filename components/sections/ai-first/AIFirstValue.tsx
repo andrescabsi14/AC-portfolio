@@ -66,7 +66,7 @@ export default function AIFirstValue() {
               Save hundreds of thousands in costs
             </p>
             <p className="text-white/50 font-light text-sm">
-              These aren't promises. They're results from businesses already using AI-first solutions.
+              These aren't promises. They're results from businesses already using AI-First solutions.
             </p>
           </div>
         </motion.div>

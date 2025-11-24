@@ -5,7 +5,7 @@ import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
 import IntroSection from '@/components/sections/IntroSection';
 import HonorsSection from '@/components/sections/HonorsSection';
-import AIChatSectionNew from '@/components/sections/AIChatSectionNew';
+
 import WorldExperienceSection from '@/components/sections/WorldExperienceSection';
 import ServicesOverviewSection from '@/components/sections/ServicesOverviewSection';
 import ProblemsSection from '@/components/sections/ProblemsSection';
@@ -33,24 +33,26 @@ export default function Home() {
       <WorldExperienceSection />
 
 
-      {/* Services Overview Section */}
-      <ServicesOverviewSection />
 
-      {/* Project Participation Section */}
-      <ProjectParticipationSection />
+
+
 
       {/* Problems & Solutions Section */}
       <ProblemsSection />
 
+      {/* Services Overview Section */}
+      <ServicesOverviewSection />
+
       {/* Personal Guarantee Section */}
       <PersonalGuaranteeSection />
+
+      {/* Project Participation Section */}
+      <ProjectParticipationSection />
 
       {/* CTA Section */}
       {/* <CTASection /> */}
 
-      {/* AI Chat Section */}
-      <AIChatSectionNew />
-      <Footer />
+      <Footer variant="assessment" />
     </main>
   );
 }

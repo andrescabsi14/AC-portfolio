@@ -222,7 +222,7 @@ export default function AIReadyPage() {
               </h3>
               <p className="mx-auto max-w-2xl text-base text-white/70">
                 Partner with a team that understands your business and can deliver fast, simple solutions
-                to your specific challenges. Let's build your path to becoming AI-first.
+                to your specific challenges. Let's build your path to becoming AI-First.
               </p>
               <Button
                 variant="secondary"

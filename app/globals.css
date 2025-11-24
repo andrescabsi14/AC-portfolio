@@ -125,4 +125,17 @@
   html[data-globe-expanded='true'] header {
     display: none;
   }
+
+  .aifirst {
+    color: #0fe8ff !important;
+    text-decoration-color: #0fe8ff !important;
+  }
+
+  .underline:has(.aifirst) {
+    text-decoration-color: #0fe8ff !important;
+  }
+
+  section p {
+    opacity: 0.65;
+  }
 }

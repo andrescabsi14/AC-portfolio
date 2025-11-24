@@ -7,6 +7,7 @@ interface TypewriterProps {
   text: string;
   speed?: number; // milliseconds per character
   isMarkdown?: boolean;
+  isHtml?: boolean;
   onComplete?: () => void;
   className?: string;
   startDelay?: number; // milliseconds before starting
@@ -16,6 +17,7 @@ export default function Typewriter({
   text,
   speed = 50,
   isMarkdown = false,
+  isHtml = false,
   onComplete,
   className = '',
   startDelay = 0,
@@ -73,6 +75,15 @@ export default function Typewriter({
         >
           {displayedText}
         </ReactMarkdown>
+        {!isComplete && <span className="animate-pulse">|</span>}
+      </div>
+    );
+  }
+
+  if (isHtml) {
+    return (
+      <div className={className}>
+        <span dangerouslySetInnerHTML={{ __html: displayedText }} />
         {!isComplete && <span className="animate-pulse">|</span>}
       </div>
     );

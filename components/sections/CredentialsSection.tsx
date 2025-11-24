@@ -30,7 +30,7 @@ const credentials: Credential[] = [
         organization: 'Denmark Technical University (DTU)',
         year: '2018',
         description: 'Acknowledged as a leading voice in sustainable innovation and technology at the C40 World Mayors Summit in Copenhagen. Contributing to global discussions on urban sustainability.',
-        image: '/photos/certificate/TechCamp-Bolivia.jpg',
+        image: '/honors/dtu.jpg',
         accentColor: 'from-red-500 to-orange-500'
     },
     {
@@ -39,7 +39,7 @@ const credentials: Credential[] = [
         organization: 'International Summits',
         year: 'Ongoing',
         description: 'Regular contributor to high-level dialogues on AI, technology, and future readiness. Bridging the gap between policy, technology, and practical implementation.',
-        image: 'https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2070&auto=format&fit=crop', // Placeholder for now
+        image: '/honors/detroit.jpg', // Placeholder for now
         accentColor: 'from-purple-500 to-pink-500'
     }
 ];
@@ -82,7 +82,7 @@ export default function CredentialsSection() {
                                         alt={credential.title}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-40"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
                                 </div>
 
                                 {/* Content */}
@@ -120,14 +120,14 @@ export default function CredentialsSection() {
                             {
                                 title: 'Meeting with Richard Branson',
                                 description: 'Engaged in meaningful discussions with Sir Richard Branson during the YLAI Fellowship at the U.S. Department of State, exchanging insights on entrepreneurship and innovation.',
-                                image: '/photos/mlb/IMG_5006.jpeg', // Using a placeholder from photos/mlb as Branson photo not explicitly named, user can swap
+                                image: '/honors/ylai2016.jpg', // Using a placeholder from photos/mlb as Branson photo not explicitly named, user can swap
                                 gradient: 'from-red-500/20 to-orange-500/20',
                                 border: 'border-red-500/30'
                             },
                             {
                                 title: 'Presidential Summits',
                                 description: 'Participated in high-level presidential summits and international conferences, contributing to discussions on technology, innovation, and global economic development.',
-                                image: '/photos/Obama-Lima-TownHall.jpg',
+                                image: '/honors/lima.png',
                                 gradient: 'from-blue-500/20 to-purple-500/20',
                                 border: 'border-blue-500/30'
                             }

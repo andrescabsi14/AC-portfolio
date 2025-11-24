@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { Button } from '@/components/ui/button';
+import GlassButton from '@/components/ui/GlassButton';
 import MomentLightbox from '@/components/ui/MomentLightbox';
 import * as THREE from 'three';
 
@@ -414,12 +414,9 @@ function WorldExperienceSectionContent() {
               transition={{ delay: 0.5 }}
               className="pointer-events-auto"
             >
-              <Button
-                onClick={handleExpand}
-                className="cursor-pointer backdrop-blur-md bg-white/10 border border-white/30 text-white uppercase tracking-widest font-medium hover:bg-white/20 hover:border-white/50 transition-all"
-              >
+              <GlassButton onClick={handleExpand}>
                 Discover My Journey
-              </Button>
+              </GlassButton>
             </motion.div>
           )}
         </motion.div>

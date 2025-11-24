@@ -12,7 +12,7 @@ const honors = [
         individual: "Barack Obama",
         role: "President of the United States",
         year: "2016",
-        image: "/honors/ylai2016.jpg",
+        image: "/honors/honorylai.png",
         imagePosition: "center-center" as const,
         textPosition: "center-center" as const,
     },
@@ -41,6 +41,8 @@ function HonorItem({ honor }: HonorItemProps) {
 
     // Parallax effect for background image
     const y = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
+    // Image fade-in effect
+    const imageOpacity = useTransform(scrollYProgress, [0, 0.3, 1], [0, 1, 0]);
 
     // Text positioning logic
     const getPositionClasses = (position: string) => {
@@ -80,17 +82,20 @@ function HonorItem({ honor }: HonorItemProps) {
             filter: "blur(0px)",
             transition: {
                 duration: 1,
+                delay: 0.7,
                 ease: [0.22, 1, 0.36, 1]
             }
         }
     };
 
     return (
-        <div ref={ref} className="relative w-full min-h-screen overflow-hidden flex flex-col">
-            {/* Parallax Background */}
-            <div className="absolute inset-0 z-0">
+        <div ref={ref} className="relative w-full min-h-[200vh] overflow-hidden flex flex-col">
+            {/* Parallax Background with Fade */}
+            <motion.div
+                className="absolute inset-0 z-0"
+            >
                 <motion.div
-                    style={{ y, height: "140%", backgroundImage: `url(${honor.image})`, backgroundSize: "cover", backgroundPosition: honor.imagePosition || "center center" }}
+                    style={{ y, opacity: imageOpacity, height: "140%", backgroundImage: `url(${honor.image})`, backgroundSize: "cover", backgroundPosition: honor.imagePosition || "center center" }}
                     className="relative w-full -top-[20%]"
                 >
                     <Image
@@ -107,7 +112,7 @@ function HonorItem({ honor }: HonorItemProps) {
 
                 {/* Gradient Overlay based on text position for better readability */}
                 <div className={`absolute inset-0 z-10 bg-gradient-to-b from-transparent via-black/20 to-black/80`} />
-            </div>
+            </motion.div>
 
             {/* Content */}
             <motion.div
@@ -153,7 +158,7 @@ function HonorItem({ honor }: HonorItemProps) {
                     </span>
                 </motion.div>
             </motion.div>
-        </div>
+        </div >
     );
 }
 
@@ -161,16 +166,17 @@ export default function HonorsSection() {
     const titleRef = useRef(null);
     const { scrollYProgress } = useScroll({
         target: titleRef,
-        offset: ["start start", "end start"]
+        offset: ["start 20%", "end start"]
     });
 
-    const titleOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+    // Fade in/out effect for title - fade in early, fully visible in middle, fade out at end
+    const titleOpacity = useTransform(scrollYProgress, [0, 0.1, 0.4, 0.8, 1], [0, 1, 1, 1, 0]);
     const titleScale = useTransform(scrollYProgress, [0, 0.8], [1, 0.9]);
 
     return (
-        <section className="bg-black">
+        <section className="bg-black relative">
             {/* Title Section */}
-            <div ref={titleRef} className="relative h-[100vh] flex items-center justify-center overflow-hidden border-b border-white/5">
+            <div ref={titleRef} className="relative h-[150vh] flex items-center justify-center overflow-hidden border-b border-white/5 relative">
                 <motion.div
                     style={{ opacity: titleOpacity, scale: titleScale }}
                     className="text-center px-4"
@@ -185,11 +191,15 @@ export default function HonorsSection() {
             </div>
 
             {/* Honors List */}
-            <div className="flex flex-col">
+            <div className="flex flex-col relative">
+                <div className="absolute top-0 left-0 right-0 h-[50vh] bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
                 {honors.map((honor, index) => (
                     <HonorItem key={index} honor={honor} />
                 ))}
             </div>
+
+            {/* Gradient Fade-in for Next Section */}
+            <div className="absolute bottom-0 left-0 right-0 h-[50vh] bg-gradient-to-b from-transparent via-black/40 to-black pointer-events-none z-30" />
         </section>
     );
 }

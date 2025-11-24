@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import PreFooterContact from '@/components/ui/PreFooterContact';
 
 const navLinks = [
   { label: 'Experience', href: '#world-experience' },
@@ -10,11 +10,11 @@ const navLinks = [
 ];
 
 const socialLinks = [
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/andrescabrera', icon: 'linkedin' },
-  { label: 'GitHub', href: 'https://github.com/adacabrera', icon: 'github' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/andrescabsi', icon: 'linkedin' },
+  { label: 'GitHub', href: 'https://github.com/andrescabsi14', icon: 'github' },
   { label: 'Twitter', href: 'https://twitter.com/andrescabrera', icon: 'twitter' },
   { label: 'Medium', href: 'https://medium.com/@andrescabrera', icon: 'medium' },
-  { label: 'Email', href: 'mailto:hello@andrescabrera.com', icon: 'email' },
+  { label: 'Email', href: 'mailto:hello@vessel.nyc', icon: 'email' },
 ];
 
 const footerLinks = [
@@ -36,29 +36,15 @@ const footerLinks = [
   },
 ];
 
-export default function Footer() {
+interface FooterProps {
+  variant?: 'assessment' | 'contact';
+}
+
+export default function Footer({ variant = 'contact' }: FooterProps) {
   return (
     <footer className="border-t border-white/5 bg-black/80 px-6 py-16 text-white">
       <div className="mx-auto max-w-6xl space-y-12">
-        <div className="flex flex-col gap-5 rounded-3xl border border-white/10 bg-white/[0.04] p-8 backdrop-blur-sm md:flex-row md:items-center md:justify-between">
-          <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.45em] text-white/60">Still curious?</p>
-            <h3 className="text-3xl font-semibold tracking-tight text-white">
-              Let’s build something worth shipping.
-            </h3>
-            <p className="text-sm text-white/70">
-              I design and ship products that make measurable impact. Share your next challenge and let’s talk strategy.
-            </p>
-          </div>
-          <Button
-            variant="secondary"
-            size="lg"
-            className="w-full md:w-auto"
-            onClick={() => document.getElementById('ai-chat')?.scrollIntoView({ behavior: 'smooth' })}
-          >
-            Start the conversation
-          </Button>
-        </div>
+        <PreFooterContact variant={variant} />
 
         {/* Main Footer Content */}
         <div className="grid gap-8 md:grid-cols-5">
@@ -66,16 +52,16 @@ export default function Footer() {
           <div className="space-y-3 md:col-span-2">
             <h3 className="text-xl font-semibold text-white">Andrés Cabrera</h3>
             <p className="text-sm text-white/70">
-              Building AI-first solutions that make measurable impact. From NYC to the world.
+              Building AI-First solutions that make measurable impact. <br />From NYC to the world.
             </p>
-            <div className="flex flex-wrap gap-3 pt-2">
+            <div className="flex flex-wrap pt-2">
               {socialLinks.map((link) => (
                 <a
                   key={link.label}
                   href={link.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/70 transition hover:border-white/40 hover:text-white"
+                  className="rounded-full border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-white/70 transition hover:border-white/40 hover:text-white"
                 >
                   {link.label}
                 </a>
@@ -127,7 +113,7 @@ export default function Footer() {
 
 
         <div className="flex flex-col gap-6 border-t border-white/5 pt-6 text-xs text-white/60 md:flex-row md:items-center md:justify-between">
-          <span>© {new Date().getFullYear()} Andrés Cabrera. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Vessel Tech Inc. All rights reserved.</span>
           <span className="text-white/90">NYC</span>
         </div>
       </div>

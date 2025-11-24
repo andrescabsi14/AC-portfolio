@@ -26,7 +26,7 @@ export default function IndustryResults({ industry }: IndustryResultsProps) {
             Real <span className="text-green-400">Results</span>
           </h2>
           <p className="text-xl text-white/70 max-w-3xl mx-auto">
-            These aren't promises. These are actual metrics from businesses using AI-first solutions.
+            These aren't promises. These are actual metrics from businesses using AI-First solutions.
           </p>
         </motion.div>
 

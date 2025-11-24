@@ -92,7 +92,7 @@ export default function AboutUsIntroSection({ onIntroAnimationComplete }: AboutU
           </motion.h1>
         </div>
 
-        {/* AI First Experiences - positioned below name */}
+        {/* <span className="aifirst">AI-First</span> Experiences - positioned below name */}
         <div ref={taglineRef} className="text-center">
           <motion.p
             initial={hasAnimated ? false : { opacity: 0, y: 30 }}

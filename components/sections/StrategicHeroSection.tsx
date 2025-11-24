@@ -11,13 +11,14 @@ export default function StrategicHeroSection() {
             ref={containerRef}
             className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black"
         >
-            {/* Background Effects */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-black to-black" />
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150" />
-            </div>
+            {/* Background Image */}
+            <div
+                className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+                style={{ backgroundImage: "url('/bg/dumbo.jpg')" }}
+            />
 
-            {/* Content */}
+            {/* Dark Overlay */}
+            <div className="absolute inset-0 z-0 bg-black/60" />            {/* Content */}
             <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}

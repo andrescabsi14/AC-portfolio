@@ -110,7 +110,7 @@ export default function AIFirstPage() {
         <SmartContactSection />
 
       </main>
-      <Footer />
+      <Footer variant="assessment" />
     </>
   );
 }

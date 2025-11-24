@@ -174,7 +174,7 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
           </motion.div>
         </motion.div>
 
-        {/* AI First Experiences - positioned below name - stays visible */}
+        {/* <span className="aifirst">AI-First</span> Experiences - positioned below name - stays visible */}
         <motion.div
           ref={taglineRef}
           className="text-center max-w-5xl mx-auto"
@@ -197,7 +197,7 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
             transition={{ duration: hasAnimated ? 0 : 1.2, delay: hasAnimated ? 0 : 5, ease: [0.22, 1, 0.36, 1] }}
             className="text-2xl md:text-3xl lg:text-4xl font-light tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-gray-500 mb-6"
           >
-            CEO of BX Infrastructure
+            Self-taught Software Engineer & AI Architect.
           </motion.p>
           <motion.p
             initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
@@ -205,10 +205,10 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
             transition={{ duration: hasAnimated ? 0 : 1.2, delay: hasAnimated ? 0 : 5.5, ease: [0.22, 1, 0.36, 1] }}
             className="text-lg md:text-xl lg:text-2xl font-light text-gray-400 max-w-3xl mx-auto"
           >
-            Architecting AI-First ecosystems for global leaders like Coca-Cola and Gillette.
+            Author of <span className="aifirst">AI-First</span>.
             <br />
             <span className="text-sm md:text-base opacity-70 mt-4 block">
-              Available for Contract & Enterprise Engagements
+              Building intelligent systems for global businesses across 4 continents.
             </span>
           </motion.p>
         </motion.div>
