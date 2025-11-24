@@ -26,7 +26,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased bg-black text-white overflow-x-hidden font-sans" style={{ fontFamily: "'Raleway', sans-serif" }}>
+      <body className="antialiased bg-black text-white overflow-x-hidden font-sans">
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

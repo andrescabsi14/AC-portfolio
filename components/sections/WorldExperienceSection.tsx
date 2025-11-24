@@ -391,7 +391,7 @@ function WorldExperienceSectionContent() {
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.8 }}
             className="text-5xl md:text-7xl font-light text-white mb-4"
             style={{ letterSpacing: '-0.04em' }}
@@ -401,7 +401,7 @@ function WorldExperienceSectionContent() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-lg md:text-xl text-white-400 font-light mb-8"
           >

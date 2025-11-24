@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ScrollIndicator from '@/components/ui/ScrollIndicator';
+import MembershipSection from './MembershipSection';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -54,10 +55,9 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
       },
     });
 
-    // GSAP Parallax effect for tagline (slower movement)
+    // GSAP Parallax effect for tagline (slower movement, no fade)
     gsap.to(taglineRef.current, {
-      y: -100,
-      opacity: 0,
+      y: -50, // Reduced movement so text stays more visible
       scrollTrigger: {
         trigger: sectionRef.current,
         start: 'top top',
@@ -86,7 +86,17 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
       {/* Content */}
       <div className="relative z-20 h-full flex flex-col items-center justify-center px-6">
         {/* Name with GSAP parallax - Grouped A|C and full name container */}
-        <div ref={nameRef} className="text-center mb-8 relative">
+        <motion.div
+          ref={nameRef}
+          className="text-center relative"
+          initial={{ marginBottom: hasAnimated ? '4rem' : '2rem' }}
+          animate={{ marginBottom: '4rem' }}
+          transition={{
+            duration: hasAnimated ? 0 : 2.0,
+            delay: hasAnimated ? 0 : 4.5,
+            ease: [0.22, 1, 0.36, 1]
+          }}
+        >
           {/* Grouped animation container for A|C and full name overlap */}
           <motion.div className="relative h-0">
             {/* Phase 2: Full Andrés Cabrera name - overlaps A|C position with floating */}
@@ -162,34 +172,37 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
 
 
           </motion.div>
-        </div>
+        </motion.div>
 
         {/* AI First Experiences - positioned below name - stays visible */}
         <motion.div
           ref={taglineRef}
           className="text-center max-w-5xl mx-auto"
-          initial={hasAnimated ? false : { opacity: 0 }}
-          animate={hasAnimated ? false : { opacity: 1, y: [0, 40, 40], }}
+          initial={hasAnimated ? { opacity: 1, y: 40 } : { opacity: 0 }}
+          animate={{ opacity: 1, y: hasAnimated ? 40 : [0, 40, 40] }}
           transition={{
-            duration: 0.4, delay: 5, ease: 'easeOut', y: {
-              duration: 2.0,
-              delay: 5,
+            duration: hasAnimated ? 0 : 0.4,
+            delay: hasAnimated ? 0 : 5,
+            ease: 'easeOut',
+            y: {
+              duration: hasAnimated ? 0 : 2.0,
+              delay: hasAnimated ? 0 : 5,
               ease: 'easeOut'
             }
           }}
         >
           <motion.p
-            initial={hasAnimated ? false : { opacity: 0, y: 30 }}
-            animate={hasAnimated ? false : { opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 5, ease: [0.22, 1, 0.36, 1] }}
+            initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: hasAnimated ? 0 : 1.2, delay: hasAnimated ? 0 : 5, ease: [0.22, 1, 0.36, 1] }}
             className="text-2xl md:text-3xl lg:text-4xl font-light tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-gray-300 to-gray-500 mb-6"
           >
             CEO of BX Infrastructure
           </motion.p>
           <motion.p
-            initial={hasAnimated ? false : { opacity: 0, y: 30 }}
-            animate={hasAnimated ? false : { opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 5.5, ease: [0.22, 1, 0.36, 1] }}
+            initial={hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: hasAnimated ? 0 : 1.2, delay: hasAnimated ? 0 : 5.5, ease: [0.22, 1, 0.36, 1] }}
             className="text-lg md:text-xl lg:text-2xl font-light text-gray-400 max-w-3xl mx-auto"
           >
             Architecting AI-First ecosystems for global leaders like Coca-Cola and Gillette.
@@ -201,8 +214,9 @@ export default function IntroSection({ onAnimationComplete }: IntroSectionProps)
         </motion.div>
       </div>
 
+
       {/* Scroll Indicator */}
       <ScrollIndicator sectionRef={sectionRef} initialDelay={hasAnimated ? 0 : 1.3} />
-    </motion.section>
+    </motion.section >
   );
 }
