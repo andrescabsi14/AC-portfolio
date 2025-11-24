@@ -4,13 +4,14 @@ import { useState } from 'react';
 import Header from '@/components/ui/Header';
 import Footer from '@/components/ui/Footer';
 import IntroSection from '@/components/sections/IntroSection';
-import TrustedBySection from '@/components/sections/TrustedBySection';
+import HonorsSection from '@/components/sections/HonorsSection';
 import AIChatSectionNew from '@/components/sections/AIChatSectionNew';
 import WorldExperienceSection from '@/components/sections/WorldExperienceSection';
 import ServicesOverviewSection from '@/components/sections/ServicesOverviewSection';
 import ProblemsSection from '@/components/sections/ProblemsSection';
 import PersonalGuaranteeSection from '@/components/sections/PersonalGuaranteeSection';
-import CTASection from '@/components/sections/CTASection';
+import ProjectParticipationSection from '@/components/sections/ProjectParticipationSection';
+import MembershipSection from '@/components/sections/MembershipSection';
 
 export default function Home() {
   const [introAnimationComplete, setIntroAnimationComplete] = useState(false);
@@ -24,13 +25,19 @@ export default function Home() {
       <IntroSection onAnimationComplete={() => setIntroAnimationComplete(true)} />
 
       {/* Trusted By Section */}
-      <TrustedBySection />
+      <HonorsSection />
+
+      <MembershipSection />
 
       {/* World Experience Section */}
       <WorldExperienceSection />
 
+
       {/* Services Overview Section */}
       <ServicesOverviewSection />
+
+      {/* Project Participation Section */}
+      <ProjectParticipationSection />
 
       {/* Problems & Solutions Section */}
       <ProblemsSection />

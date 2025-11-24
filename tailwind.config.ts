@@ -72,7 +72,7 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-raleway)", "sans-serif"],
+        sans: ["'Raleway'", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {

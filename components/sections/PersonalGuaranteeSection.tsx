@@ -11,7 +11,7 @@ export default function PersonalGuaranteeSection() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.3 }}
           className="grid gap-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] items-center"
         >
           {/* Main statement - direct and confident */}

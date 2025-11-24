@@ -25,10 +25,7 @@ export default function AIChatSectionNew() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Show typewriter on mount
-  useEffect(() => {
-    setShowTypewriter(true);
-  }, []);
+
 
   // Typewriter effect for assistant messages
   const typeMessage = async (text: string) => {
@@ -158,7 +155,13 @@ export default function AIChatSectionNew() {
 
       {/* Content */}
       <div className="relative z-20 h-full flex flex-col items-center justify-center px-6">
-        <div className="max-w-3xl w-full">
+        <motion.div
+          className="max-w-3xl w-full"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, amount: 0.3 }}
+          onViewportEnter={() => setShowTypewriter(true)}
+        >
           {/* Initial State - Typewriter greeting + Button */}
           <AnimatePresence>
             {showButton && (
@@ -174,7 +177,7 @@ export default function AIChatSectionNew() {
                       text="Let's create something extraordinary together."
                       speed={50}
                       className="text-3xl md:text-4xl font-light text-white"
-                      onComplete={() => {}}
+                      onComplete={() => { }}
                     />
                   )}
                 </div>
@@ -246,16 +249,14 @@ export default function AIChatSectionNew() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
-                      className={`flex ${
-                        message.role === 'user' ? 'justify-end' : 'justify-start'
-                      }`}
+                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'
+                        }`}
                     >
                       <div
-                        className={`max-w-[80%] px-4 py-3 rounded-lg ${
-                          message.role === 'user'
-                            ? 'bg-white text-black'
-                            : 'bg-white/10 text-white border border-white/20'
-                        }`}
+                        className={`max-w-[80%] px-4 py-3 rounded-lg ${message.role === 'user'
+                          ? 'bg-white text-black'
+                          : 'bg-white/10 text-white border border-white/20'
+                          }`}
                       >
                         <p className="text-sm md:text-base">{message.content}</p>
                       </div>
@@ -338,8 +339,8 @@ export default function AIChatSectionNew() {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </motion.div>
       </div>
-    </section>
+    </section >
   );
 }
