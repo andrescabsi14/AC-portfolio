@@ -169,6 +169,7 @@ function WorldExperienceSectionContent() {
   const scrollPositionRef = useRef(0);
   const globeEl = useRef<any>(null);
   const atmosphereRef = useRef<THREE.Mesh | null>(null);
+  const starsRef = useRef<THREE.Points | null>(null);
 
   // Load GeoJSON data
   useEffect(() => {
@@ -279,6 +280,10 @@ function WorldExperienceSectionContent() {
     return () => window.removeEventListener('keydown', handleEscapeKey);
   }, [isExpanded]);
 
+
+
+
+
   // Control rotation
   useEffect(() => {
     if (globeEl.current) {
@@ -347,7 +352,7 @@ function WorldExperienceSectionContent() {
       const scene = globeEl.current.scene();
       scene.rotation.z = THREE.MathUtils.degToRad(23.5);
 
-      // Set up controls
+      // Set up controls - Enable autoRotate for globe spinning
       const controls = globeEl.current.controls();
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.3;
@@ -366,21 +371,15 @@ function WorldExperienceSectionContent() {
     <>
       <section id="world-experience" className="relative h-screen w-full bg-black-70 overflow-hidden">
         {/* Background Stars - Ensure z-index allows visibility */}
-        <div className="absolute inset-0 bg-[url('https://unpkg.com/three-globe/example/img/night-sky.png')] opacity-20 brightness-30 pointer-events-none z-0" />
-
-        {/* Blinking Stars Effect */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="stars-small"></div>
-          <div className="stars-medium"></div>
-          <div className="stars-large"></div>
-        </div>
+        {/* Background Stars - High quality static image */}
+        <div className="absolute inset-0 bg-[url('https://unpkg.com/three-globe/example/img/night-sky.png')] opacity-40 brightness-100 pointer-events-none z-0" />
 
         <div className="absolute inset-0 z-10" style={{ overflow: 'hidden' }}>
           {placesData && globeMaterial && (
             <Globe
               ref={globeEl}
               globeMaterial={globeMaterial}
-              backgroundColor="rgba(0,0,0,1)"
+              backgroundColor="rgba(0,0,0,0)"
               objectsData={[
                 {
                   type: 'cloud',
