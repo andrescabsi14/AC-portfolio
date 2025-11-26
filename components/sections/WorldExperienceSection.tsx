@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import StarfieldBackground from '@/components/ui/StarfieldBackground';
 import GlassButton from '@/components/ui/GlassButton';
 import MomentLightbox from '@/components/ui/MomentLightbox';
 import * as THREE from 'three';
@@ -158,6 +159,7 @@ const GLOBE_MOMENT_LOCATIONS: GlobeMoment[] = [
 const SUN_DIRECTION = new THREE.Vector3(-1, 0, 0.2).normalize();
 
 // Atmosphere distance from globe surface (1.05 = 5% larger than globe)
+// Atmosphere distance from globe surface (1.05 = 5% larger than globe)
 const ATMOSPHERE_RADIUS_MULTIPLIER = 1;
 
 function WorldExperienceSectionContent() {
@@ -169,7 +171,6 @@ function WorldExperienceSectionContent() {
   const scrollPositionRef = useRef(0);
   const globeEl = useRef<any>(null);
   const atmosphereRef = useRef<THREE.Mesh | null>(null);
-  const starsRef = useRef<THREE.Points | null>(null);
 
   // Load GeoJSON data
   useEffect(() => {
@@ -370,9 +371,8 @@ function WorldExperienceSectionContent() {
   return (
     <>
       <section id="world-experience" className="relative h-screen w-full bg-black-70 overflow-hidden">
-        {/* Background Stars - Ensure z-index allows visibility */}
-        {/* Background Stars - High quality static image */}
-        <div className="absolute inset-0 bg-[url('https://unpkg.com/three-globe/example/img/night-sky.png')] opacity-40 brightness-100 pointer-events-none z-0" />
+        {/* Independent Starfield Background */}
+        <StarfieldBackground />
 
         <div className="absolute inset-0 z-10" style={{ overflow: 'hidden' }}>
           {placesData && globeMaterial && (
