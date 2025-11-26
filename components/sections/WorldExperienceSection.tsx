@@ -160,7 +160,7 @@ const SUN_DIRECTION = new THREE.Vector3(-1, 0, 0.2).normalize();
 
 // Atmosphere distance from globe surface (1.05 = 5% larger than globe)
 // Atmosphere distance from globe surface (1.05 = 5% larger than globe)
-const ATMOSPHERE_RADIUS_MULTIPLIER = 1;
+
 
 function WorldExperienceSectionContent() {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -171,6 +171,7 @@ function WorldExperienceSectionContent() {
   const scrollPositionRef = useRef(0);
   const globeEl = useRef<any>(null);
   const atmosphereRef = useRef<THREE.Mesh | null>(null);
+  const ATMOSPHERE_RADIUS_MULTIPLIER = isExpanded ? 1 : 1;
 
   // Load GeoJSON data
   useEffect(() => {

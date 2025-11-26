@@ -1,8 +1,17 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { motion, useAnimation } from 'framer-motion';
 
 const TWINKLE_SPEED_PERCENT = 150; // Adjust to scale twinkle animation speed (100 = default)
 const TWINKLE_SPEED_MULTIPLIER = TWINKLE_SPEED_PERCENT / 100;
+
+const STARFIELD_FADE_VARIANTS = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 1.5, ease: 'easeInOut' }
+  }
+};
 
 // Custom shader for stationary, ultra-realistic twinkling stars
 const STAR_VERTEX_SHADER = `
@@ -40,23 +49,90 @@ const STAR_FRAGMENT_SHADER = `
   varying vec3 vColor;
 
   void main() {
-    vec2 center = gl_PointCoord - 0.5;
-    float dist = length(center);
+    vec2 coord = gl_PointCoord - 0.5;
+    float dist = length(coord);
 
-    float halo = smoothstep(0.65, 0.0, dist);
-    float core = smoothstep(0.25, 0.0, dist);
-    float bloom = exp(-9.0 * dist * dist);
+    float radial = smoothstep(0.5, 0.0, dist);
+    float core = smoothstep(0.2, 0.0, dist);
+    float sparkle = exp(-18.0 * dist * dist);
 
-    vec3 color = vColor * (0.55 + 0.45 * halo) + vColor * bloom * 0.6;
-    float alpha = vOpacity * (core * 0.7 + bloom * 0.3);
+    float angle = atan(coord.y, coord.x);
+    float cross = pow(abs(cos(angle * 4.0)), 2.0) * smoothstep(0.45, 0.0, dist);
+
+    float alpha = vOpacity * (core * 0.6 + sparkle * 0.3 + radial * 0.1 + cross * 0.2);
+    vec3 color = vColor * (0.35 + 0.65 * core) + vColor * sparkle * 0.8 + vColor * radial * 0.2;
 
     if (alpha < 0.01) discard;
     gl_FragColor = vec4(color, alpha);
   }
 `;
 
+const STAR_GLOW_VERTEX_SHADER = `
+  attribute float size;
+  attribute float speed;
+  attribute float phase;
+  attribute float twinkle;
+  uniform float time;
+  varying float vGlowIntensity;
+
+  void main() {
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * mvPosition;
+    float depthScale = clamp(1400.0 / -mvPosition.z, 0.4, 4.5);
+    gl_PointSize = size * depthScale * 3.0;
+
+    float slowPulse = sin(time * speed + phase);
+    float driftPulse = sin(time * (speed * 0.5 + 0.15) + phase * 1.1);
+    float combined = 0.5 + 0.5 * (slowPulse * 0.6 + driftPulse * 0.4);
+    vGlowIntensity = mix(0.15, 1.0, combined * twinkle);
+  }
+`;
+
+const STAR_GLOW_FRAGMENT_SHADER = `
+  varying float vGlowIntensity;
+
+  void main() {
+    vec2 coord = gl_PointCoord - 0.5;
+    float dist = length(coord);
+
+    float glow = exp(-6.0 * dist * dist);
+    float halo = smoothstep(0.9, 0.0, dist);
+    float alpha = (glow * 0.7 + halo * 0.3) * vGlowIntensity * 0.55;
+
+    if (alpha < 0.01) discard;
+    gl_FragColor = vec4(0.7, 0.82, 1.0, alpha);
+  }
+`;
+
 const StarfieldBackground = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const controls = useAnimation();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const section = document.getElementById('world-experience');
+    if (!section) {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]) {
+          setIsVisible(entries[0].isIntersecting);
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    controls.start(isVisible ? 'visible' : 'hidden');
+  }, [isVisible, controls]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -226,14 +302,29 @@ const StarfieldBackground = () => {
       blending: THREE.AdditiveBlending
     });
 
+    const glowMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 }
+      },
+      vertexShader: STAR_GLOW_VERTEX_SHADER,
+      fragmentShader: STAR_GLOW_FRAGMENT_SHADER,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+
+    const starGlow = new THREE.Points(starGeometry, glowMaterial);
     const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(starGlow);
     scene.add(stars);
 
     let animationId: number;
     const clock = new THREE.Clock();
 
     const animate = () => {
-      starMaterial.uniforms.time.value = clock.getElapsedTime();
+      const elapsed = clock.getElapsedTime();
+      starMaterial.uniforms.time.value = elapsed;
+      glowMaterial.uniforms.time.value = elapsed;
       renderer.render(scene, camera);
       animationId = requestAnimationFrame(animate);
     };
@@ -270,16 +361,28 @@ const StarfieldBackground = () => {
       }
       starGeometry.dispose();
       starMaterial.dispose();
+      glowMaterial.dispose();
       renderer.dispose();
     };
   }, []);
 
   return (
-    <div
-      ref={containerRef}
+    <motion.div
       className="absolute inset-0 z-0 pointer-events-none"
-      style={{ background: 'black' }}
-    />
+      variants={STARFIELD_FADE_VARIANTS}
+      initial="hidden"
+      animate={controls}
+    >
+      <div
+        className="absolute inset-0"
+        aria-hidden="true"
+        style={{
+          background:
+            'radial-gradient(circle at 55% 20%, rgba(22,70,140,0.35), rgba(0,0,0,0) 45%), linear-gradient(180deg, rgba(2,7,15,0.95) 0%, rgba(1,2,6,0.85) 55%, rgba(0,0,0,0.98) 100%)'
+        }}
+      />
+      <div ref={containerRef} className="absolute inset-0" />
+    </motion.div>
   );
 };
 
