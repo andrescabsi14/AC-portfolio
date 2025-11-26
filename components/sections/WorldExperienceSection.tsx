@@ -158,7 +158,7 @@ const GLOBE_MOMENT_LOCATIONS: GlobeMoment[] = [
 const SUN_DIRECTION = new THREE.Vector3(-1, 0, 0.2).normalize();
 
 // Atmosphere distance from globe surface (1.05 = 5% larger than globe)
-const ATMOSPHERE_RADIUS_MULTIPLIER = 1.005;
+const ATMOSPHERE_RADIUS_MULTIPLIER = 1;
 
 function WorldExperienceSectionContent() {
   const [isExpanded, setIsExpanded] = useState(false);
