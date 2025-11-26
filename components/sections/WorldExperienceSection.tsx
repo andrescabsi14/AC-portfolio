@@ -155,7 +155,7 @@ const GLOBE_MOMENT_LOCATIONS: GlobeMoment[] = [
 ];
 
 // Sun direction constant - used for both surface lighting and atmosphere
-const SUN_DIRECTION = new THREE.Vector3(-1, 0, 0.3).normalize();
+const SUN_DIRECTION = new THREE.Vector3(-1, 0, 0.2).normalize();
 
 // Atmosphere distance from globe surface (1.05 = 5% larger than globe)
 const ATMOSPHERE_RADIUS_MULTIPLIER = 1.005;
@@ -222,7 +222,7 @@ function WorldExperienceSectionContent() {
             float rimDot = 1.0 - max(0.0, dot(viewDir, vNormal));
             float sunAlignment = max(0.0, dot(vNormal, sunDirection));
             float rimIntensity = pow(rimDot, 3.0) * sunAlignment;
-            vec3 rimColor = vec3(0.6, 0.8, 1.0) * rimIntensity * 0.4;
+            vec3 rimColor = vec3(0.6, 1, 3.0) * rimIntensity * 0.5; // Glow intensity on the globe glow
             
             gl_FragColor = vec4(baseColor.rgb + rimColor, 1.0);
           }
@@ -329,7 +329,7 @@ function WorldExperienceSectionContent() {
             vec3 normalizedPos = normalize(vPosition);
             float rightSide = smoothstep(-0.8, 0.2, normalizedPos.x);
             float glow = rim * (0.3 + 0.7 * rightSide);
-            vec3 glowColor = vec3(0.4, 0.7, 1.0); // Earth's blue atmosphere
+            vec3 glowColor = vec3(0.7, 0.7, 1.0); // Earth's blue atmosphere
             gl_FragColor = vec4(glowColor, glow * 0.8);
           }
         `,
@@ -354,7 +354,7 @@ function WorldExperienceSectionContent() {
       controls.enableZoom = false;
 
       // Set initial view
-      globeEl.current.pointOfView({ lat: 20, lng: -90, altitude: 2 });
+      globeEl.current.pointOfView({ lat: 0, lng: -90, altitude: 2 });
 
       console.log('Globe initialized successfully');
     } catch (error) {
