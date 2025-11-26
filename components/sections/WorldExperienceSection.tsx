@@ -38,13 +38,13 @@ interface GlobeMoment {
 
 // Globe moments with coordinates
 const GLOBE_MOMENT_LOCATIONS: GlobeMoment[] = [
-  // Milestones (Red)
   {
     id: 'ylai',
     title: 'Washington, D.C.',
-    subtitle: 'YLAI Fellowship',
-    description: 'Selected by the U.S. Department of State as one of 250 exceptional young leaders. Recognized by President Obama.',
-    image: '/photos/certificate/PresidentObamaCertificate.jpg',
+    subtitle: 'YLAI Fellowship — U.S. Department of State',
+    description:
+      'Selected by the U.S. Department of State for the Young Leaders of the Americas Initiative. Recognized among the top young leaders across 36 countries.',
+    image: '/photos/milestones/ylai.jpg',
     lat: 38.9072,
     lng: -77.0369,
     color: '#ef4444',
@@ -53,115 +53,179 @@ const GLOBE_MOMENT_LOCATIONS: GlobeMoment[] = [
   {
     id: 'dtu',
     title: 'Copenhagen, Denmark',
-    subtitle: 'DTU Young Influencer',
-    description: 'Selected as a Young Influencer by Denmark Technical University for the C40 World Mayors Summit.',
-    image: '/photos/certificate/TechCamp-Bolivia.jpg', // Placeholder
+    subtitle: 'DTU Young Influencer — C40 World Mayors Summit',
+    description:
+      'Represented the Americas at the C40 World Mayors Summit as a Young Influencer selected by the Denmark Technical University.',
+    image: '/photos/milestones/dtu.jpg',
     lat: 55.6761,
     lng: 12.5683,
     color: '#ef4444',
     type: 'milestone'
   },
   {
-    id: 'innovators',
-    title: 'Mexico City',
-    subtitle: 'MIT Technology Review',
-    description: 'Innovators Under 35 - Recognition for technological impact in the region.',
-    image: '/photos/innovators35.jpg',
-    lat: 19.4326,
-    lng: -99.1332,
+    id: 'mit',
+    title: 'Bogotá, Colombia',
+    subtitle: 'MIT Technology Review — Innovators Under 35 (Nominee)',
+    description:
+      'Nominated by MIT Technology Review for pioneering work using neural networks for disease detection.',
+    image: '/photos/milestones/mit35.jpg',
+    lat: 4.7110,
+    lng: -74.0721,
     color: '#ef4444',
     type: 'milestone'
   },
-
-  // High-Level Events (Gold)
   {
-    id: 'apec',
-    title: 'Lima, Peru',
-    subtitle: 'APEC Summit',
-    description: 'Delegate at the Asia-Pacific Economic Cooperation summit, discussing trade and technology.',
-    image: '/photos/Obama-Lima-TownHall.jpg',
-    lat: -12.0464,
-    lng: -77.0428,
-    color: '#D4AF37', // Gold
-    type: 'event'
-  },
-  {
-    id: 'ges',
-    title: 'Silicon Valley',
-    subtitle: 'Global Entrepreneurship Summit',
-    description: 'Selected delegate for the Global Entrepreneurship Summit hosted at Stanford University.',
-    image: '/photos/mlb/IMG_5006.jpeg', // Placeholder
-    lat: 37.4275,
-    lng: -122.1697,
+    id: 'c40',
+    title: 'Copenhagen, Denmark',
+    subtitle: 'C40 World Mayors Summit',
+    description:
+      'Participated in global climate discussions with world leaders, representing the Americas in innovation-focused sessions.',
+    image: '/photos/events/c40.jpg',
+    lat: 55.6761,
+    lng: 12.5683,
     color: '#D4AF37',
     type: 'event'
   },
   {
-    id: 'michigan',
-    title: 'Ann Arbor, MI',
-    subtitle: 'University of Michigan',
-    description: 'Fellowship and collaboration on social impact and innovation ecosystems.',
-    image: '/photos/mlb/IMG_5005.jpeg', // Placeholder
-    lat: 42.2808,
-    lng: -83.7430,
-    color: '#D4AF37',
-    type: 'event'
-  },
-  {
-    id: 'techcamp',
+    id: 'techcamp-bolivia',
     title: 'La Paz, Bolivia',
-    subtitle: 'TechCamp',
-    description: 'Digital innovation workshops fostering cross-border collaboration.',
-    image: '/photos/certificate/TechCamp-Bolivia.jpg',
+    subtitle: 'TechCamp — Department of State',
+    description:
+      'Contributed to an international TechCamp focused on digital innovation and cross-border collaboration.',
+    image: '/photos/events/techcamp-bolivia.jpg',
     lat: -16.5000,
     lng: -68.1193,
     color: '#D4AF37',
     type: 'event'
   },
   {
-    id: 'maastricht',
-    title: 'Maastricht, Netherlands',
-    subtitle: 'AI Research',
-    description: 'Advanced research in Artificial Intelligence and agentic workflows.',
-    image: '/images/globe/copenhagen-aarhus-c40.jpg', // Placeholder
-    lat: 50.8514,
-    lng: 5.6910,
+    id: 'peru-leadership',
+    title: 'Lima, Peru',
+    subtitle: 'APEC Leadership Program',
+    description:
+      'Selected for APEC Leadership initiatives focused on trade, innovation, and high-impact community development.',
+    image: '/photos/events/apec.jpg',
+    lat: -12.0464,
+    lng: -77.0428,
     color: '#D4AF37',
     type: 'event'
   },
-
-  // Projects (Cyan/Teal)
   {
-    id: 'astra-code',
-    title: 'Rome, Italy',
-    subtitle: 'Astra Code',
-    description: 'Leading the development of advanced AI solutions for the Italian market.',
-    image: '/images/globe/copenhagen-aarhus-c40.jpg', // Placeholder
-    lat: 41.9028,
-    lng: 12.4964,
-    color: '#06b6d4', // Cyan
+    id: 'vessel-ny',
+    title: 'New York, USA',
+    subtitle: 'Vessel — GenAI Infrastructure',
+    description:
+      'Founder of Vessel, a GenAI memory and agent orchestration platform recognized by Stanford PhDs and NYU neuroscientists at NY Tech Week.',
+    image: '/photos/projects/vessel.jpg',
+    lat: 40.7128,
+    lng: -74.0060,
+    color: '#06b6d4',
     type: 'project'
   },
   {
-    id: 'san-diego',
-    title: 'San Diego, USA',
-    subtitle: 'Strategic Project',
-    description: 'Spearheading innovative technology initiatives in Southern California.',
-    image: '/images/globe/new-york-hudson-yards.jpg', // Placeholder
-    lat: 32.7157,
-    lng: -117.1611,
-    color: '#06b6d4', // Cyan
+    id: 'realio',
+    title: 'New York, USA',
+    subtitle: 'Realio — Multi-Chain RWA Platform',
+    description:
+      'Engineered multi-chain smart contracts and a P2P OTC trading system handling $50M+ in tokenized real-world assets.',
+    image: '/photos/projects/realio.jpg',
+    lat: 40.7128,
+    lng: -74.0060,
+    color: '#06b6d4',
+    type: 'project'
+  },
+  {
+    id: 'astrakode',
+    title: 'Rome, Italy',
+    subtitle: 'AstraKode — No-Code Smart Contract Platform',
+    description:
+      'Architected a no-code Solidity platform enabling 1,000+ monthly smart contract deployments with full AWS serverless infra.',
+    image: '/photos/projects/astrakode.jpg',
+    lat: 41.9028,
+    lng: 12.4964,
+    color: '#06b6d4',
+    type: 'project'
+  },
+  {
+    id: 'coca-cola-fanta',
+    title: 'Atlanta, USA',
+    subtitle: 'Coca-Cola — What The Fanta Campaign',
+    description:
+      'Built multilingual animated React + AEM experience deployed in 44 countries for Coca-Cola’s global Halloween campaign.',
+    image: '/photos/projects/cocacola.jpg',
+    lat: 33.7490,
+    lng: -84.3880,
+    color: '#06b6d4',
+    type: 'project'
+  },
+  {
+    id: 'everlyhealth',
+    title: 'Austin, TX',
+    subtitle: 'EverlyHealth — Telehealth Infrastructure',
+    description:
+      'Led development of HIPAA-compliant telehealth systems processing 1M+ daily transactions with 99.99% uptime.',
+    image: '/photos/projects/everlyhealth.jpg',
+    lat: 30.2672,
+    lng: -97.7431,
+    color: '#06b6d4',
+    type: 'project'
+  },
+  {
+    id: 'scoutcool',
+    title: 'Buenos Aires, Argentina',
+    subtitle: 'Scout.cool — dYdX, Uniswap, Livepeer Explorer',
+    description:
+      'Principal Engineer for a high-performance blockchain explorer serving dYdX, Uniswap, and Livepeer with $1B+ TVL tracked.',
+    image: '/photos/projects/scout.jpg',
+    lat: -34.6037,
+    lng: -58.3816,
+    color: '#06b6d4',
+    type: 'project'
+  },
+  {
+    id: 'belatrix',
+    title: 'Mendoza, Argentina',
+    subtitle: 'Belatrix — ML & Blockchain Engineering',
+    description:
+      'Built Deep Convolutional GANs and led front-end architecture for an early blockchain startup.',
+    image: '/photos/projects/belatrix.jpg',
+    lat: -32.8895,
+    lng: -68.8458,
+    color: '#06b6d4',
+    type: 'project'
+  },
+  {
+    id: 'mds-digital',
+    title: 'Bogotá, Colombia',
+    subtitle: 'MDS Digital — Fortune 500 Web Experiences',
+    description:
+      'Developed digital experiences for Coca-Cola, Disney, ESPN, Nissan, Dr Pepper, and Discovery Channel across 20+ web applications.',
+    image: '/photos/projects/mds.jpg',
+    lat: 4.7110,
+    lng: -74.0721,
+    color: '#06b6d4',
+    type: 'project'
+  },
+  {
+    id: 'djes',
+    title: 'Bogotá, Colombia',
+    subtitle: 'DJES — SMB Web Platforms',
+    description:
+      'Built WordPress and Django REST API experiences for multiple small businesses across Colombia.',
+    image: '/photos/projects/djes.jpg',
+    lat: 4.7110,
+    lng: -74.0721,
+    color: '#06b6d4',
     type: 'project'
   }
 ];
 
 // Sun direction constant - used for both surface lighting and atmosphere
 const SUN_DIRECTION = new THREE.Vector3(-1, 0, 0.2).normalize();
-
-// Atmosphere distance from globe surface (1.05 = 5% larger than globe)
-// Atmosphere distance from globe surface (1.05 = 5% larger than globe)
-
-
+const NON_EXPANDED_SPIN_SPEED = 0.05;
+const EXPANDED_SPIN_SPEED = 0.1;
+const NON_EXPANDED_ALTITUDE = 0.4;
+const EXPANDED_ALTITUDE = 2.5;
 function WorldExperienceSectionContent() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [placesData, setPlacesData] = useState<GeoJSONData | null>(null);
@@ -253,7 +317,7 @@ function WorldExperienceSectionContent() {
     setIsExpanded(true);
 
     if (globeEl.current) {
-      globeEl.current.pointOfView({ altitude: 2.5 }, 1000);
+      globeEl.current.pointOfView({ lat: 0, lng: -90, altitude: EXPANDED_ALTITUDE }, 1000);
     }
   };
 
@@ -268,7 +332,7 @@ function WorldExperienceSectionContent() {
     }, 100);
 
     if (globeEl.current) {
-      globeEl.current.pointOfView({ altitude: 0.1 }, 1000);
+      globeEl.current.pointOfView({ lat: 0, lng: -90, altitude: NON_EXPANDED_ALTITUDE }, 1000);
     }
   };
 
@@ -301,7 +365,7 @@ function WorldExperienceSectionContent() {
     if (globeEl.current) {
       const controls = globeEl.current.controls();
       controls.autoRotate = true; // Always rotate
-      controls.autoRotateSpeed = 0.3; // Slightly faster rotation
+      controls.autoRotateSpeed = isExpanded ? EXPANDED_SPIN_SPEED : NON_EXPANDED_SPIN_SPEED;
 
       // Disable zoom when not expanded
       controls.enableZoom = isExpanded;
@@ -355,14 +419,15 @@ function WorldExperienceSectionContent() {
       const headGeometry = new THREE.SphereGeometry(1.5, 16, 16);
       const headMaterial = new THREE.MeshLambertMaterial({ color: color });
       const head = new THREE.Mesh(headGeometry, headMaterial);
-      head.position.y = 4;
+      head.position.set(0, 0, 4);
       group.add(head);
 
       // Pin Body (Cylinder)
       const bodyGeometry = new THREE.CylinderGeometry(0.2, 0, 4, 8);
       const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
       const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-      body.position.y = 2;
+      body.rotation.x = Math.PI / 2;
+      body.position.set(0, 0, 2);
       group.add(body);
 
       return group;
@@ -422,11 +487,11 @@ function WorldExperienceSectionContent() {
       // Set up controls - Enable autoRotate for globe spinning
       const controls = globeEl.current.controls();
       controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.3;
+      controls.autoRotateSpeed = NON_EXPANDED_SPIN_SPEED;
       controls.enableZoom = false;
 
       // Set initial view
-      globeEl.current.pointOfView({ lat: 0, lng: -90, altitude: 2 });
+      globeEl.current.pointOfView({ lat: 0, lng: -90, altitude: NON_EXPANDED_ALTITUDE });
 
       console.log('Globe initialized successfully');
     } catch (error) {
@@ -436,58 +501,82 @@ function WorldExperienceSectionContent() {
 
   return (
     <>
-      <section id="world-experience" className="relative h-screen w-full bg-black-70 overflow-hidden">
-        {/* Independent Starfield Background */}
-        <StarfieldBackground />
+      <section
+        id="world-experience"
+        className="relative h-screen w-full bg-black-70 overflow-hidden transition-all duration-500"
+        style={{
+          transition: 'filter 0.6s ease'
+        }}
+      >
+        {/* Gradient Fade-in for Next Section */}
+        <div className="absolute top-0 left-0 right-0 h-[20vh] bg-gradient-to-b from-black via-black/40 to-transparent pointer-events-none z-30" />
 
-        <div className="absolute inset-0 z-10" style={{ overflow: 'hidden' }}>
-          {placesData && globeMaterial && (
-            <Globe
-              ref={globeEl}
-              globeMaterial={globeMaterial}
-              backgroundColor="rgba(0,0,0,0)"
-              objectsData={globeObjects}
-              objectLat="lat"
-              objectLng="lng"
-              objectAltitude={0.75}
-              objectThreeObject={renderGlobeObject}
-              onObjectClick={(obj: any) => {
-                if (obj.type !== 'cloud') {
-                  setSelectedMoment(obj as GlobeMoment);
-                }
-              }}
-              onGlobeReady={() => {
-                console.log('Globe ready callback fired');
-                setIsGlobeReady(true);
-              }}
-              labelsData={labelData}
-              labelLat="lat"
-              labelLng="lng"
-              labelText="title"
-              labelSize={1.5}
-              labelDotRadius={0.5}
-              labelColor={() => "rgba(255, 255, 255, 0.75)"}
-              labelResolution={2}
-              width={typeof window !== 'undefined' ? window.innerWidth : 1920}
-              height={typeof window !== 'undefined' ? window.innerHeight : 1080}
-            />
-          )}
+        {/* Independent Starfield Background */}
+        <motion.div initial={{ opacity: 0 }} animate={
+          isExpanded
+            ? { opacity: 1 }
+            : { opacity: 0 }
+        }
+          transition={{ duration: 0.5, ease: 'easeInOut' }}>
+          <StarfieldBackground />
+        </motion.div>
+
+        <div
+          className="absolute inset-0 z-10 flex justify-center pointer-events-none top-0 mt-20"
+          style={{ overflow: 'hidden', opacity: isExpanded ? 1 : 0.7, }}
+        >
+          <div className="pointer-events-auto w-full h-full flex justify-center" style={{
+            filter: isExpanded ? 'none' : 'hue-rotate(-30deg) blur(5px) brightness(1.6)',
+            transition: 'filter 0.6s ease'
+          }}>
+            {placesData && globeMaterial && (
+              <Globe
+                ref={globeEl}
+                globeMaterial={globeMaterial}
+                backgroundColor="rgba(0,0,0,0)"
+                objectsData={globeObjects}
+                objectLat="lat"
+                objectLng="lng"
+                objectAltitude={(d: any) => (d.type === 'cloud' ? 0 : 0.01)}
+                objectThreeObject={renderGlobeObject}
+                onObjectClick={(obj: any) => {
+                  if (obj.type !== 'cloud') {
+                    setSelectedMoment(obj as GlobeMoment);
+                  }
+                }}
+                onGlobeReady={() => {
+                  console.log('Globe ready callback fired');
+                  setIsGlobeReady(true);
+                }}
+                labelsData={labelData}
+                labelLat="lat"
+                labelLng="lng"
+                labelText="title"
+                labelSize={1}
+                labelDotRadius={0.5}
+                labelColor={() => "rgba(255, 255, 255, 0.75)"}
+                labelResolution={2}
+                width={typeof window !== 'undefined' ? window.innerWidth : 1920}
+                height={typeof window !== 'undefined' ? window.innerHeight : 1080}
+              />
+            )}
+          </div>
         </div>
 
         <motion.div
           className="absolute px-6 text-center z-20 pointer-events-none"
           animate={
             isExpanded
-              ? { top: 140, left: '50%', width: '100%', transform: 'translateX(-50%)' } // Lowered further to avoid header overlap
-              : { top: '50%', left: '50%', width: '100%', transform: 'translate(-50%, -50%)' }
+              ? { top: '8%', left: '50%', width: '100%', transform: 'translateX(-50%)' } // Lowered further to avoid header overlap
+              : { top: '40vw', left: '50vw', width: '100%', transform: 'translate(-50%, -50%)' }
           }
           transition={{ duration: 0.5, ease: 'easeInOut' }}
         >
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 20, }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
             className="text-5xl md:text-7xl font-light text-white mb-4"
             style={{ letterSpacing: '-0.04em' }}
           >
@@ -497,7 +586,7 @@ function WorldExperienceSectionContent() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
             className="text-lg md:text-xl text-white-400 font-light mb-8"
           >
             Global impact across continents
@@ -506,7 +595,7 @@ function WorldExperienceSectionContent() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
+              transition={{ delay: 0.8 }}
               className="pointer-events-auto"
             >
               <GlassButton onClick={handleExpand}>
@@ -569,7 +658,10 @@ function WorldExperienceSectionContent() {
             </>
           )}
         </AnimatePresence>
+        {/* Gradient Fade-in for Next Section */}
+        <div className="absolute bottom-0 left-0 right-0 h-[20vh] bg-gradient-to-b from-transparent via-black/40 to-black pointer-events-none z-30" />
       </section>
+
 
       {/* Moment Lightbox */}
       <MomentLightbox moment={selectedMoment} onClose={() => setSelectedMoment(null)} />

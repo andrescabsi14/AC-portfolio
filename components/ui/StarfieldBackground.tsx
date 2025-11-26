@@ -401,7 +401,7 @@ const StarfieldBackground = () => {
   return (
     <motion.div
       className="absolute inset-0 z-0 pointer-events-none"
-      variants={STARFIELD_FADE_VARIANTS}
+      variants={STARFIELD_FADE_VARIANTS as any}
       initial="hidden"
       animate={controls}
     >
