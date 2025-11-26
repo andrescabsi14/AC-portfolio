@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import StarfieldBackground from '@/components/ui/StarfieldBackground';
@@ -171,6 +171,7 @@ function WorldExperienceSectionContent() {
   const scrollPositionRef = useRef(0);
   const globeEl = useRef<any>(null);
   const atmosphereRef = useRef<THREE.Mesh | null>(null);
+  const cloudTextureRef = useRef<THREE.Texture | null>(null);
   const ATMOSPHERE_RADIUS_MULTIPLIER = isExpanded ? 1 : 1;
 
   // Load GeoJSON data
@@ -178,6 +179,14 @@ function WorldExperienceSectionContent() {
     fetch('/ne_110m_populated_places_simple.geojson')
       .then((res) => res.json())
       .then((data) => setPlacesData(data));
+  }, []);
+
+  const getCloudTexture = useCallback(() => {
+    if (!cloudTextureRef.current) {
+      const loader = new THREE.TextureLoader();
+      cloudTextureRef.current = loader.load('/earthcloudshigh.jpg');
+    }
+    return cloudTextureRef.current;
   }, []);
 
   // Load textures and create shader material
@@ -188,6 +197,7 @@ function WorldExperienceSectionContent() {
       loader.loadAsync('/earthhighnight.jpg'),
       loader.loadAsync('/earthcloudshigh.jpg')
     ]).then(([dayTexture, nightTexture, cloudsTexture]) => {
+      cloudTextureRef.current = cloudsTexture;
       const shaderMaterial = new THREE.ShaderMaterial({
         uniforms: {
           dayTexture: { value: dayTexture },
@@ -305,6 +315,61 @@ function WorldExperienceSectionContent() {
     }
   }, [isExpanded]);
 
+  const globeObjects = useMemo<any[]>(() => {
+    const baseObjects = [{ type: 'cloud', radius: 1.1 }];
+    return isExpanded ? [...baseObjects, ...GLOBE_MOMENT_LOCATIONS] : baseObjects;
+  }, [isExpanded]);
+
+  const labelData = useMemo<GlobeMoment[]>(() => (isExpanded ? GLOBE_MOMENT_LOCATIONS : []), [isExpanded]);
+
+  const renderGlobeObject = useCallback(
+    (d: any) => {
+      if (d.type === 'cloud') {
+        const cloudsTexture = getCloudTexture();
+        const geometry = new THREE.SphereGeometry(d.radius * 100, 64, 64);
+        const material = new THREE.MeshPhongMaterial({
+          map: cloudsTexture || undefined,
+          transparent: true,
+          opacity: 0.7,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide
+        });
+        const cloudMesh = new THREE.Mesh(geometry, material);
+
+        const animate = () => {
+          cloudMesh.rotation.y += 0.0005;
+          requestAnimationFrame(animate);
+        };
+        animate();
+
+        return cloudMesh;
+      }
+
+      // Create 3D Pin for Milestones/Events/Projects
+      const group = new THREE.Group();
+
+      // Color based on type
+      const color = d.color ? new THREE.Color(d.color) : new THREE.Color(0xff0000);
+
+      // Pin Head (Sphere)
+      const headGeometry = new THREE.SphereGeometry(1.5, 16, 16);
+      const headMaterial = new THREE.MeshLambertMaterial({ color: color });
+      const head = new THREE.Mesh(headGeometry, headMaterial);
+      head.position.y = 4;
+      group.add(head);
+
+      // Pin Body (Cylinder)
+      const bodyGeometry = new THREE.CylinderGeometry(0.2, 0, 4, 8);
+      const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+      const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+      body.position.y = 2;
+      group.add(body);
+
+      return group;
+    },
+    [getCloudTexture]
+  );
+
   // Initialize globe when ready (more reliable than onGlobeReady callback)
   useEffect(() => {
     if (!isGlobeReady || !globeEl.current || atmosphereRef.current) {
@@ -381,61 +446,11 @@ function WorldExperienceSectionContent() {
               ref={globeEl}
               globeMaterial={globeMaterial}
               backgroundColor="rgba(0,0,0,0)"
-              objectsData={[
-                {
-                  type: 'cloud',
-                  radius: 1.1
-                },
-                ...(isExpanded ? GLOBE_MOMENT_LOCATIONS : [])
-              ]}
+              objectsData={globeObjects}
               objectLat="lat"
               objectLng="lng"
               objectAltitude={0.75}
-              objectThreeObject={(d: any) => {
-                if (d.type === 'cloud') {
-                  const loader = new THREE.TextureLoader();
-                  const cloudsTexture = loader.load('/earthcloudshigh.jpg');
-                  const geometry = new THREE.SphereGeometry(d.radius * 100, 64, 64);
-                  const material = new THREE.MeshPhongMaterial({
-                    map: cloudsTexture,
-                    transparent: true,
-                    opacity: 0.7,
-                    blending: THREE.AdditiveBlending,
-                    side: THREE.DoubleSide
-                  });
-                  const cloudMesh = new THREE.Mesh(geometry, material);
-
-                  const animate = () => {
-                    cloudMesh.rotation.y += 0.0005;
-                    requestAnimationFrame(animate);
-                  };
-                  animate();
-
-                  return cloudMesh;
-                }
-
-                // Create 3D Pin for Milestones/Events/Projects
-                const group = new THREE.Group();
-
-                // Color based on type
-                const color = d.color ? new THREE.Color(d.color) : new THREE.Color(0xff0000);
-
-                // Pin Head (Sphere)
-                const headGeometry = new THREE.SphereGeometry(1.5, 16, 16);
-                const headMaterial = new THREE.MeshLambertMaterial({ color: color });
-                const head = new THREE.Mesh(headGeometry, headMaterial);
-                head.position.y = 4;
-                group.add(head);
-
-                // Pin Body (Cylinder)
-                const bodyGeometry = new THREE.CylinderGeometry(0.2, 0, 4, 8);
-                const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
-                const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-                body.position.y = 2;
-                group.add(body);
-
-                return group;
-              }}
+              objectThreeObject={renderGlobeObject}
               onObjectClick={(obj: any) => {
                 if (obj.type !== 'cloud') {
                   setSelectedMoment(obj as GlobeMoment);
@@ -445,7 +460,7 @@ function WorldExperienceSectionContent() {
                 console.log('Globe ready callback fired');
                 setIsGlobeReady(true);
               }}
-              labelsData={isExpanded ? GLOBE_MOMENT_LOCATIONS : []}
+              labelsData={labelData}
               labelLat="lat"
               labelLng="lng"
               labelText="title"

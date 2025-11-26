@@ -108,6 +108,8 @@ const StarfieldBackground = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const controls = useAnimation();
+  const animationControllerRef = useRef<{ start: () => void; stop: () => void } | null>(null);
+  const isVisibleRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -132,6 +134,11 @@ const StarfieldBackground = () => {
 
   useEffect(() => {
     controls.start(isVisible ? 'visible' : 'hidden');
+    isVisibleRef.current = isVisible;
+    const controller = animationControllerRef.current;
+    if (controller) {
+      isVisible ? controller.start() : controller.stop();
+    }
   }, [isVisible, controls]);
 
   useEffect(() => {
@@ -147,7 +154,11 @@ const StarfieldBackground = () => {
     );
     camera.position.z = 1500;
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+      powerPreference: 'high-performance'
+    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setClearColor(0x000000, 0);
@@ -318,7 +329,7 @@ const StarfieldBackground = () => {
     scene.add(starGlow);
     scene.add(stars);
 
-    let animationId: number;
+    let animationId: number | null = null;
     const clock = new THREE.Clock();
 
     const animate = () => {
@@ -328,7 +339,27 @@ const StarfieldBackground = () => {
       renderer.render(scene, camera);
       animationId = requestAnimationFrame(animate);
     };
-    animate();
+
+    const startAnimation = () => {
+      if (animationId !== null) return;
+      animationId = requestAnimationFrame(animate);
+    };
+
+    const stopAnimation = () => {
+      if (animationId !== null) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    };
+
+    animationControllerRef.current = {
+      start: startAnimation,
+      stop: stopAnimation
+    };
+
+    if (isVisibleRef.current) {
+      startAnimation();
+    }
 
     const resizeRenderer = () => {
       if (!container) return;
@@ -355,7 +386,8 @@ const StarfieldBackground = () => {
       } else {
         window.removeEventListener('resize', resizeRenderer);
       }
-      cancelAnimationFrame(animationId);
+      stopAnimation();
+      animationControllerRef.current = null;
       if (containerRef.current) {
         containerRef.current.removeChild(renderer.domElement);
       }
