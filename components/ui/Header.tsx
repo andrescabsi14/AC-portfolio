@@ -106,7 +106,7 @@ export default function Header({ showAnimation = true }: HeaderProps) {
         ease: 'easeOut',
         delay: showAnimation ? 2 : 0,
       }}
-      className="fixed inset-x-0 top-0 z-50 bg-black/80 backdrop-blur-sm"
+      className="fixed inset-x-0 top-0 z-50 bg-secondary/80 backdrop-blur-sm"
     >
       <div className="mx-auto max-w-7xl flex h-16 items-center justify-between px-8">
         {/* Brand/Name */}
