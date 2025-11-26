@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useInView } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 
 interface TypewriterProps {
@@ -11,6 +12,7 @@ interface TypewriterProps {
   onComplete?: () => void;
   className?: string;
   startDelay?: number; // milliseconds before starting
+  triggerInView?: boolean; // if true (default), start when fully visible in viewport
 }
 
 export default function Typewriter({
@@ -21,37 +23,58 @@ export default function Typewriter({
   onComplete,
   className = '',
   startDelay = 0,
+  triggerInView = true,
 }: TypewriterProps) {
   const [displayedText, setDisplayedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [showHtml, setShowHtml] = useState(false);
 
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { amount: 1.0, once: false });
+  const shouldStart = triggerInView ? isInView : true;
+
+  // Optional start delay (runs once on mount)
   useEffect(() => {
     if (startDelay > 0) {
-      const delayTimeout = setTimeout(() => {
-        setCurrentIndex(0);
-      }, startDelay);
+      const delayTimeout = setTimeout(() => { }, startDelay);
       return () => clearTimeout(delayTimeout);
     }
   }, [startDelay]);
 
+  // Initiate typing or HTML rendering when conditions are met
   useEffect(() => {
+    if (!shouldStart) return;
+    if (isHtml) {
+      setShowHtml(true);
+    } else if (!hasStarted) {
+      setHasStarted(true);
+      setCurrentIndex(0);
+    }
+  }, [shouldStart, isHtml, hasStarted]);
+
+  // Typing effect for plain text / markdown
+  useEffect(() => {
+    if (isHtml || !hasStarted) return;
     if (currentIndex < text.length) {
       const timeout = setTimeout(() => {
         setDisplayedText((prev) => prev + text[currentIndex]);
         setCurrentIndex((prev) => prev + 1);
       }, speed);
-
       return () => clearTimeout(timeout);
     } else if (currentIndex === text.length && !isComplete) {
       setIsComplete(true);
       onComplete?.();
     }
-  }, [currentIndex, text, speed, onComplete, isComplete]);
+  }, [currentIndex, text, speed, onComplete, isComplete, hasStarted, isHtml]);
+
+  // Convert JSX‑style className to HTML class attribute for raw HTML strings
+  const sanitizedHtml = isHtml ? text.replace(/className=/g, 'class=') : '';
 
   if (isMarkdown) {
     return (
-      <div className={className}>
+      <div ref={ref} className={className}>
         <ReactMarkdown
           components={{
             p: ({ children }) => <p className="mb-4">{children}</p>,
@@ -82,15 +105,17 @@ export default function Typewriter({
 
   if (isHtml) {
     return (
-      <div className={className}>
-        <span dangerouslySetInnerHTML={{ __html: displayedText }} />
-        {!isComplete && <span className="animate-pulse">|</span>}
+      <div ref={ref} className={className}>
+        {showHtml && (
+          <span dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
+        )}
+        {!isComplete && !showHtml && <span className="animate-pulse">|</span>}
       </div>
     );
   }
 
   return (
-    <div className={className}>
+    <div ref={ref} className={className}>
       {displayedText}
       {!isComplete && <span className="animate-pulse">|</span>}
     </div>

@@ -38,9 +38,9 @@ const organizations = [
 ];
 
 export default function MembershipSection() {
-    const height = 500;
+    const height = 100;
     return (
-        <section className={`py-20 bg-black border-b border-white/5`} style={{ height: `${height}px`, minHeight: `${height}px` }}>
+        <section className={`py-20 bg-black border-b border-white/5`} style={{ height: `${height}vh`, minHeight: `${height}vh` }}>
             <div className="max-w-7xl mx-auto px-6">
                 {/* Animated Title */}
                 <motion.p

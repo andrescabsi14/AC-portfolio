@@ -154,13 +154,21 @@ const GLOBE_MOMENT_LOCATIONS: GlobeMoment[] = [
   }
 ];
 
+// Sun direction constant - used for both surface lighting and atmosphere
+const SUN_DIRECTION = new THREE.Vector3(-1, 0, 0.3).normalize();
+
+// Atmosphere distance from globe surface (1.05 = 5% larger than globe)
+const ATMOSPHERE_RADIUS_MULTIPLIER = 1.005;
+
 function WorldExperienceSectionContent() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [placesData, setPlacesData] = useState<GeoJSONData | null>(null);
   const [selectedMoment, setSelectedMoment] = useState<GlobeMoment | null>(null);
   const [globeMaterial, setGlobeMaterial] = useState<THREE.Material | null>(null);
+  const [isGlobeReady, setIsGlobeReady] = useState(false);
   const scrollPositionRef = useRef(0);
   const globeEl = useRef<any>(null);
+  const atmosphereRef = useRef<THREE.Mesh | null>(null);
 
   // Load GeoJSON data
   useEffect(() => {
@@ -181,15 +189,18 @@ function WorldExperienceSectionContent() {
         uniforms: {
           dayTexture: { value: dayTexture },
           nightTexture: { value: nightTexture },
-          sunDirection: { value: new THREE.Vector3(1, 0.5, 1).normalize() }
+          sunDirection: { value: SUN_DIRECTION } // Sun from left-front
         },
         vertexShader: `
           varying vec2 vUv;
           varying vec3 vNormal;
+          varying vec3 vViewPosition;
           void main() {
             vUv = uv;
             vNormal = normalize(normalMatrix * normal);
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            vViewPosition = -mvPosition.xyz;
+            gl_Position = projectionMatrix * mvPosition;
           }
         `,
         fragmentShader: `
@@ -198,11 +209,22 @@ function WorldExperienceSectionContent() {
           uniform vec3 sunDirection;
           varying vec2 vUv;
           varying vec3 vNormal;
+          varying vec3 vViewPosition;
           void main() {
+            // Day/night lighting
             float intensity = dot(vNormal, sunDirection);
             vec4 dayColor = texture2D(dayTexture, vUv);
             vec4 nightColor = texture2D(nightTexture, vUv);
-            gl_FragColor = mix(nightColor, dayColor, smoothstep(-0.2, 0.2, intensity));
+            vec4 baseColor = mix(nightColor, dayColor, smoothstep(-0.2, 0.2, intensity));
+            
+            // Rim light on sunlit edge
+            vec3 viewDir = normalize(vViewPosition);
+            float rimDot = 1.0 - max(0.0, dot(viewDir, vNormal));
+            float sunAlignment = max(0.0, dot(vNormal, sunDirection));
+            float rimIntensity = pow(rimDot, 3.0) * sunAlignment;
+            vec3 rimColor = vec3(0.6, 0.8, 1.0) * rimIntensity * 0.4;
+            
+            gl_FragColor = vec4(baseColor.rgb + rimColor, 1.0);
           }
         `
       });
@@ -261,14 +283,14 @@ function WorldExperienceSectionContent() {
   useEffect(() => {
     if (globeEl.current) {
       const controls = globeEl.current.controls();
-      controls.autoRotate = isExpanded;
-      controls.autoRotateSpeed = 0.1;
+      controls.autoRotate = true; // Always rotate
+      controls.autoRotateSpeed = 0.3; // Slightly faster rotation
 
       // Disable zoom when not expanded
       controls.enableZoom = isExpanded;
       if (!isExpanded) {
-        controls.minDistance = 200; // Lock zoom
-        controls.maxDistance = 200;
+        controls.minDistance = 150; // Lock zoom
+        controls.maxDistance = 150;
       } else {
         controls.minDistance = 100; // Allow zoom
         controls.maxDistance = 400;
@@ -276,11 +298,75 @@ function WorldExperienceSectionContent() {
     }
   }, [isExpanded]);
 
+  // Initialize globe when ready (more reliable than onGlobeReady callback)
+  useEffect(() => {
+    if (!isGlobeReady || !globeEl.current || atmosphereRef.current) {
+      return;
+    }
+
+    try {
+      console.log('Initializing globe...');
+
+      // Create custom atmosphere glow
+      const atmosphereGeometry = new THREE.SphereGeometry(100 * ATMOSPHERE_RADIUS_MULTIPLIER, 64, 64);
+      const atmosphereMaterial = new THREE.ShaderMaterial({
+        vertexShader: `
+          varying vec3 vNormal;
+          varying vec3 vPosition;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vPosition = position;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          varying vec3 vNormal;
+          varying vec3 vPosition;
+          void main() {
+            vec3 viewDirection = normalize(cameraPosition - vPosition);
+            float rim = 1.0 - abs(dot(vNormal, viewDirection));
+            rim = pow(rim, 2.5);
+            vec3 normalizedPos = normalize(vPosition);
+            float rightSide = smoothstep(-0.8, 0.2, normalizedPos.x);
+            float glow = rim * (0.3 + 0.7 * rightSide);
+            vec3 glowColor = vec3(0.4, 0.7, 1.0); // Earth's blue atmosphere
+            gl_FragColor = vec4(glowColor, glow * 0.8);
+          }
+        `,
+        side: THREE.BackSide,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false
+      });
+
+      const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+      atmosphereRef.current = atmosphere;
+      globeEl.current.scene().add(atmosphere);
+
+      // Apply Earth's axial tilt
+      const scene = globeEl.current.scene();
+      scene.rotation.z = THREE.MathUtils.degToRad(23.5);
+
+      // Set up controls
+      const controls = globeEl.current.controls();
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 0.3;
+      controls.enableZoom = false;
+
+      // Set initial view
+      globeEl.current.pointOfView({ lat: 20, lng: -90, altitude: 2 });
+
+      console.log('Globe initialized successfully');
+    } catch (error) {
+      console.error('Error initializing globe:', error);
+    }
+  }, [isGlobeReady]);
+
   return (
     <>
-      <section className="relative h-screen w-full bg-black overflow-hidden">
+      <section id="world-experience" className="relative h-screen w-full bg-black-70 overflow-hidden">
         {/* Background Stars - Ensure z-index allows visibility */}
-        <div className="absolute inset-0 bg-[url('https://unpkg.com/three-globe/example/img/night-sky.png')] opacity-50 brightness-50 pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-[url('https://unpkg.com/three-globe/example/img/night-sky.png')] opacity-20 brightness-30 pointer-events-none z-0" />
 
         {/* Blinking Stars Effect */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -289,24 +375,22 @@ function WorldExperienceSectionContent() {
           <div className="stars-large"></div>
         </div>
 
-        <div className="absolute inset-0 z-10">
+        <div className="absolute inset-0 z-10" style={{ overflow: 'hidden' }}>
           {placesData && globeMaterial && (
             <Globe
               ref={globeEl}
               globeMaterial={globeMaterial}
-              backgroundColor="rgba(0,0,0,0)"
-              atmosphereColor="#3a228a"
-              atmosphereAltitude={0.25} // Increased atmosphere for better glow
+              backgroundColor="rgba(0,0,0,1)"
               objectsData={[
                 {
                   type: 'cloud',
-                  radius: 1.005
+                  radius: 1.1
                 },
                 ...(isExpanded ? GLOBE_MOMENT_LOCATIONS : [])
               ]}
               objectLat="lat"
               objectLng="lng"
-              objectAltitude={0.01}
+              objectAltitude={0.75}
               objectThreeObject={(d: any) => {
                 if (d.type === 'cloud') {
                   const loader = new THREE.TextureLoader();
@@ -315,7 +399,7 @@ function WorldExperienceSectionContent() {
                   const material = new THREE.MeshPhongMaterial({
                     map: cloudsTexture,
                     transparent: true,
-                    opacity: 0.4,
+                    opacity: 0.7,
                     blending: THREE.AdditiveBlending,
                     side: THREE.DoubleSide
                   });
@@ -358,12 +442,8 @@ function WorldExperienceSectionContent() {
                 }
               }}
               onGlobeReady={() => {
-                if (globeEl.current) {
-                  globeEl.current.controls().autoRotateSpeed = 0.1;
-                  globeEl.current.pointOfView({ lat: 20, lng: -90, altitude: 0.05 });
-                  // Disable zoom initially
-                  globeEl.current.controls().enableZoom = false;
-                }
+                console.log('Globe ready callback fired');
+                setIsGlobeReady(true);
               }}
               labelsData={isExpanded ? GLOBE_MOMENT_LOCATIONS : []}
               labelLat="lat"

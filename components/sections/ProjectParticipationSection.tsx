@@ -3,29 +3,58 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
-const baseCompanies = [
+const companies = [
     {
         id: 1,
         name: "Coca-Cola",
-        logo: "/logos/coca-cola-logo.png",
+        logo: "/logos/coca-cola.png",
     },
     {
         id: 2,
         name: "Gillette",
-        logo: "/logos/Gillette-Logo.wine.svg",
+        logo: "/logos/gillette.svg",
     },
     {
         id: 3,
         name: "DJI",
-        logo: "/logos/png-clipart-dji-logo-music-white-point-dji-drone-logo-angle-white.png",
+        logo: "/logos/dji.png",
     },
+    {
+        id: 4,
+        name: "Disney",
+        logo: "/logos/disney.png",
+    },
+    {
+        id: 5,
+        name: "Dole",
+        logo: "/logos/dole.png",
+    },
+    {
+        id: 6,
+        name: "Discovery",
+        logo: "/logos/discovery.png",
+    },
+    {
+        id: 7,
+        name: "Dr Pepper",
+        logo: "/logos/drpepper.png",
+    },
+    {
+        id: 8,
+        name: "Nissan",
+        logo: "/logos/nissan.png",
+    },
+    {
+        id: 9,
+        name: "Smithsonian",
+        logo: "/logos/smithsonian.png",
+    },
+    {
+        id: 10,
+        name: "Uniswap",
+        logo: "/logos/uniswap.png",
+    }
 ];
-
-// Repeat companies to fill the grid (12 items)
-const companies = Array(4).fill(baseCompanies).flat().map((company, index) => ({
-    ...company,
-    id: index + 1 // Ensure unique IDs for keys
-}));
 
 export default function ProjectParticipationSection() {
     return (
@@ -56,7 +85,7 @@ export default function ProjectParticipationSection() {
                                     src={company.logo}
                                     alt={company.name}
                                     fill
-                                    className="object-contain invert brightness-0 filter"
+                                    className="object-contain invert"
                                 />
                             </div>
                         </motion.div>
