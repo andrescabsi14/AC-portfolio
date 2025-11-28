@@ -49,6 +49,7 @@ interface MomentLightboxProps {
 export default function MomentLightbox({ moment, onClose }: MomentLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(1);
+  const [autoRotate, setAutoRotate] = useState(true);
   const lastInteractionRef = useRef(Date.now());
 
   useEffect(() => {
@@ -61,17 +62,18 @@ export default function MomentLightbox({ moment, onClose }: MomentLightboxProps)
   useEffect(() => {
     setCurrentIndex(0);
     setDirection(1);
+    setAutoRotate(true);
   }, [moment]);
 
   useEffect(() => {
-    if (!moment || moment.items.length <= 1) return;
+    if (!moment || moment.items.length <= 1 || !autoRotate) return;
     const timer = setInterval(() => {
       if (Date.now() - lastInteractionRef.current < 1500) return;
       setDirection(1);
       setCurrentIndex((prev) => (prev + 1) % moment.items.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, [moment]);
+  }, [moment, autoRotate]);
 
   const currentItem = moment ? moment.items[currentIndex] : null;
   const hasMultiple = !!moment && moment.items.length > 1;
@@ -85,6 +87,7 @@ export default function MomentLightbox({ moment, onClose }: MomentLightboxProps)
 
   const handlePrev = useCallback(() => {
     if (!moment) return;
+    setAutoRotate(false);
     lastInteractionRef.current = Date.now();
     setDirection(-1);
     setCurrentIndex((prev) => (prev - 1 + moment.items.length) % moment.items.length);
@@ -131,6 +134,9 @@ export default function MomentLightbox({ moment, onClose }: MomentLightboxProps)
           onClick={() => {
             lastInteractionRef.current = Date.now();
             setDirection(index > currentIndex ? 1 : -1);
+            if (index < currentIndex) {
+              setAutoRotate(false);
+            }
             setCurrentIndex(index);
           }}
           className={`h-1.5 rounded-full transition-all cursor-pointer ${

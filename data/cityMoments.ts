@@ -69,7 +69,7 @@ export const CITY_MOMENTS: CityMoments[] = [
         description: `Mentorship program hosted by AmCham Colombia for YLAI young entrepreneurs, held at the U.S. Ambassador's Residence.`,
         venue: 'U.S. Ambassador Residence, Bogotá',
         image: '/events/amcham.jpeg',
-        imagePosition: 'center',
+        imagePosition: 'top',
         type: 'event'
       },
       {
@@ -101,7 +101,7 @@ export const CITY_MOMENTS: CityMoments[] = [
         description: `Private reception hosted by Philip S. Goldberg, U.S. Ambassador to Colombia, honoring the visit of the Major League Baseball Players Association (MLBPA) Foundation. Andrés Cabrera Silva was officially invited on Friday, December 13, 2019, from 6:00 p.m. to 8:00 p.m., as part of the Embassy's diplomacy and cooperation initiatives with local leaders.`,
         venue: "U.S. Ambassador's Residence, Bogotá",
         image: '/events/mlb.png',
-        imagePosition: 'center',
+        imagePosition: 'center 20%',
         type: 'event'
       },
       {
@@ -132,7 +132,8 @@ export const CITY_MOMENTS: CityMoments[] = [
         subtitle: 'Universidad Sergio Arboleda - Charlas Virtuales de Emprendimiento',
         description: `Invited speaker for Sergio Arboleda University's "Virtual Entrepreneurship Talks" series, sharing seven key lessons learned in the journey from employee to entrepreneur.`,
         venue: 'Sergio Arboleda University (virtual via Zoom), Bogotá',
-        image: '/events/',
+        image: '/events/ylaibanner.png',
+        imagePosition: 'center',
         type: 'speaker'
       },
       {
@@ -144,7 +145,7 @@ export const CITY_MOMENTS: CityMoments[] = [
           'Talk on the future of work, outlining ten emerging technologies that will transform how companies hire, collaborate, and build teams.',
         venue: 'Sergio Arboleda University (virtual via Zoom), Bogotá',
         image: '/events/empleado.jpg',
-        imagePosition: 'center',
+        imagePosition: 'center 68%',
         type: 'speaker'
       },
       {
@@ -200,7 +201,8 @@ export const CITY_MOMENTS: CityMoments[] = [
         description:
           'Guest speaker during the YLAI 2020 pre-departure orientation for the Venezuela cohort, sharing the impact of the program and recommendations to get the most value from the fellowship.',
         venue: 'U.S. Embassy, Bogotá',
-        image: '/events/',
+        image: '/events/memphis.jpg',
+        imagePosition: 'top',
         type: 'speaker'
       },
       {
@@ -252,7 +254,8 @@ export const CITY_MOMENTS: CityMoments[] = [
         subtitle: 'President Obama - YLAI Fellowship',
         description: `Selected from more than 4,000 applicants for President Obama's YLAI Initiative. Participated in mentorship, training, and high-level meetings. Received official recognition and certification.`,
         venue: 'Various YLAI venues, Washington, D.C.',
-        image: '/events/',
+        image: '/events/wash.png',
+        imagePosition: 'top',
         type: 'recognition'
       },
       {
@@ -401,12 +404,13 @@ export const CITY_MOMENTS: CityMoments[] = [
       {
         id: 'vessel-genai',
         year: 2025,
-        title: 'Vessel - GenAI Memory & Infrastructure',
+        title: 'VX - GenAI Memory & Infrastructure',
         subtitle: 'Founder / Independent Research Project',
         description:
-          'Founded Vessel, a GenAI infrastructure and memory layer enabling contextual reasoning across 100K+ tokens. Recognized at NY Tech Week by Stanford PhDs and NYU neuroscientists.',
+          'Founded VX, a GenAI infrastructure and memory layer enabling contextual reasoning across 100K+ tokens. Recognized at NY Tech Week by Stanford PhDs and NYU neuroscientists.',
         venue: 'New York (remote / distributed)',
-        image: '/events/',
+        image: '/events/vessel.png',
+        imagePosition: 'top',
         type: 'project'
       },
       {
@@ -417,7 +421,8 @@ export const CITY_MOMENTS: CityMoments[] = [
         description:
           'Built multi-chain smart contracts across EVM, Cosmos SDK, Stellar, and Algorand, and a decentralized OTC trading platform managing over $50M in tokenized assets.',
         venue: 'New York (remote / distributed)',
-        image: '/events/',
+        image: '/events/realio.png',
+        imagePosition: 'top',
         type: 'project'
       }
     ]

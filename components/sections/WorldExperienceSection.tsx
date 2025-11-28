@@ -366,7 +366,6 @@ function WorldExperienceSectionContent() {
   return (
     <>
       <section
-        id="world-experience"
         className="relative h-screen w-full bg-black-70 overflow-hidden transition-all duration-500"
         style={{
           transition: 'filter 0.6s ease'
@@ -386,6 +385,7 @@ function WorldExperienceSectionContent() {
         </motion.div>
 
         <div
+          id="world-experience"
           className="absolute inset-0 z-10 flex justify-center pointer-events-none top-0 mt-20"
           style={{ overflow: 'hidden', opacity: isExpanded ? 1 : 0.7, }}
         >
@@ -431,7 +431,7 @@ function WorldExperienceSectionContent() {
           className="absolute px-6 text-center z-20 pointer-events-none"
           animate={
             isExpanded
-              ? { top: '8%', left: '50%', width: '100%', transform: 'translateX(-50%)' } // Lowered further to avoid header overlap
+              ? { top: '10%', left: '50%', width: '100%', transform: 'translateX(-50%)' } // Lowered further to avoid header overlap
               : { top: '60%', left: '50vw', width: '100%', transform: 'translate(-50%, -50%)' }
           }
           transition={{ duration: 0.5, ease: 'easeInOut' }}
