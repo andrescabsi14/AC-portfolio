@@ -7,6 +7,7 @@ import StarfieldBackground from '@/components/ui/StarfieldBackground';
 import GlassButton from '@/components/ui/GlassButton';
 import MomentLightbox from '@/components/ui/MomentLightbox';
 import * as THREE from 'three';
+import { CITY_MOMENTS, CityMomentItem, CityMoments, GlobeItemType } from '@/data/cityMoments';
 
 // Dynamically import Globe to avoid SSR issues
 const Globe = dynamic(() => import('react-globe.gl'), { ssr: false });
@@ -24,201 +25,23 @@ interface GeoJSONData {
   features: Place[];
 }
 
-interface GlobeMoment {
-  id: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  image: string;
-  lat: number;
-  lng: number;
-  color: string;
-  type: 'milestone' | 'event' | 'project';
-}
+const TYPE_COLOR_MAP: Record<GlobeItemType, string> = {
+  recognition: '#ef4444',
+  event: '#D4AF37',
+  project: '#06b6d4',
+  speaker: '#a855f7'
+};
 
-// Globe moments with coordinates
-const GLOBE_MOMENT_LOCATIONS: GlobeMoment[] = [
-  {
-    id: 'ylai',
-    title: 'Washington, D.C.',
-    subtitle: 'YLAI Fellowship — U.S. Department of State',
-    description:
-      'Selected by the U.S. Department of State for the Young Leaders of the Americas Initiative. Recognized among the top young leaders across 36 countries.',
-    image: '/photos/milestones/ylai.jpg',
-    lat: 38.9072,
-    lng: -77.0369,
-    color: '#ef4444',
-    type: 'milestone'
-  },
-  {
-    id: 'dtu',
-    title: 'Copenhagen, Denmark',
-    subtitle: 'DTU Young Influencer — C40 World Mayors Summit',
-    description:
-      'Represented the Americas at the C40 World Mayors Summit as a Young Influencer selected by the Denmark Technical University.',
-    image: '/photos/milestones/dtu.jpg',
-    lat: 55.6761,
-    lng: 12.5683,
-    color: '#ef4444',
-    type: 'milestone'
-  },
-  {
-    id: 'mit',
-    title: 'Bogotá, Colombia',
-    subtitle: 'MIT Technology Review — Innovators Under 35 (Nominee)',
-    description:
-      'Nominated by MIT Technology Review for pioneering work using neural networks for disease detection.',
-    image: '/photos/milestones/mit35.jpg',
-    lat: 4.7110,
-    lng: -74.0721,
-    color: '#ef4444',
-    type: 'milestone'
-  },
-  {
-    id: 'c40',
-    title: 'Copenhagen, Denmark',
-    subtitle: 'C40 World Mayors Summit',
-    description:
-      'Participated in global climate discussions with world leaders, representing the Americas in innovation-focused sessions.',
-    image: '/photos/events/c40.jpg',
-    lat: 55.6761,
-    lng: 12.5683,
-    color: '#D4AF37',
-    type: 'event'
-  },
-  {
-    id: 'techcamp-bolivia',
-    title: 'La Paz, Bolivia',
-    subtitle: 'TechCamp — Department of State',
-    description:
-      'Contributed to an international TechCamp focused on digital innovation and cross-border collaboration.',
-    image: '/photos/events/techcamp-bolivia.jpg',
-    lat: -16.5000,
-    lng: -68.1193,
-    color: '#D4AF37',
-    type: 'event'
-  },
-  {
-    id: 'peru-leadership',
-    title: 'Lima, Peru',
-    subtitle: 'APEC Leadership Program',
-    description:
-      'Selected for APEC Leadership initiatives focused on trade, innovation, and high-impact community development.',
-    image: '/photos/events/apec.jpg',
-    lat: -12.0464,
-    lng: -77.0428,
-    color: '#D4AF37',
-    type: 'event'
-  },
-  {
-    id: 'vessel-ny',
-    title: 'New York, USA',
-    subtitle: 'Vessel — GenAI Infrastructure',
-    description:
-      'Founder of Vessel, a GenAI memory and agent orchestration platform recognized by Stanford PhDs and NYU neuroscientists at NY Tech Week.',
-    image: '/photos/projects/vessel.jpg',
-    lat: 40.7128,
-    lng: -74.0060,
-    color: '#06b6d4',
-    type: 'project'
-  },
-  {
-    id: 'realio',
-    title: 'New York, USA',
-    subtitle: 'Realio — Multi-Chain RWA Platform',
-    description:
-      'Engineered multi-chain smart contracts and a P2P OTC trading system handling $50M+ in tokenized real-world assets.',
-    image: '/photos/projects/realio.jpg',
-    lat: 40.7128,
-    lng: -74.0060,
-    color: '#06b6d4',
-    type: 'project'
-  },
-  {
-    id: 'astrakode',
-    title: 'Rome, Italy',
-    subtitle: 'AstraKode — No-Code Smart Contract Platform',
-    description:
-      'Architected a no-code Solidity platform enabling 1,000+ monthly smart contract deployments with full AWS serverless infra.',
-    image: '/photos/projects/astrakode.jpg',
-    lat: 41.9028,
-    lng: 12.4964,
-    color: '#06b6d4',
-    type: 'project'
-  },
-  {
-    id: 'coca-cola-fanta',
-    title: 'Atlanta, USA',
-    subtitle: 'Coca-Cola — What The Fanta Campaign',
-    description:
-      'Built multilingual animated React + AEM experience deployed in 44 countries for Coca-Cola’s global Halloween campaign.',
-    image: '/photos/projects/cocacola.jpg',
-    lat: 33.7490,
-    lng: -84.3880,
-    color: '#06b6d4',
-    type: 'project'
-  },
-  {
-    id: 'everlyhealth',
-    title: 'Austin, TX',
-    subtitle: 'EverlyHealth — Telehealth Infrastructure',
-    description:
-      'Led development of HIPAA-compliant telehealth systems processing 1M+ daily transactions with 99.99% uptime.',
-    image: '/photos/projects/everlyhealth.jpg',
-    lat: 30.2672,
-    lng: -97.7431,
-    color: '#06b6d4',
-    type: 'project'
-  },
-  {
-    id: 'scoutcool',
-    title: 'Buenos Aires, Argentina',
-    subtitle: 'Scout.cool — dYdX, Uniswap, Livepeer Explorer',
-    description:
-      'Principal Engineer for a high-performance blockchain explorer serving dYdX, Uniswap, and Livepeer with $1B+ TVL tracked.',
-    image: '/photos/projects/scout.jpg',
-    lat: -34.6037,
-    lng: -58.3816,
-    color: '#06b6d4',
-    type: 'project'
-  },
-  {
-    id: 'belatrix',
-    title: 'Mendoza, Argentina',
-    subtitle: 'Belatrix — ML & Blockchain Engineering',
-    description:
-      'Built Deep Convolutional GANs and led front-end architecture for an early blockchain startup.',
-    image: '/photos/projects/belatrix.jpg',
-    lat: -32.8895,
-    lng: -68.8458,
-    color: '#06b6d4',
-    type: 'project'
-  },
-  {
-    id: 'mds-digital',
-    title: 'Bogotá, Colombia',
-    subtitle: 'MDS Digital — Fortune 500 Web Experiences',
-    description:
-      'Developed digital experiences for Coca-Cola, Disney, ESPN, Nissan, Dr Pepper, and Discovery Channel across 20+ web applications.',
-    image: '/photos/projects/mds.jpg',
-    lat: 4.7110,
-    lng: -74.0721,
-    color: '#06b6d4',
-    type: 'project'
-  },
-  {
-    id: 'djes',
-    title: 'Bogotá, Colombia',
-    subtitle: 'DJES — SMB Web Platforms',
-    description:
-      'Built WordPress and Django REST API experiences for multiple small businesses across Colombia.',
-    image: '/photos/projects/djes.jpg',
-    lat: 4.7110,
-    lng: -74.0721,
-    color: '#06b6d4',
-    type: 'project'
-  }
+const LEGEND_ITEMS: { type: GlobeItemType; label: string }[] = [
+  { type: 'recognition', label: 'Recognition' },
+  { type: 'event', label: 'Events' },
+  { type: 'project', label: 'Projects' },
+  { type: 'speaker', label: 'Speakers' }
 ];
+
+const formatCityLabel = (text: string) => text.normalize('NFC');
+
+type FilteredCity = CityMoments & { items: CityMomentItem[] };
 
 // Sun direction constant - used for both surface lighting and atmosphere
 const SUN_DIRECTION = new THREE.Vector3(-1, 0, 0.2).normalize();
@@ -229,9 +52,10 @@ const EXPANDED_ALTITUDE = 2.5;
 function WorldExperienceSectionContent() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [placesData, setPlacesData] = useState<GeoJSONData | null>(null);
-  const [selectedMoment, setSelectedMoment] = useState<GlobeMoment | null>(null);
+  const [selectedCity, setSelectedCity] = useState<FilteredCity | null>(null);
   const [globeMaterial, setGlobeMaterial] = useState<THREE.Material | null>(null);
   const [isGlobeReady, setIsGlobeReady] = useState(false);
+  const [activeTypes, setActiveTypes] = useState<GlobeItemType[]>([]);
   const scrollPositionRef = useRef(0);
   const globeEl = useRef<any>(null);
   const atmosphereRef = useRef<THREE.Mesh | null>(null);
@@ -252,6 +76,33 @@ function WorldExperienceSectionContent() {
     }
     return cloudTextureRef.current;
   }, []);
+
+  const filteredCities = useMemo<FilteredCity[]>(() => {
+    return CITY_MOMENTS.map((city) => {
+      const items =
+        activeTypes.length === 0 ? city.items : city.items.filter((item) => activeTypes.includes(item.type));
+      return { ...city, items };
+    }).filter((city) => city.items.length > 0);
+  }, [activeTypes]);
+
+  const labelOffsets = useMemo(() => {
+    const offsets = new Map<string, number>();
+    const thresholdLat = 0.8;
+    const thresholdLng = 0.8;
+    const delta = 0.6;
+
+    filteredCities.forEach((city, i) => {
+      for (let j = i + 1; j < filteredCities.length; j++) {
+        const other = filteredCities[j];
+        if (Math.abs(city.lat - other.lat) < thresholdLat && Math.abs(city.lng - other.lng) < thresholdLng) {
+          offsets.set(city.id, offsets.get(city.id) ?? -delta / 2);
+          offsets.set(other.id, offsets.get(other.id) ?? delta / 2);
+        }
+      }
+    });
+
+    return offsets;
+  }, [filteredCities]);
 
   // Load textures and create shader material
   useEffect(() => {
@@ -323,7 +174,7 @@ function WorldExperienceSectionContent() {
 
   const handleClose = () => {
     setIsExpanded(false);
-    setSelectedMoment(null);
+    setSelectedCity(null);
     document.body.style.position = '';
     document.body.style.width = '';
     document.body.style.top = '';
@@ -381,10 +232,23 @@ function WorldExperienceSectionContent() {
 
   const globeObjects = useMemo<any[]>(() => {
     const baseObjects = [{ type: 'cloud', radius: 1.1 }];
-    return isExpanded ? [...baseObjects, ...GLOBE_MOMENT_LOCATIONS] : baseObjects;
-  }, [isExpanded]);
+    if (!isExpanded) return baseObjects;
+    return [
+      ...baseObjects,
+      ...filteredCities.map((city) => ({
+        ...city,
+        type: 'city'
+      }))
+    ];
+  }, [filteredCities, isExpanded]);
 
-  const labelData = useMemo<GlobeMoment[]>(() => (isExpanded ? GLOBE_MOMENT_LOCATIONS : []), [isExpanded]);
+  const labelData = useMemo<FilteredCity[]>(() => (isExpanded ? filteredCities : []), [filteredCities, isExpanded]);
+
+  const toggleTypeFilter = useCallback((type: GlobeItemType) => {
+    setActiveTypes((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]));
+  }, []);
+
+  const clearFilters = useCallback(() => setActiveTypes([]), []);
 
   const renderGlobeObject = useCallback(
     (d: any) => {
@@ -541,7 +405,7 @@ function WorldExperienceSectionContent() {
                 objectThreeObject={renderGlobeObject}
                 onObjectClick={(obj: any) => {
                   if (obj.type !== 'cloud') {
-                    setSelectedMoment(obj as GlobeMoment);
+                    setSelectedCity(obj as FilteredCity);
                   }
                 }}
                 onGlobeReady={() => {
@@ -549,12 +413,12 @@ function WorldExperienceSectionContent() {
                   setIsGlobeReady(true);
                 }}
                 labelsData={labelData}
-                labelLat="lat"
+                labelLat={(d: any) => d.lat + 0.8 + (labelOffsets.get(d.id) || 0)}
                 labelLng="lng"
-                labelText="title"
+                labelText={(d: any) => formatCityLabel(d.city)}
                 labelSize={1}
                 labelDotRadius={0.5}
-                labelColor={() => "rgba(255, 255, 255, 0.75)"}
+                labelColor={(d: any) => d.color || 'rgba(255, 255, 255, 0.75)'}
                 labelResolution={2}
                 width={typeof window !== 'undefined' ? window.innerWidth : 1920}
                 height={typeof window !== 'undefined' ? window.innerHeight : 1080}
@@ -568,7 +432,7 @@ function WorldExperienceSectionContent() {
           animate={
             isExpanded
               ? { top: '8%', left: '50%', width: '100%', transform: 'translateX(-50%)' } // Lowered further to avoid header overlap
-              : { top: '40vw', left: '50vw', width: '100%', transform: 'translate(-50%, -50%)' }
+              : { top: '60%', left: '50vw', width: '100%', transform: 'translate(-50%, -50%)' }
           }
           transition={{ duration: 0.5, ease: 'easeInOut' }}
         >
@@ -576,7 +440,7 @@ function WorldExperienceSectionContent() {
             initial={{ opacity: 0, y: 20, }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={{ duration: 0.8, delay: 1.4 }}
             className="text-5xl md:text-7xl font-light text-white mb-4"
             style={{ letterSpacing: '-0.04em' }}
           >
@@ -586,7 +450,7 @@ function WorldExperienceSectionContent() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
+            transition={{ duration: 0.8, delay: 1.6 }}
             className="text-lg md:text-xl text-white-400 font-light mb-8"
           >
             Global impact across continents
@@ -595,7 +459,7 @@ function WorldExperienceSectionContent() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
+              transition={{ delay: 1.8 }}
               className="pointer-events-auto"
             >
               <GlassButton onClick={handleExpand}>
@@ -637,22 +501,45 @@ function WorldExperienceSectionContent() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="fixed bottom-8 left-8 z-40 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-4 pointer-events-auto"
+                className="fixed bottom-8 left-8 z-40 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl p-4 pointer-events-auto w-64"
               >
-                <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-3 border-b border-white/10 pb-2">Legend</h4>
+                <h4 className="text-xs font-bold text-white uppercase tracking-widest mb-3 border-b border-white/10 pb-2">
+                  Legend
+                </h4>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
-                    <span className="text-xs text-gray-300">Career Milestones</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]" />
-                    <span className="text-xs text-gray-300">High-Level Events</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
-                    <span className="text-xs text-gray-300">Projects</span>
-                  </div>
+                  {LEGEND_ITEMS.map(({ type, label }) => {
+                    const isActive = activeTypes.includes(type);
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => toggleTypeFilter(type)}
+                        className={`w-full flex items-center justify-between text-left text-xs px-3 py-2 rounded-lg border transition ${
+                          isActive
+                            ? 'bg-white/10 border-white/30 text-white'
+                            : 'border-white/10 text-gray-300 hover:border-white/30'
+                        }`}
+                      >
+                        <span className="flex items-center gap-3">
+                          <span
+                            className="w-3 h-3 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.4)]"
+                            style={{ backgroundColor: TYPE_COLOR_MAP[type] }}
+                          />
+                          {label}
+                        </span>
+                        {isActive && <span className="text-white/70 text-sm">×</span>}
+                      </button>
+                    );
+                  })}
+                  {activeTypes.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearFilters}
+                      className="w-full text-center text-xs text-white/70 mt-4 py-2 border border-white/20 rounded-lg hover:bg-white/10"
+                    >
+                      Clear filters
+                    </button>
+                  )}
                 </div>
               </motion.div>
             </>
@@ -664,7 +551,7 @@ function WorldExperienceSectionContent() {
 
 
       {/* Moment Lightbox */}
-      <MomentLightbox moment={selectedMoment} onClose={() => setSelectedMoment(null)} />
+      <MomentLightbox moment={selectedCity} onClose={() => setSelectedCity(null)} />
     </>
   );
 }
